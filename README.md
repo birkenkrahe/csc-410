@@ -33,5 +33,5 @@
 
 # History
 
--   First offered @Lyon: Spring 2022.
+-   First offered @Lyon: Spring 2025.
 
