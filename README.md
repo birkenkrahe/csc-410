@@ -1,4 +1,4 @@
-![img](../img/cover.jpg)
+![img](./img/cover.jpg)
 
 
 # Introduction to Programming in C++p
