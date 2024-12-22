@@ -1,12 +1,12 @@
 ![img](./img/cover.jpg)
 
 
-# Introduction to Programming in C++p
+# Data Communications and Networks
 
 
 # What's in this repo?
 
--   Repository for CSC 100 - Introduction to Programming in C++
+-   Repository for CSC 410 - Data Communications and Networks
 -   Emacs Org-mode files( `.org`) are rendered as Markdown (not on
     mobile app but works well in mobile browser).
 -   Reference links in the files lead to a 404 error. You always find
