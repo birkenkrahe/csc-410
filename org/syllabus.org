@@ -1,0 +1,137 @@
+#+TITLE: Syllabus - Data Communications & Networks
+#+AUTHOR: Marcus Birkenkrahe
+#+SUBTITLE: Syllabus - CSC 410 - Lyon College - Spring 2025
+#+SEQ_TODO: PRACTICE | DONE
+#+STARTUP: overview hideblocks indent entitiespretty
+#+OPTIONS: toc:nil num:1 ^:nil
+
+* General Course Information
+
+- Meeting Times: Monday/Wednesday/Friday, 11:00-11:50 AM
+- Meeting place: Lyon Building Room 104 (computer lab)
+- Professor: Dr. Marcus Birkenkrahe
+- Office: Derby Science Building 210
+- Phone: (870) 307-7254 
+- Office hours: By appointment via [[https://tinyurl.com/sp25-booking][tinyurl.com/sp25-booking]]
+- Textbooks (optional + free + online):
+  1) *Computer Networking: Principles, Protocols and Practice* by
+     Olivier Bonaventure: [[https://beta.computer-networking.info/syllabus/default/index.html][computer-networking.info]]
+  2) *Beej's Guide to Network Programming Using Internet Sockets* by
+     Brian "Beej" Hall: [[https://beej.us/guide/bgnet/][beej.us/guide/bgnet]]
+
+* Standard and Course Policies
+
+- *Standard Lyon College Policies* are incorporated into this syllabus
+  and can be found at: [[http://www.lyon.edu/standard-course-policies][lyon.edu/standard-course-policies]].
+
+- The *Assignments and Honor Code* and the *Attendance Policy* are
+  incorporated into this syllabus also and can be found at:
+  [[https://tinyurl.com/LyonPolicy][tinyurl.com/LyonPolicy]].
+
+- In addition to these rules, please read and observe my guide to
+  Using AI to code (written in Fall 2024):
+  [[https://tinyurl.com/Using-AI-to-code][tinyurl.com/Using-AI-to-code]].
+
+* Objectives
+
+This course introduces the theory and practice of computer
+networks. We cover topics such as software protocols, communication
+hardware, error detection, error handling, and basic network
+programming. The course focuses on building a solid foundation in
+networking concepts while offering practical programming assignments
+to apply the learned concepts.
+
+* Student Learning Outcomes
+
+Students who complete CSC 410 "Data Communications & Networks" will be able to:
+- Understand the OSI and TCP/IP models and their layers.
+- Explain network protocols, addressing, and error handling.
+- Demonstrate knowledge of communication hardware components.
+- Write and debug basic network applications using sockets.
+- Apply error detection and correction techniques.
+- Gain familiarity with network configuration and security.
+
+* Course Requirements / Prerequisites
+
+- Prerequisite courses: CSC 265 (Algorithms) and CSC 310 (Operating
+  Systems), or permission of the instructor/advisor.
+- Basic programming knowledge in C/C++.
+- Familiarity with command-line tools.
+- Curiosity and willingness to explore practical networking tasks.
+
+* Grading System
+
+You should be able to see your current grade at any time using the
+Canvas gradebook for the course.
+
+| WHEN    | DESCRIPTION           | IMPACT |
+|---------+-----------------------+--------|
+| Weekly  | Assignments           |    25% |
+| Weekly  | Multiple choice tests |    25% |
+| Monthly | Project Sprint review |    25% |
+| TBD     | Final exam (optional) |    25% |
+
+Notes:
+- *To pass:* 60% of all available points.
+- *Tests:* weekly online quizzes based on classroom lectures and
+  practice.
+- *Final exam:* random selection of the known test questions. *Note:* You
+  only have to write the final exam if you want to improve your grade
+  at the end of the course. If the final exam result is below your
+  final grade average up to this point, it will be ignored.
+
+* Rubric
+
+| Component                    | Weight | Excellent                                                                              | Good                                                            | Satisfactory                                                         | Needs Improvement                                                             | Unsatisfactory                                                        |
+|------------------------------+--------+----------------------------------------------------------------------------------------+-----------------------------------------------------------------+----------------------------------------------------------------------+-------------------------------------------------------------------------------+-----------------------------------------------------------------------|
+| Participation and Attendance |     0% | Consistently attends and actively participates in all classes.                         | Attends most classes and participates in discussions.           | Attends classes but participation is minimal.                        | Frequently absent and rarely participates.                                    | Rarely attends classes and does not participate.                      |
+| Programming assignments      |    50% | Completes all assignments on time with high accuracy (90-100%).                        | Completes most assignments on time with good accuracy (80-89%). | Completes assignments but with some inaccuracies or delays (70-79%). | Frequently late or incomplete assignments with several inaccuracies (60-69%). | Rarely completes assignments and shows minimal understanding (0-59%). |
+| Tests                        |    25% | Demonstrates thorough understanding and application of concepts (90-100%).             | Shows good understanding with minor errors (80-89%).            | Displays basic understanding with some errors (70-79%).              | Limited understanding with several errors (60-69%).                           | Minimal understanding and many errors (0-59%).                        |
+| Final Exam (Optional)        |    25% | Demonstrates comprehensive understanding and application of course concepts (90-100%). | Shows strong understanding with minor errors (80-89%).          | Displays adequate understanding with some errors (70-79%).           | Limited understanding with several errors (60-69%).                           | Minimal understanding and many errors (0-59%).                        |
+
+* Grading Table
+
+|------------------+------------------|
+| Percentage       | LETTER GRADE     |
+|------------------+------------------|
+| 100% to 89.5%    | A (very good)    |
+|------------------+------------------|
+| < 89.5% to 79.5% | B (good)         |
+|------------------+------------------|
+| < 79.5% to 69.5% | C (satisfactory) |
+|------------------+------------------|
+| < 69.5% to 59.5% | D (passed)       |
+|------------------+------------------|
+| < 59.5% to 0%    | F (FAILED)       |
+
+* Schedule and Workload
+
+For *important dates*, see the 2024-2025 Academic Calendar at:
+[[https://catalog.lyon.edu/202425-academic-calendar][catalog.lyon.edu/202425-academic-calendar]].
+
+*Workload* (estimated):
+- Time in class: 48 hrs.
+- Time outside of class: 42 hrs.
+- Time for tests [1 hrs/test]: 14 hrs.
+- Time for home assignments [2 hrs/pgm]: 28 hrs.
+- Total number of hrs in term: 90.
+- Weekly workload (outside of class): 5.625 (2.625)
+
+* Course Outline
+
+- Week 1: Introduction to Computer Networks
+- Week 2: OSI and TCP/IP Models
+- Week 3: Network Protocols and Addressing
+- Week 4: Error Detection and Correction Techniques
+- Week 5: Communication Hardware Overview
+- Week 6: Socket Programming Basics
+- Week 7: Network Configuration and Tools
+- Week 8: Midterm Review and Assessment
+- Week 9: Advanced Socket Programming
+- Week 10: Routing and Switching Concepts
+- Week 11: Network Security Basics
+- Week 12: Wireless Networking
+- Week 13: Network Performance and Optimization
+- Week 14: Cloud and Virtual Networking
+- Week 15: Project Presentations and Final Review
+- Week 16: Final Exam Week
