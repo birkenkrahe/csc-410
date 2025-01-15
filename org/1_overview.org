@@ -4,6 +4,8 @@
 #+STARTUP: overview hideblocks indent
 #+options: toc:nil num:nil ^:nil:
 * What is this course about?
+#+attr_html: :width 600px:
+[[../img/hydra.jpg]]
 
 Catalog entry for CSC 410: Data Communications and Networks:
 #+begin_quote
