@@ -1,0 +1,100 @@
+#+TITLE:OVERVIEW - DATA COMMUNICATIONS AND NETWORKS
+#+AUTHOR: Marcus Birkenkrahe
+#+SUBTITLE: CSC 410 - Lyon College - Spring 2025
+#+STARTUP: overview hideblocks indent
+#+options: toc:nil num:nil ^:nil:
+* What is this course about?
+
+Catalog entry for CSC 410: Data Communications and Networks:
+#+begin_quote
+An introduction to the theory and practice of computer networks,
+software protocols, communication hardware, error detection, and
+handling.
+#+end_quote
+
+* What will you learn in this course?
+
+1. Cloud computing - basics, deployment, providers
+2. Microservice technologies (Docker, Kubernetes)
+3. Networking and protocols theory and models
+4. Cisco Certified Network Associate (CCNA) training
+5. Socket Programming - Coding
+
+* How will you be evaluated?
+
+| WHEN       | DESCRIPTION             | IMPACT |
+|------------+-------------------------+--------|
+| Weekly     | Assignments             |    25% |
+| Weekly     | Multiple choice tests   |    25% |
+| Monthly    | Sprint reviews          |    25% |
+| TBD        | Final exam (optional)   |    25% |
+
+Rules:
+- If you have to miss a deadline, come talk to me first.
+- Unexcused late submissions will be penalized (max. 50%).
+- Optional final exam will be sourced by term test questions.
+- Programming assignments are (usually) home assignments.
+- Tests are online, open book, multiple choice quizzes for home.
+
+* Which projects can you do?
+
+- Class projects are individual projects.
+
+- Anything related to networking, for example:
+
+  1) "How I created a home mesh network and lived to tell the tale"
+
+  2) "Secure Shell: Building a Mobile SSH Server with Termux" ([[https://chat.google.com/room/AAAA-JMbI_M/5Pi9IfZzNWc/5Pi9IfZzNWc?cls=10][Chat]])
+
+  3) "Building a Cloud Development Environment with Termux & Docker"
+
+  4) "Brain Computer Interfaces - State of the Art" ([[https://chat.google.com/room/AAAA-JMbI_M/7TqIej3bMr8/7TqIej3bMr8?cls=10][Chat]])
+
+  5) "Load balancing - Managing Internet traffic" ([[https://chat.google.com/room/AAAA-JMbI_M/Szz72gMYVac/Szz72gMYVac?cls=10][Chat]])
+
+  6) "Tesla's Hardware-Based Ethernet Innovation" ([[https://chat.google.com/room/AAAA-JMbI_M/TvGCgpGcp2I/TvGCgpGcp2I?cls=10][Chat]])
+
+  7) "The Path of a Packet through the Linux kernel" ([[https://chat.google.com/room/AAAA-JMbI_M/2-oT2glSvg8/2-oT2glSvg8?cls=10][Chat]] & [[https://chat.google.com/room/AAAA-JMbI_M/EyGuuvXzBtg/EyGuuvXzBtg?cls=10][Chat]])
+
+  8) "History of the World-Wide Web" ([[https://chat.google.com/room/AAAA-JMbI_M/88mQFajvWxM/88mQFajvWxM?cls=10][Chat]])
+
+  9) "Linux Device Drivers Development" ([[https://chat.google.com/room/AAAA-JMbI_M/kN__hu9bh_I/kN__hu9bh_I?cls=10][Chat]])
+
+  10) "Designing a Firewall Rule Set: Balancing Security & Usability"
+
+- Project management as usual with Scrum + IMRaD + 4 spring reviews
+
+* Which platforms are we going to use?
+
+- *Canvas* (learning management system).
+
+- *GitHub* repo: [[https://github.com/birkenkrahe/csc-410][github.com/birkenkrahe/csc-410]]
+
+- *Google Drive* (tied to your Lyon email).
+
+- *Google Chat Space* (you're a member already).
+
+- *DataCamp* for an unspecified number of lessons.
+
+- *Linux VM*:
+  1) Cisco Packet Tracer (simulation software)
+  2) Command-line network analysis
+  3) C programming (sockets)
+
+* Which sources did I use?
+
+1. How Linux Works, B Ward (2021)
+2. Networking Fundamentals, D Bombal (2024)
+3. [[https://beta.computer-networking.info/syllabus/default/index.html][Computer Networking, O Bonaventure (2025)]] - free
+4. The Linux Programming Interface, M Kerrisk (2019)
+5. Hands-on Networking with C, L van Winkle (2019)
+6. [[https://beej.us/guide/bgnet/][Network Programming Using Sockets, B Hall (2022)]] - free
+7. Internet network use 1990-2025 - only in my head
+
+* When is the first assignment?
+
+- Your first home assignment is due on Wed, 22 Jan: Online DataCamp
+  lesson "Introduction to Cloud Computing" (no-code).
+
+- Your first home test is due on Fri, 24 Jan: Multiple-choice
+  questions based on the material covered in the course by that time.

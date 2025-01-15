@@ -1,0 +1,47 @@
+#+title: Agenda Notebook
+#+author: Marcus Birkenkrahe
+#+subtitle: CSC 410 - Data Communications and Networking - Spring 2025
+#+SEQ_TODO: TODO NEXT IN_PROGRESS | DONE CANCELLED
+#+startup: overview hideblocks indent entitiespretty
+:PROPERTIES:
+:header-args:C:      :main yes :includes <stdio.h> :results output :exports both
+:header-args:python: :session *Python* :python python3 :results output :exports both
+:header-args:R:      :session *R* :results graphics output file :exports both
+:header-args:C++:    :main yes :includes <iostream> :results output :exports both
+:END:
+* Week 1: Course overview
+#+attr_html: :width 400px
+[[../img/cover.jpg]]
+
+- [ ] Course overview
+- [ ] Installing Cisco Packet Tracer
+- [ ] Getting started with Cisco Packet Tracer
+- [ ] Introducing Networks and Protocols
+- [ ] C Programming Basics Review: "FizzBuzz"
+
+** [[file:1_overview.org][Course overview]]: Content, Grading, Projects, Platforms
+
+** [[./2_packettracer.org][Cisco Packet Tracer]]: Intro & Installation & Getting started
+
+** Introducing Networks and Protocols
+
+- Network programming and C
+- OSI layer model
+- TCP/IP reference model
+- The Internet Protocol (IP)
+- IPv4 and IPv6 addresses
+- Domain names
+- Internet protocol routing
+- Network address translation
+- Client-Server paradigm
+- Listing your IP addresses using C
+
+** C Programming Basics Review: Control & Functions & Pointers
+
+1. Using Emacs, create an Org-mode source file.
+2. Solve the problem using pseudocode.
+3. Solve the problem in C using only one =main= function.
+4. Solve the problem using a function =fizzbuzz=.
+5. Solve the problem using pointers and pointer arithmetic.
+
+
