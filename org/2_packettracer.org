@@ -32,7 +32,7 @@
 
 * Installing Cisco Packet Tracer
 
-  1) Login to Linux and downnload the software [[https://www.netacad.com/resources/lab-downloads?courseLang=en-US][from here]]
+  1) Login to Linux and download the software [[https://www.netacad.com/resources/lab-downloads?courseLang=en-US][from here]]
 
   2) Make a local directory:
      #+begin_example sh
