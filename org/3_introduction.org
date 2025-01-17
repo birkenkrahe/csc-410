@@ -1,0 +1,349 @@
+#+title: Introduction to Networks
+#+author: Marcus Birkenkrahe
+#+SEQ_TODO: TODO IN_PROGRESS | DONE
+#+startup: overview hideblocks indent entitiespretty:
+#+property: header-args:C :main yes :includes <stdio.h> :results output :exports both:
+#+property: header-args:python :session *Python* :python python3 :results output :exports both:
+#+src R :file :session *R* :results graphics output file :exports both:
+#+property: header-args:C++ :main yes :includes <iostream> :results output :exports both:
+
+* Objectives                                                 :lecture:csc410:
+
+The following topics are covered:
+
+- [ ] Network programming and C
+- [ ] OSI layer model
+- [ ] TCP/IP reference model
+- [ ] The Internet Protocol
+- [ ] IPv4 addresses and IPv6 addresses
+- [ ] Domain names (DNS)
+- [ ] LANs, subnets and WANs
+- [ ] Internet protocol routing
+- [ ] Network address translation
+- [ ] The client-server paradigm
+- [ ] Network sockets
+
+Next: Listing your IP addresses programmatically from C
+
+* Networks
+
+- A network is a system of connected nodes or network devices that
+  exchange data (like files) and resources (like power).
+
+- The simplest network:
+  #+attr_html: :width 600px:
+  #+Caption: Connecting two hosts (Bonaventure, 2021)
+  [[../img/network.png]]
+
+* The Internet is C
+
+- Approximately *23 bn devices* are currently connected to the Internet:
+  20 bn IoT (sensors), 3 bn computers & smartphones (though 85% or
+  nearly 7 bn people own smartphones). These are very rough estimates.
+
+- Almost every network stack (= software to connect to a network) is
+  *programmed in C*, and all the network-relevant kernel code, including
+  network-capable device drivers.
+
+- Looking at C implementations alone would therefore unlock ALL
+  networking secrets. But networking contains many different levels of
+  *abstraction* (where the details of C are not helpful but hindering).
+
+- *"The Internet is C"* is more true than to say "The Web is HTML"
+  (which is what most people think): The Internet is based on C but
+  the Web (a subset of the Internet) is build on a diverse tech stack.
+
+* Layering structure = Divide and conquer
+
+- Internet standards are called protocols: They define everything from
+  voltage levels on an Ethernet cable to the compression factor of a
+  JPG image on a web page.
+
+- If you're programming an Internet router, you don't want to have to
+  think of image compression for a web application, and vice
+  versa. The structural answer: Divide and conquer (Caesar: /Divide et
+  impera./) *Can you think of examples?* [fn:1]
+
+- The basic structuring technique is *layering*: The whole problem is
+  broken down in layers. Each layer provides services for the layer on
+  top of it, and each upper layer relies on the layers underneath
+  without needing to know how they work.
+
+- *Can you think of an example for applied layering?*[fn:2]
+
+- The conceptual benefits (example[fn:3]):
+  1) *Modularity* (independent design, development and maintenance)
+  2) *Abstraction* (layers don't need to know details elsewhere)
+  3) *Interchangeability* (components can be replaced by layer)
+  4) *Interoperability* (systems from different vendors work together)
+
+* OSI Layer Model
+
+The Open Systems Interconnection (OSI) model is from 1977, published
+as [[https://www.iso.org/standard/20269.html][ISO 7498]] ([[https://cdn.standards.iteh.ai/samples/20269/4b12bcad0c6247dba2875b7cdf47b807/ISO-IEC-7498-1-1994.pdf][PDF sample]]). It's worth looking at this document.
+#+attr_html: :width 400px:
+#+caption: OSI Layer Model
+[[../img/osi.png]]
+
+Let's briefly look at each layer[fn:4]
+
+1. *Physical Layer:* Physical communication in the real world.
+   - Voltage levels on an Ethernet cable
+   - What each pin on a connector is for
+   - Radio frequency of Wi-Fi (Wireless Fidelity)
+   - Light flashes over an optic fiber
+
+2. *Data Link*: Protocols connecting two network nodes[fn:5].
+   - How a direct message between nodes starts and ends (framing)
+   - How messaging errors are detected and corrected
+   - How message flow is controlled (e.g. based on MAC address)
+
+3. *Network Layer*: Methods to transmit packets between nodes in
+   different networks.
+   - Layer for the Internet protocol (IP)
+   - Example for a command: =ping lyon.edu=
+   - Determines best path for data transmission (datagram)
+   - Routers maintain routing and forwarding tables
+   - Diagrams show network topology (connectivity abstraction)
+     #+attr_html: :width 900px:
+     #+caption: A simple network with two hosts and four routers
+     [[../img/topology.png]]
+   - Networks are modeled as directed weighted graphs[fn:6]
+
+4. *Transport Layer:* Methods to deliver variable length data between
+   hosts.
+   - Layer for the TCP (Transfer Communication Protocol)
+   - Splitting data up and recombine it
+   - Ensuring data arrives in order and without errors
+
+5. *Session Layer*: Manages dialogs between applications.
+   - Establish, maintain, terminate a connection
+   - A video conference session
+   - A SSH (Secure Shell, remote login) session
+   - Checkpoint (handshake), suspend (pause), resume dialogs
+
+6. *Presentation Layer:* Manage data translation to applications.
+   - Data encoding, compression and encryption
+   - Converting image files so that an app can open (PNG, JPG, GIF)
+   - Data compression in video streaming
+
+7. *Application Layer:* User applications
+   - Web browser using HTTP to load a web page
+   - Email client using SMTP (Simple Mail Transfer Protocol)
+   - FTP (File Transfer Protocol) for transferring files between PCs
+
+* OSI Application: Web browser
+
+- An application like a web browser, exists in the application layer.
+
+- The HTTP used to transmit web pages (https://github.com/birkenkrahe)
+  does not care HOW the data is transmitted.
+  #+attr_html: :width 900px:
+  #+caption: Abstracted (visible) vs. actual (hidden) connection
+  [[../img/browser.png]]
+
+* Frames, packets, segments, and datagrams
+
+Data chunks have different names depending on the OSI layer:
+- A data unit on layer 2 (data link) is called a *frame*
+- A data unit on layer 3 (network) is called a *packet*
+- A data unit on layer 4 (transport) is called a *segment* if it is
+  part of a TCP connection, but a *datagram* if it's a UDP message
+
+* TCP/IP Layer Model
+
+- TCP/IP model is the most common network communication model in
+  use. The same functions are performed in both models with different
+  divisions.
+
+  #+attr_html: :width 900px:
+  #+caption: OSI and TCP/IP layer models
+  [[../img/tcpip.png]]
+
+- The OSI model is used to reason and understand networking concerns
+  but the TCP/IP model reflects the real network implementation
+  better.
+
+- Its layers are as follows:
+
+  1. *Network Access Layer:* Physical host connection and data framing,
+     like sending an Ethernet or Wi-Fi packet over the network. This
+     is where the (hardwired) MAC address is used:
+
+     - Example: Mapping IP addresses to MAC addresses
+       #+begin_src bash :results output :exports both
+         arp -n
+       #+end_src
+
+     - Result at my house:
+       #+begin_example sh
+       : Address                  HWtype  HWaddress           Flags Mask            Iface
+       : 192.168.68.53            ether   78:80:38:cc:71:88   C                     wlo1
+       : 192.168.68.57            ether   ae:4b:fd:96:38:90   C                     wlo1
+       : 192.168.68.1             ether   60:83:e7:71:ed:50   C                     wlo1
+       : 192.168.1.254            ether   6c:4b:b4:6f:65:21   C                     enp4s0
+       #+end_example
+
+  2. *Internet Layer*: Addressing packets and routing them over multiple
+     interconnected networks. This is where an IP address is defined:
+
+     ExamppeL: Display host name(s) as IP addresses (IPv4 and IPv6):
+     #+begin_src bash :results output :exports both
+       hostname -I | cut -d' ' -f1  # use ' ' delimiter, first field only
+     #+end_src
+
+     #+RESULTS:
+     : 192.168.1.250
+
+  3. *Host-to-Host Layer:* Provides two protocols, TCP (Transfer
+     Communication Protocol) and UDP (User Datagram Protocol) for data
+     order, data segmentation, network congestion, error correction.
+
+     - Example: Show active TCP and UDP connections and listening ports:
+       #+begin_src bash :results output :exports both
+         netstat -tul | head -n 10
+       #+end_src
+
+     - Results at my house:
+       #+begin_example
+       Active Internet connections (only servers)
+       Proto Recv-Q Send-Q Local Address           Foreign Address         State
+       tcp        0      0 localhost:domain        0.0.0.0:*               LISTEN
+       tcp        0      0 localhost:ipp           0.0.0.0:*               LISTEN
+       tcp6       0      0 localhost:ipp           [::]:*                  LISTEN
+       tcp6       0      0 [::]:60000              [::]:*                  LISTEN
+       tcp6       0      0 [::]:1716               [::]:*                  LISTEN
+       udp        0      0 localhost:domain        0.0.0.0:*
+       udp        0      0 localhost:323           0.0.0.0:*
+       udp        0      0 0.0.0.0:33442           0.0.0.0:*
+       #+end_example
+
+  4. *Process/Application Layer:* Implements protocols such as HTTP,
+     SMTP, FTP, Telnet, =wget=. Socket programming happens here making
+     use of Linux' implementation of the lower layers.
+
+     - Example: Get URL from web & store in =.emacs= configuration file
+       #+begin_example sh
+       wget -O .emacs tinyurl.com/lyon-emacs
+       #+end_example
+
+     - Example: resolve network domain names:
+       #+begin_src bash :results output :exports both
+         nslookup lyon.edu
+       #+end_src
+
+     - Answer:
+       #+begin_example
+       : Server:        127.0.0.53
+       : Address: 127.0.0.53#53
+       :
+       : Non-authoritative answer:
+       : Name:    lyon.edu
+       : Address: 40.119.1.254
+       #+end_example
+
+* Data encapsulation
+
+- Lower-levels handle data from higher levels: their data structures
+  must encapsulate data from higher levels.
+
+- Example: A web browser only implements the protocols dealing with
+  websites - HTTP, HTML, CSS, etc. It doesn't need to bother with
+  TCP/IP or Wi-Fi.
+
+- A web server, *Host A*, transmits a web page to the receiver, *Host B*:
+  #+attr_html: :width 900px:
+  #+caption: Host A sends web page to Host B
+  [[../img/web_server.png]]
+
+- The journey of the data up and down the layers looks like this:
+
+  1. Text is encoded in an HTML structure before it can be sent:
+     #+attr_html: :width 500px:
+     [[../img/text_to_html.png]]
+
+     - The text: 
+       #+begin_example
+       * Welcome to My HTML Page
+
+       This is a simple HTML page in Org-mode format.
+       #+end_example
+
+     - The HTML encoding:
+       #+begin_example html
+       <!DOCTYPE html>
+       <html lang="en">
+       <head>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <meta name="author" content="Marcus Birkenkrahe">
+         <meta name="description" content="A simple HTML starter page">
+         <meta name="keywords" content="HTML, Org-mode, Example">
+         <title>Example HTML Page</title>
+       </head>
+       <body>
+         <h1>Welcome to My HTML Page</h1>
+         <p>This is a simple HTML page in Org-mode format.</p>
+       </body>
+       #+end_example
+
+     - This is essentially what Emacs does when you dynamically
+       (on-the-fly) render an Org-mode page with =C-c C-e h o=
+       ("Org-mode dispatch as HTML open file").
+
+  2. The HTML file cannot be send as such either! It must be
+     transmitted as part of a HTTP response.
+     #+attr_html: :width 500px:
+     [[../img/html_to_http.png]]
+
+     
+
+* Internet Protocol
+
+* What is an address? IPv4 vs. IPv6
+
+* Domain names
+
+* Internet routing
+
+* Local networks
+
+* Subnetting and CIDR
+
+* Multicast, broadcast, and anycast
+
+* Port numbers
+
+* Clients and servers
+
+* What is a socket?
+
+* What's your address?
+
+* Footnotes
+
+[fn:1] Divide and conquer in other areas: Fourier transform (signal
+processing), sorting algorithms (binary sort), mob control (break mob
+up in parts).
+
+[fn:2] Layers in building construction: Foundation, building skeleton
+(frame), utilities (plumbing, electrics, HVAC), finish (walls,
+flooring, paint).
+
+[fn:3] In house building, modularity = interior & exterior design;
+abstraction = wall paint is independent of electric circuitry;
+interchangeability = replace plumbing without changing foundation;
+interoperability = choose freely which lamp to plug in.
+
+[fn:4] For much more detail, see Bonaventure, [[https://beta.computer-networking.info/syllabus/default/principles/reliability.html#][Connecting two hosts
+together]] - in his interactive ebook (2021).
+
+[fn:5] Sample question on this layer: "Consider two hosts connected by
+a physical cable. The two hosts are separated by a distance of 830
+kilometers and the propagation delay is 5 microseconds per
+kilometer. What is the delay required to send one bit from the sender
+to the receiver (in milliseconds)?" (Source: Bonaventure, 2021).
+
+[fn:6]A directed weighted graph can for example model a road network:
+vertices = cities, edges = roads connecting cities, weights =
+distances.
