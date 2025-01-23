@@ -11,8 +11,8 @@
 
 The following topics are covered:
 
-- [ ] Network programming and C
-- [ ] OSI layer model
+- [X] Network programming and C
+- [X] OSI layer model
 - [ ] TCP/IP reference model
 - [ ] The Internet Protocol
 - [ ] IPv4 addresses and IPv6 addresses
@@ -31,7 +31,7 @@ Next: Listing your IP addresses programmatically from C
   exchange data (like files) and resources (like power).
 
 - The simplest network:
-  #+attr_html: :width 600px:
+  #+attr_html: :width 200px:
   #+Caption: Connecting two hosts (Bonaventure, 2021)
   [[../img/network.png]]
 
@@ -81,7 +81,7 @@ Next: Listing your IP addresses programmatically from C
 
 The Open Systems Interconnection (OSI) model is from 1977, published
 as [[https://www.iso.org/standard/20269.html][ISO 7498]] ([[https://cdn.standards.iteh.ai/samples/20269/4b12bcad0c6247dba2875b7cdf47b807/ISO-IEC-7498-1-1994.pdf][PDF sample]]). It's worth looking at this document.
-#+attr_html: :width 400px:
+#+attr_html: :width 200px:
 #+caption: OSI Layer Model
 [[../img/osi.png]]
 
@@ -105,7 +105,7 @@ Let's briefly look at each layer[fn:4]
    - Determines best path for data transmission (datagram)
    - Routers maintain routing and forwarding tables
    - Diagrams show network topology (connectivity abstraction)
-     #+attr_html: :width 900px:
+     #+attr_html: :width 400px:
      #+caption: A simple network with two hosts and four routers
      [[../img/topology.png]]
    - Networks are modeled as directed weighted graphs[fn:6]
@@ -138,7 +138,7 @@ Let's briefly look at each layer[fn:4]
 
 - The HTTP used to transmit web pages (https://github.com/birkenkrahe)
   does not care HOW the data is transmitted.
-  #+attr_html: :width 900px:
+  #+attr_html: :width 400px:
   #+caption: Abstracted (visible) vs. actual (hidden) connection
   [[../img/browser.png]]
 
@@ -156,7 +156,7 @@ Data chunks have different names depending on the OSI layer:
   use. The same functions are performed in both models with different
   divisions.
 
-  #+attr_html: :width 900px:
+  #+attr_html: :width 400px:
   #+caption: OSI and TCP/IP layer models
   [[../img/tcpip.png]]
 
@@ -252,17 +252,17 @@ Data chunks have different names depending on the OSI layer:
   TCP/IP or Wi-Fi.
 
 - A web server, *Host A*, transmits a web page to the receiver, *Host B*:
-  #+attr_html: :width 900px:
+  #+attr_html: :width 400px:
   #+caption: Host A sends web page to Host B
   [[../img/web_server.png]]
 
 - The journey of the data up and down the layers looks like this:
 
   1. Text is encoded in an HTML structure before it can be sent:
-     #+attr_html: :width 500px:
+     #+attr_html: :width 200px:
      [[../img/text_to_html.png]]
 
-     - The text: 
+     - The text:
        #+begin_example
        * Welcome to My HTML Page
 
@@ -293,15 +293,247 @@ Data chunks have different names depending on the OSI layer:
 
   2. The HTML file cannot be send as such either! It must be
      transmitted as part of a HTTP response.
-     #+attr_html: :width 500px:
+     #+attr_html: :width 200px:
      [[../img/html_to_http.png]]
 
-     
+     - The web server does this by applying the appropriate HTTP
+       header to the HTML:
+       #+begin_example
+       HTTP/1.1 200 OK
+       Date: Fri, 17 Jan 2025 10:00:00 GMT
+       Content-Type: text/html; charset=UTF-8
+       Content-Length: 1234
+       Connection: keep-alive
+       Server: Apache/2.4.54 (Unix)
+       #+end_example
+
+  3. The HTTP response is transmitted as part of a TCP session. This
+     is taken care of by the operating system's TCP/IP stack:
+     #+attr_html: :width 200px:
+     [[../img/http_to_tcp.png]]
+
+     This (still untested) Python program defines HTML content and
+     HTTP header, and creates a TCP socket (to localhost) to access
+     the server in your browser at http://localhost:8080:
+
+     1. =html_content= contains the HTML file
+     2. =http_response= includes HTTL header and HTML content
+     3. A TCP/IP socket is created and bound to =localhost:8080=
+     4. The server listens for incoming connections.
+     5. The server accepts connections, reads the request, and sends
+        the HTTP response.
+
+        #+begin_src python :python python3 :session *Python* :tangle socket.py
+          import socket
+
+          # HTML content to be served
+          html_content = """
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Simple HTML File</title>
+          </head>
+          <body>
+              <h1>Hello, World!</h1>
+              <p>This is a simple HTML file served via a basic HTTP server.</p>
+          </body>
+          </html>
+          """
+
+          # HTTP response
+          http_response = f"""\
+          HTTP/1.1 200 OK
+          Content-Type: text/html; charset=UTF-8
+          Content-Length: {len(html_content)}
+
+          {html_content}
+          """
+
+          # Create a TCP socket
+          server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          server_socket.bind(("localhost", 8080))  # Bind to localhost and port 8080
+          server_socket.listen(1)  # Listen for incoming connections
+
+          print("Server is running at http://localhost:8080")
+          try:
+              while True:
+                  # Accept an incoming connection
+                  client_socket, client_address = server_socket.accept()
+                  print(f"Connection received from {client_address}")
+
+                  # Read the request (not parsed here for simplicity)
+                  request = client_socket.recv(1024).decode('utf-8')
+                  print(f"Request:\n{request}\n")
+
+                  # Send the HTTP response
+                  client_socket.sendall(http_response.encode('utf-8'))
+
+                  # Close the connection
+                  client_socket.close()
+          except KeyboardInterrupt:
+              print("Shutting down the server...")
+          finally:
+              server_socket.close()
+        #+end_src
+
+  4. The TCP packet is routed by an IP packet.
+     #+attr_html: :width 200px:
+     [[../img/tcp_to_ip.png]]
+
+     - The =traceroute= command prints the trace to the network host -
+       it assumes a maximum of 30 "hops" between routers until it
+       reaches the destination
+       #+begin_src bash :results output :exports both
+         traceroute lyon.edu
+       #+end_src
+
+     - This is what I get at home:
+       #+begin_example bash
+       traceroute to lyon.edu (40.119.1.254), 30 hops max, 60 byte packets
+       1  dsldevice.attlocal.net (192.168.1.254)  0.976 ms  1.242 ms  1.473 ms
+       2  69.234.156.1 (69.234.156.1)  6.150 ms  6.160 ms  6.171 ms
+       3  71.154.103.130 (71.154.103.130)  12.077 ms  12.090 ms  21.021 ms
+       4  32.130.17.194 (32.130.17.194)  21.008 ms  21.022 ms  21.035 ms
+       5  32.130.17.39 (32.130.17.39)  21.087 ms  21.043 ms  21.122 ms
+       6  * * 12.90.152.70 (12.90.152.70)  24.274 ms
+       7  ae21-0.icr03.sn6.ntwk.msn.net (104.44.230.116)  31.217 ms  31.202 ms ae32-0.icr01.sn6.ntwk.msn.net (104.44.230.112)  29.308 ms
+       ...
+       #+end_example
+
+     - How many hops to get to yourself as the host? (=localhost=)
+       #+begin_src bash :results output :exports both
+         traceroute localhost
+       #+end_src
+
+     - On my machine:
+       #+begin_example
+       : traceroute to localhost (127.0.0.1), 30 hops max, 60 byte packets
+       :  1  localhost (127.0.0.1)  0.010 ms  0.001 ms  0.001 ms
+       #+end_example
+
+  5. The IP packet is transmitted over the wire in an Ethernet frame. 
+     #+attr_html: :width 200px:
+     [[../img/ip_to_ethernet.png]]
+
+     - The =tcpdump= command shows a hexadecimal representation of the
+       full packet including Ethernet headers.
+
+     - First you have to find out what your ethernet link is called:
+       #+begin_src bash :results output :exports both
+       ip link show
+       #+end_src
+
+     - On my machine it's not =eth0= but =enp4s0=
+       #+begin_example
+       : 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+       :     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+       : 2: enp4s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+       :     link/ether 74:56:3c:b9:74:2d brd ff:ff:ff:ff:ff:ff
+       : 3: wlo1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DORMANT group default qlen 1000
+       :     link/ether 28:c5:d2:33:f1:c6 brd ff:ff:ff:ff:ff:ff
+       :     altname wlp0s20f3
+       #+end_example
+
+     - Or you can use =nmcli= (Network Manager Command Line Interface):
+       #+begin_src bash :results output :exports both
+       nmcli device status
+       #+end_src
+
+       #+RESULTS:
+       : DEVICE        TYPE      STATE         CONNECTION         
+       : enp4s0        ethernet  connected     Wired connection 1 
+       : wlo1          wifi      connected     deco2024           
+       : p2p-dev-wlo1  wifi-p2p  disconnected  --                 
+       : lo            loopback  unmanaged     --                 
+       
+     - On my machine:
+       #+begin_example
+       DEVICE        TYPE      STATE         CONNECTION         
+       enp4s0        ethernet  connected     Wired connection 1 
+       wlo1          wifi      connected     deco2024           
+       p2p-dev-wlo1  wifi-p2p  disconnected  --                 
+       lo            loopback  unmanaged     --                 
+       #+end_example
+       
+     - Dump the frame:
+       #+begin_example bash
+       sudo tcpdump -i enp4s0 -vv -X
+       #+end_example
+
+       The result shows individual packets. It begins like this:
+       #+begin_example sh
+       tcpdump: listening on enp4s0, link-type EN10MB (Ethernet), 
+       snapshot length 262144 bytes
+       22:36:09.752500 ARP, Ethernet (len 6), IPv4 (len 4), 
+       Request who-has 192.168.1.94 tell dsldevice.attlocal.net, length 46
+               0x0000:  0001 0800 0604 0001 6c4b b46d 6521 c0a8  ........lK.me!..
+  	         0x0010:  01fe 0000 0000 0000 c0a8 015e 0000 0000  ...........^....
+	         0x0020:  0000 0000 0000 0000 0000 0000 0000       ..............
+       #+end_example
 
 * Internet Protocol
 
-* What is an address? IPv4 vs. IPv6
+- One "protocol" (set of rules to facilitate network traffic) is
+  overwhelmingly common today: IP. It comes in two versions, IPv4 and
+  IPv6. IPv4 is ubiquitous, and IPv6 is growing.
 
+- IPv4 uses 32-bit addresses or max. 2^32 uniquely identifiable
+  systems:
+  #+begin_src R
+    2^32
+  #+end_src
+
+  #+RESULTS:
+  : 4294967296
+
+- These 4.3 bn addresses were not initially assigned efficiently
+  (nobody knew how much this show would grow!) and providers today
+  are forced to ration IPv4 addresses.
+
+- IPv6 was designed 1998 to replace IPv4. It uses a 128-bit address,
+  or theoretically 2^128 addresses for uniquely identifiable systems:
+  #+begin_src R
+    2^128
+  #+end_src
+
+  #+RESULTS:
+  : 3.40282366920938e+38
+
+- That is about 10^14 times larger than the number of stars in the
+  observable universe, and 10^16 times larger than the estimated
+  number of grains of sand on Earth's beaches.
+
+- Every desktop and smartphone OS supports both IPv4 and IPv6
+  (so-called dual-stack configuration). 
+
+* IN_PROGRESS What is an address? IPv4 vs. IPv6
+
+- All Internet Protocol (IP) traffic routes to an address - like phone
+  calls that must be dialed to phone numbers.
+
+- IPv4 addresses are 32 bits long. They are divided into four 8-bit (1
+  byte word) sections. Each section is displayed as a decimal number
+  between 0 and 255 and delineated by a period.
+
+- Examples
+  #+begin_example
+  0.0.0.0
+  127.0.0.1
+  10.0.0.0
+  172.16.0.5
+  192.168.0.1
+  192.168.50.1
+  255.255.255.255
+  #+end_example
+
+- A special address, the *loopback address*, is reserved at
+  =127.0.0.1=. To the computer, it means "establish a connection to
+  myself".
+
+- You can see this in the file =/etc/hosts/=, or by tracing the path
+  with =traceroute=, or by entering =ping 127.0.0.1=, or by opening
+  =127.0.0.1= in your browser (this may not work).
+  
 * Domain names
 
 * Internet routing
