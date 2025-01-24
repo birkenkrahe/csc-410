@@ -25,7 +25,7 @@ The following topics are covered:
 
 Next: Listing your IP addresses programmatically from C
 
-* Networks
+* DONE Networks
 
 - A network is a system of connected nodes or network devices that
   exchange data (like files) and resources (like power).
@@ -35,7 +35,7 @@ Next: Listing your IP addresses programmatically from C
   #+Caption: Connecting two hosts (Bonaventure, 2021)
   [[../img/network.png]]
 
-* The Internet is C
+* DONE The Internet is C
 
 - Approximately *23 bn devices* are currently connected to the Internet:
   20 bn IoT (sensors), 3 bn computers & smartphones (though 85% or
@@ -53,7 +53,7 @@ Next: Listing your IP addresses programmatically from C
   (which is what most people think): The Internet is based on C but
   the Web (a subset of the Internet) is build on a diverse tech stack.
 
-* Layering structure = Divide and conquer
+* DONE Layering structure = Divide and conquer
 
 - Internet standards are called protocols: They define everything from
   voltage levels on an Ethernet cable to the compression factor of a
@@ -77,7 +77,7 @@ Next: Listing your IP addresses programmatically from C
   3) *Interchangeability* (components can be replaced by layer)
   4) *Interoperability* (systems from different vendors work together)
 
-* OSI Layer Model
+* DONE OSI Layer Model
 
 The Open Systems Interconnection (OSI) model is from 1977, published
 as [[https://www.iso.org/standard/20269.html][ISO 7498]] ([[https://cdn.standards.iteh.ai/samples/20269/4b12bcad0c6247dba2875b7cdf47b807/ISO-IEC-7498-1-1994.pdf][PDF sample]]). It's worth looking at this document.
@@ -132,7 +132,7 @@ Let's briefly look at each layer[fn:4]
    - Email client using SMTP (Simple Mail Transfer Protocol)
    - FTP (File Transfer Protocol) for transferring files between PCs
 
-* OSI Application: Web browser
+* DONE OSI Application: Web browser
 
 - An application like a web browser, exists in the application layer.
 
@@ -142,7 +142,7 @@ Let's briefly look at each layer[fn:4]
   #+caption: Abstracted (visible) vs. actual (hidden) connection
   [[../img/browser.png]]
 
-* Frames, packets, segments, and datagrams
+* DONE Frames, packets, segments, and datagrams
 
 Data chunks have different names depending on the OSI layer:
 - A data unit on layer 2 (data link) is called a *frame*
