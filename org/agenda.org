@@ -1,8 +1,8 @@
 #+title: Agenda Notebook
 #+author: Marcus Birkenkrahe
 #+subtitle: CSC 410 - Data Communications and Networking - Spring 2025
-#+SEQ_TODO: TODO NEXT IN_PROGRESS | DONE CANCELLED
-#+startup: overview hideblocks indent entitiespretty
+#+SEQ_TODO: TODO NEXT IN_PROGRESS PRACTICE | DONE CANCELLED
+#+startup: overview hideblocks indent
 :PROPERTIES:
 :header-args:C:      :main yes :includes <stdio.h> :results output :exports both
 :header-args:python: :session *Python* :python python3 :results output :exports both
@@ -13,28 +13,210 @@
 #+attr_html: :width 400px
 [[../img/cover.jpg]]
 
-- [ ] Course overview
-- [ ] Installing Cisco Packet Tracer
+- [X] Course overview
+- [X] Installing Cisco Packet Tracer
+- [X] Introducing Networks and Protocols
 - [ ] Getting started with Cisco Packet Tracer
-- [ ] Introducing Networks and Protocols
 - [ ] C Programming Basics Review: "FizzBuzz"
 
-** [[file:1_overview.org][Course overview]]: Content, Grading, Projects, Platforms
+** DONE [[file:1_overview.org][Course overview]]: Content, Grading, Projects, Platforms
 
-** [[./2_packettracer.org][Cisco Packet Tracer]]: Intro & Installation & Getting started
+** DONE Review (Overview)
 
-** Introducing Networks and Protocols
+1. Remember at least 2 topics that will be addressed in this class.
+   #+begin_quote
+   1. Cloud computing
+   2. Microservice technologies
+   3. Networking and Internet protocols
+   4. Cisco Packet Tracer simulation
+   5. Socket programming with C
+   #+end_quote
 
-- Network programming and C
-- OSI layer model
-- TCP/IP reference model
-- The Internet Protocol (IP)
-- IPv4 and IPv6 addresses
-- Domain names
-- Internet protocol routing
-- Network address translation
-- Client-Server paradigm
-- Listing your IP addresses using C
+2. What is "Termux"?
+   #+begin_quote
+   A Linux emulator for Android phones.
+   #+end_quote
+
+3. Why is Linux relevant for computer networks?
+   #+begin_quote
+   1. Dominant operating system for servers (97% of web servers, 90%
+      of cloud computing servers, > 70% of global market overall).
+   2. Free and open source.
+   3. Core platform for microservices like Docker and Kubernetes.
+   4. Powerful command-line networking tools for configuration,
+      firewalling, monitoring, analysis.
+   #+end_quote
+
+4. What is an Internet "packet"?
+   #+begin_quote
+   An Internet packet (= header + payload) is a small unit of data
+   transmitted over a network as part of a message. Packets are
+   independently routed through the network and then reassembled at
+   their destination to recreate the original message.
+   #+end_quote
+
+5. What is Cisco Packet Tracer?
+   #+begin_quote
+   Cisco packet tracer is a cross-platform network simulation tool
+   developed by Cisco Systems, the dominant firm in networking.
+   #+end_quote
+
+** IN_PROGRESS Introducing Networks and Protocols
+
+- [X] Network programming and C
+- [ ] OSI layer model
+- [ ] TCP/IP reference model
+- [ ] The Internet Protocol (IP)
+- [ ] IPv4 and IPv6 addresses
+- [ ] Domain names
+- [ ] Internet protocol routing
+- [ ] Network address translation
+- [ ] Client-Server paradigm
+- [ ] Listing your IP addresses using C
+
+* Week 2: Introduction to networking
+#+attr_html: :width 600px:
+#+caption: Building (Retro)
+[[../img/builder.jpg]]
+
+- [X] The Internet is C
+- [X] Layering principle
+- [X] OSI model
+- [ ] Cisco Packet Tracer
+- [ ] Test 1 (Deadline Friday, 31 January)
+
+** DONE Review / Preview (next test sometime this week)
+
+1. What is a network?
+   #+begin_quote
+   A collection of interconnected nodes or devices that exchange data.
+   #+end_quote
+
+2. Which areas of mathematics are most relevant for networks?
+   #+begin_quote
+   - *Graph theory* (theory of nodes connected by weighted edges) for
+     network optimization and routing algorithms.
+   - *Probability and statistics* for traffic modeling and performance
+     analysis.
+   - *Fourier analysis* (approximations of general functions by sums of
+     simpler trigonometric functions) for signal processing.
+   #+end_quote
+
+3. In which sense it "The Internet is C" true?
+   #+begin_quote
+   - Network stacks (layered software supporting the network) is
+     programmed in C.
+   - All network-relevant (processes, files, sockets) kernel code is
+     programmed in C.
+   #+end_quote
+
+4. Name at least two benefits of a "layering" approach to building:
+   #+begin_quote
+   - *Modularity* = independent design, development, maintenance
+   - *Abstraction* = layer details hidden from other layers
+   - *Interchangeability* = component replacement by layer
+   - *Interoperability* = different systems working together
+   #+end_quote
+
+5. Name at least two of the layers of the OSI model.
+   #+begin_quote
+   1) Application
+   2) Presentation
+   3) Session
+   4) Transport
+   5) Network
+   6) Data Link
+   7) Physical
+   #+end_quote
+
+6. What does "on-premise" computing mean and what else is there?
+   #+caption: Cloud service models - car analogy (DataCamp, 2020)
+   #+attr_html: :width 600px
+   [[../img/services.png]]
+
+   #+begin_comment
+   - On-premise: Run infrastructrure (servers), platform (apps),
+   and (end-customer) software.
+
+   - Cloud: Outsource infrastructure, platform(s), and software.
+   #+end_comment
+
+7. What do different cloud services (business models) deliver?
+   #+caption: IaaS vs. PaaS vs. SaaS (DataCamp, 2020)
+   #+attr_html: :width 600px
+   [[../img/services1.png]]
+
+8. What is the relationship between "control" and "abstraction" in
+   cloud computing?
+   #+caption: Control vs. Abstraction (DataCamp, 2020)
+   #+attr_html: :width 500px
+   [[../img/pyramid.png]]
+
+9. Who dominates the cloud market?
+   #+attr_html: :width 600px:
+   #+caption: Source: Synergy Research Group (not checked)
+   [[../img/cloud_market.png]]
+
+10. What is the size of the global IT services market?
+    #+attr_html: :width 600px:
+    #+caption: Source: Precedence Research (not checked)
+    [[../img/it_market.png]]
+
+    #+begin_quote
+    The size of the market for cloud computing is 5.6% of the market
+    for global IT services.
+
+    The rest (estimated via ChatGPT - not checked):
+
+    | Segment                            | Bn USD |
+    |------------------------------------+--------|
+    | IT Infrastructure Management       |    300 |
+    | Managed IT Services                |    200 |
+    | Enterprise Software & Apps         |    250 |
+    | Consulting Services                |    150 |
+    | Cybersecurity                      |    120 |
+    | IT Support & Maintenance           |    100 |
+    | System Integration                 |     90 |
+    | Telecommunications & Connectivity  |     80 |
+    | Business Process Outsourcing (BPO) |     80 |
+    | Emerging Technologies              |     50 |
+    | Training & Professional Services   |     30 |
+    |------------------------------------+--------|
+    | *Total*                              |  *1,250* |
+
+    #+end_quote
+
+
+** IN_PROGRESS [[./2_packettracer.org][Cisco Packet Tracer]]: Intro & Installation & Getting started
+
+* Week 3: TCP/IP & Cisco networks
+#+attr_html: :width 600px: 
+#+caption: The Nerd And The Network
+[[../img/nerd.jpg]]
+
+- [ ] TCP/IP model
+- [ ] What is a Cisco network?
+- [ ] Test 1 (Deadline Friday, 31 January)
+
+** TODO Cisco Packet Tracer review
+
+1. Which physical equipment do you need to use Cisco Packet
+   Tracer?
+   #+begin_quote
+   Laptop or desktop computer with Windows, Linux or MacOS.
+   #+end_quote
+2. What are things you can do with Cisco Packet Tracer?
+   #+begin_quote
+   1. Simulate physical equipment like a server rack.
+   2. Design, plan and test IP networks.
+   3. Configure wireless devices and wireless security.
+   4. Configure and program IoT devices such as sensors.
+   5. Build and configure smart home components.
+   6. Watch data flow across the network and watch packets.
+   7. Build a network topology from scratch.
+   8. Complete assessments towards a Cisco certificate.
+   #+end_quote
+3. 
 
 ** C Programming Basics Review: Control & Functions & Pointers
 
