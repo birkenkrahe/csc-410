@@ -8,252 +8,250 @@
 #+PROPERTY: header-args:C :main yes :includes <stdio.h> :results output :exports both :noweb yes
 #+PROPERTY: header-args:C++ :main yes :includes <iostream> :results output :exports both :noweb yes
 * What is Cisco Packet Tracer?
-  #+attr_html: :width 700px:
-  [[../img/pt.png]]
+#+attr_html: :width 700px:
+[[../img/pt.png]]
 
-  - What is it?
-    + Free software to simulate complex CISCO networks
-    + The software is enough to pass the CCNA exam
-    + Must register with the CISCO Network Academy
-    + Install on Windows, MacOS or Linux (Ubuntu/Debian)
-    + Go through the CISCO Packet Tracer course for more
+- What is it?
+  + Free software to simulate complex CISCO networks
+  + The software is enough to pass the CCNA exam
+  + Must register with the CISCO Network Academy
+  + Install on Windows, MacOS or Linux (Ubuntu/Debian)
+  + Go through the CISCO Packet Tracer course for more
 
-  - A Cisco story (that has little to do with networking)
+- A Cisco story (that has little to do with networking)
 
-  - Register with Cisco now at [[https://netacad.com/][netacad.com]] (use Google account)
+- Register with Cisco now at [[https://netacad.com/][netacad.com]] (use Google account)
 
-* Getting to know Cisco Packet Tracer (videos)
+* DONE Getting to know Cisco Packet Tracer (videos)
 
-  - Watch the [[https://www.netacad.com/launch?id=ec0847b7-e6fc-4597-bc31-38ddd6b07a2f&tab=curriculum&view=e4438117-81a5-5b37-81a5-dc26c153963d]["Overview of Cisco Packet Tracer"]] (1:30 min)
-    
-  - The Packet Tracer User Interface (3 min)
+- Watch the [[https://www.netacad.com/launch?id=ec0847b7-e6fc-4597-bc31-38ddd6b07a2f&tab=curriculum&view=e4438117-81a5-5b37-81a5-dc26c153963d]["Overview of Cisco Packet Tracer"]] (1:30 min)
 
-  - Deploying Devices (3:30 min)
+- The Packet Tracer User Interface (3 min)
+
+- Deploying Devices (3:30 min)
 
 * DONE Installing Cisco Packet Tracer
 
-  1) Login to Linux and downnload the software [[https://www.netacad.com/resources/lab-downloads?courseLang=en-US][from here]]
+1) Login to Linux and downnload the software [[https://www.netacad.com/resources/lab-downloads?courseLang=en-US][from here]]
 
-  2) Make a local directory:
-     #+begin_example sh
-     mkdir -p ~/packettracer
-     #+end_example
+2) Make a local directory:
+   #+begin_example sh
+   mkdir -p ~/packettracer
+   #+end_example
 
-  3) Change to the download directory and unpack the =.deb= file into
-     the directory you just created:
-     #+begin_example
-     dpkg-deb -x Packet_Tracer822_amd64_signed.deb ~/packettracer
-     #+end_example
+3) Change to the download directory and unpack the =.deb= file into
+   the directory you just created:
+   #+begin_example
+   dpkg-deb -x Packet_Tracer822_amd64_signed.deb ~/packettracer
+   #+end_example
 
-  4) Make a safe copy of =~/packettracer/opt/pt/packettracer=:
-     #+begin_example
-     cd ~/packettracer/opt/pt
-     cp -v packettracer packettracer.sav
-     #+end_example
+4) Make a safe copy of =~/packettracer/opt/pt/packettracer=:
+   #+begin_example
+   cd ~/packettracer/opt/pt
+   cp -v packettracer packettracer.sav
+   #+end_example
 
-  5) Edit the =packettracer= script as follows:
-     #+begin_example sh
-     #!/bin/bash
+5) Edit the =packettracer= script as follows:
+   #+begin_example sh
+   #!/bin/bash
 
-     echo Starting Packet Tracer 8.2.2
+   echo Starting Packet Tracer 8.2.2
 
-     PTDIR="$HOME/packettracer/opt/pt"
-     export LD_LIBRARY_PATH="$PTDIR/bin"
-     pushd $PTDIR/bin > /dev/null
-     ./PacketTracer "$@" > /dev/null 2>&1
-     popd > /dev/null
-     #+end_example
+   PTDIR="$HOME/packettracer/opt/pt"
+   export LD_LIBRARY_PATH="$PTDIR/bin"
+   pushd $PTDIR/bin > /dev/null
+   ./PacketTracer "$@" > /dev/null 2>&1
+   popd > /dev/null
+   #+end_example
 
-  6) Make a symlink from the script to =pt= in your home directory:
-     #+begin_example sh
-     cd ~
-     ln -s ~/packettracer/opt/pt/packettracer ~/pt
-     #+end_example
+6) Make a symlink from the script to =pt= in your home directory:
+   #+begin_example sh
+   cd ~
+   ln -s ~/packettracer/opt/pt/packettracer ~/pt
+   #+end_example
 
-  7) Start Packet Tracer:
-     #+begin_example sh
-     ./pt
-     #+end_example
+7) Start Packet Tracer:
+   #+begin_example sh
+   ./pt
+   #+end_example
 
-* Getting started with Cisco Packet Tracer
+* IN PROGRESS Getting started with Cisco Packet Tracer
 
-  Packet tracer file: 11_Packet_Tracer_Demo.pkt
+We select two hosts, connect them (1-6) and configure them so that
+they can talk to each other with MAC and IP addresses (7-11), which
+we can verify and simulate in Cisco packet tracer (12-18). Finally,
+we configure the simulation event list for our purposes.
 
-  We select two hosts, connect them (1-6) and configure them so that
-  they can talk to each other with MAC and IP addresses (7-11), which
-  we can verify and simulate in Cisco packet tracer (12-18). Finally,
-  we configure the simulation event list for our purposes.
+1) *Setup*: Go to =[End Devices]= and select a =Server= - the selection is
+   blocked until you click in the =Logical= canvas where now a
+   =Server-PT Server0= will appear.
 
-  1) *Setup*: Go to =[End Devices]= and select a =Server= - the selection is
-     blocked until you click in the =Logical= canvas where now a
-     =Server-PT Server0= will appear.
+2) Do the same thing with a PC to create a =PC-PT PC0=.
 
-  2) Do the same thing with a PC to create a =PC-PT PC0=.
+3) Click on either of them to see different menus:
+   - Physical description (image of the plugin points and racks)
+   - Config (network settings)
+   - Services (what the device can do)
+   - Desktop (runs services)
+   - Programming (scripts in a Cisco-specific config language)
+   - Attributes (serial no, price, power, size, wattage)
 
-  3) Click on either of them to see different menus:
-     - Physical description (image of the plugin points and racks)
-     - Config (network settings)
-     - Services (what the device can do)
-     - Desktop (runs services)
-     - Programming (scripts in a Cisco-specific config language)
-     - Attributes (serial no, price, power, size, wattage)
+4) "Logical" = Symbolic model or network diagram to represent a
+   physical network. Symbols are variable. Another example:
+   [[https://gns3.com][gns3.com]]. You can customize the representing symbol in the
+   =Physical= menu of an =end device=.
 
-  4) "Logical" = Symbolic model or network diagram to represent a
-     physical network. Symbols are variable. Another example:
-     [[https://gns3.com][gns3.com]]. You can customize the representing symbol in the
-     =Physical= menu of an =end device=.
+5) These two devices cannot communicate with one another. We can
+   connect them using physical cables or air connections
+   (wifi). Choose =[Connections]= and select a =Copper Cross-Over=
+   cable. The mouse pointer symbol changes.
+   #+attr_html: :width 300px:
+   #+caption: Source: Udemy, David Bombal 2024
+   [[../img/cross-over-cable.png]]
 
-  5) These two devices cannot communicate with one another. We can
-     connect them using physical cables or air connections
-     (wifi). Choose =[Connections]= and select a =Copper Cross-Over=
-     cable. The mouse pointer symbol changes.
-     #+attr_html: :width 300px:
-     #+caption: Source: Udemy, David Bombal 2024
-     [[../img/cross-over-cable.png]]
+   You can now try a few cables: For some of them, a connection is
+   possible but the link will appear red (no link), or the cable
+   cannot be connected to the available ports at all.
 
-     You can now try a few cables: For some of them, a connection is
-     possible but the link will appear red (no link), or the cable
-     cannot be connected to the available ports at all.
+6) Connect the =Cross-over Cable= at the =PC= and at the =Server= to the
+   =Fast Ethernet= port. Your network should look like this, and the
+   link is up (green):
 
-  6) Connect the =Cross-over Cable= at the =PC= and at the =Server= to the
-     =Fast Ethernet= port. Your network should look like this, and the
-     link is up (green):
+   #+attr_html: :width 300px:
+   #+caption: Image: Cisco Packet Tracer
+   [[../img/pc_server.png]]
 
-     #+attr_html: :width 300px:
-     #+caption: Image: Cisco Packet Tracer
-     [[../img/pc_server.png]]
+7) To establish a connection, we need a MAC (Media Access Control)
+   address (hard-wired into the networking card by the
+   manufacturer). MAC addresses are unique.
 
-  7) To establish a connection, we need a MAC (Media Access Control)
-     address (hard-wired into the networking card by the
-     manufacturer). MAC addresses are unique.
+   For both PC and Server, go to =Config > FastEthernet0= to find the
+   =MAC Address= of the device. Examples:
+   - PC: =0001.637A.0AD2=
+   - Server: =00E0.B086.EB03=
 
-     For both PC and Server, go to =Config > FastEthernet0= to find the
-     =MAC Address= of the device. Examples:
-     - PC: =0001.637A.0AD2=
-     - Server: =00E0.B086.EB03=
+8) Exercise: Find the MAC address of
 
-  8) Exercise: Find the MAC address of
+   1. Your mobile phone: About Phone > Status information > Phone
+      Wi-Fi MAC address
 
-     1. Your mobile phone: About Phone > Status information > Phone
-        Wi-Fi MAC address
+   2. Your Windows PC: Control Panel > Network and Internet > Network
+      Connections > WiFi Details > Physical Address
 
-     2. Your Windows PC: Control Panel > Network and Internet > Network
-        Connections > WiFi Details > Physical Address
+9) MAC addresses are 12-digit number (in hexadecimal). Change the
+   server MAC address to: 0001.2222.2222, and PC: 0001.1111.1111.
 
-  9) MAC addresses are 12-digit number (in hexadecimal). Change the
-     server MAC address to: 0001.2222.2222, and PC: 0001.1111.1111.
+10) You also need an IP (Internet Protocol) address: This address
+    comes in one of two formats, IPv4 or IPv6, and it is allocated by
+    the DHCP (Dynamic Host Configuration Protocol) server.
 
-  10) You also need an IP (Internet Protocol) address: This address
-      comes in one of two formats, IPv4 or IPv6, and it is allocated by
-      the DHCP (Dynamic Host Configuration Protocol) server.
+    We'll talk about the formats of these addresses later!
 
-      We'll talk about the formats of these addresses later!
+    *Exercise:*
+    1. Open a shell on Windows (CMD), or on Linux/MacOS (Unix), and
+       enter =ipconfig= (Windows) or =netstat -nt= (Unix). On Windows, you
+       see =IPv4 Address=, on Linux you get a list of "Active Internet
+       connections", e.g.
+       #+begin_example
+       Proto Local Address           Foreign Address         State
+       tcp   192.168.1.250:36372     52.22.110.116:443       ESTABLISHED
+       tcp   192.168.1.250:56756     104.244.42.193:443      ESTABLISHED
+       #+end_example
 
-      *Exercise:*
-      1. Open a shell on Windows (CMD), or on Linux/MacOS (Unix), and
-         enter =ipconfig= (Windows) or =netstat -nt= (Unix). On Windows, you
-         see =IPv4 Address=, on Linux you get a list of "Active Internet
-         connections", e.g.
-         #+begin_example
-         Proto Local Address           Foreign Address         State
-         tcp   192.168.1.250:36372     52.22.110.116:443       ESTABLISHED
-         tcp   192.168.1.250:56756     104.244.42.193:443      ESTABLISHED
-         #+end_example
+       Windows:
+       #+attr_html: :width 600px:
+       [[../img/ipconfig.png]]
 
-         Windows:
-         #+attr_html: :width 600px:
-         [[../img/ipconfig.png]]
+    2. On an Android mobile phone: Settings > About phone > Status
+       information > IP address
+       #+begin_example
+       fe80:ac4b:fdff:fe96:3680
+       192.168.68.50
+       #+end_example
 
-      2. On an Android mobile phone: Settings > About phone > Status
-         information > IP address
-         #+begin_example
-         fe80:ac4b:fdff:fe96:3680
-         192.168.68.50
-         #+end_example
+11) In our network, we don't have a DHCP server so we must configure
+    the IP addresses manually: Open the =Config= menu for the devices,
+    and enter =Static= values for the =FastEthernet0= =IP Configuration=:
 
-  11) In our network, we don't have a DHCP server so we must configure
-      the IP addresses manually: Open the =Config= menu for the devices,
-      and enter =Static= values for the =FastEthernet0= =IP Configuration=:
+    1. PC: IP Address: =10.1.1.1=, Subnet Mask: =255.255.255.0=
+    2. Server: IP Address: =10.1.1.2=, Subnet Mask: =255.255.255.0=
 
-      1. PC: IP Address: =10.1.1.1=, Subnet Mask: =255.255.255.0=
-      2. Server: IP Address: =10.1.1.2=, Subnet Mask: =255.255.255.0=
+    Check this using the =ipconfig= command in the =Desktop= menu by
+    selecting =Command Prompt= which brings up a terminal connected to
+    the PC or server:
+    #+attr_html: :width 400px:
+    [[../img/ipconfig.png]]
 
-      Check this using the =ipconfig= command in the =Desktop= menu by
-      selecting =Command Prompt= which brings up a terminal connected to
-      the PC or server:
-      #+attr_html: :width 400px:
-      [[../img/ipconfig.png]]
+12) Go back to the PC's =Command Prompt= and =ping= the server (if you
+    find that the font of the CLI is too small, change it in =Options= >
+    =Preferences= > =Font= > =CLI=):
+    #+attr_html: :width 400px:
+    [[../img/ping.png]]
 
-  12) Go back to the PC's =Command Prompt= and =ping= the server (if you
-      find that the font of the CLI is too small, change it in =Options= >
-      =Preferences= > =Font= > =CLI=):
-      #+attr_html: :width 400px:
-      [[../img/ping.png]]
+13) Look at the services running on the server by switching to the
+    =Services= tab of the =Server0=:
 
-  13) Look at the services running on the server by switching to the
-      =Services= tab of the =Server0=:
+    1. HTTP - HyperText Transfer Protocol
 
-      1. HTTP - HyperText Transfer Protocol
+    2. DNS - Domain Name Service
 
-      2. DNS - Domain Name Service
+    3. EMAIL
 
-      3. EMAIL
+    4. FTP - File Transfer Protocol
 
-      4. FTP - File Transfer Protocol
+    5. IoT - Internet of Things
 
-      5. IoT - Internet of Things
+14) Leave =HTTP= in the =On= position, then switch to the PC and open
+    =Desktop= > =Web Browser=, enter the URL =http://10.1.1.2= of the
+    server, and click =Go=. A web page appears, which, alongside with
+    its sub-pages, is served by the server.
+    #+attr_html: :width 400px:
+    [[../img/url.png]]
 
-  14) Leave =HTTP= in the =On= position, then switch to the PC and open
-      =Desktop= > =Web Browser=, enter the URL =http://10.1.1.2= of the
-      server, and click =Go=. A web page appears, which, alongside with
-      its sub-pages, is served by the server.
-      #+attr_html: :width 400px:
-      [[../img/url.png]]
+15) Go back to the server's =Services= menu and turn =HTTP= to =Off= but
+    leave =HTTPS= in the =On= position: Now, only =https= connections
+    (secure, encrypted version of HTTP) are being served.
 
-  15) Go back to the server's =Services= menu and turn =HTTP= to =Off= but
-      leave =HTTPS= in the =On= position: Now, only =https= connections
-      (secure, encrypted version of HTTP) are being served.
+    Your service attempt might time out or the server might reset the
+    connection but you won't get a page until you change to =https=.
 
-      Your service attempt might time out or the server might reset the
-      connection but you won't get a page until you change to =https=.
+16) To see how a packet travels across the network, Open the PC's web
+    browser and activate it while viewing the network image, with the
+    main windows switched to =Simulation= instead of =Realtime=.
+    #+attr_html: :width 600px:
+    [[../img/simulation.png]]
 
-  16) To see how a packet travels across the network, Open the PC's web
-      browser and activate it while viewing the network image, with the
-      main windows switched to =Simulation= instead of =Realtime=.
-      #+attr_html: :width 600px:
-      [[../img/simulation.png]]
+    In the network diagram you can see the packet traveling, and in
+    the =Event list= of the =Simulation Panel=, you can see how a packet
+    travels from =PC0= to =Server0= and back, and how the PC is listening
+    for =HTTP= service requests.
 
-      In the network diagram you can see the packet traveling, and in
-      the =Event list= of the =Simulation Panel=, you can see how a packet
-      travels from =PC0= to =Server0= and back, and how the PC is listening
-      for =HTTP= service requests.
+17) If you click on the first =PC0= in the =Event list= before the packet
+    is being sent, you see a snapshot of different network layers that
+    are being triggered (and can be traversed there, too).
+    #+attr_html: :width 400px:
+    [[../img/pc0_layers.png]]
 
-  17) If you click on the first =PC0= in the =Event list= before the packet
-      is being sent, you see a snapshot of different network layers that
-      are being triggered (and can be traversed there, too).
-      #+attr_html: :width 400px:
-      [[../img/pc0_layers.png]]
+    You can see how some the information we entered is used:
 
-      You can see how some the information we entered is used:
+    1. The cable connection on the /physical/ layer 1: =FastEthernet0=.
 
-      1. The cable connection on the /physical/ layer 1: =FastEthernet0=.
+    2. The corresponding MAC addresses in the /data link/ layer 2.
 
-      2. The corresponding MAC addresses in the /data link/ layer 2.
+    3. The source and destination IP addresses in the /network/ layer 3.
 
-      3. The source and destination IP addresses in the /network/ layer 3.
+    4. Set: the source and destination ports in the /transport/ layer.
 
-      4. Set: the source and destination ports in the /transport/ layer.
+18) You can also select "Outbound PDU Details" (PDU stands for
+    Protocol Data Unit) which provides even more detail and in
+    particular, how the header information (meta information for the
+    transport) is distributed in memory.
 
-  18) You can also select "Outbound PDU Details" (PDU stands for
-      Protocol Data Unit) which provides even more detail and in
-      particular, how the header information (meta information for the
-      transport) is distributed in memory.
+19) Configure the =Event List= of the =Simulation= panel: Click on =Show
+    All/None= to see all (or none) of the available service
+    events. Choose =Edit Filters= and check only those ACL (Access
+    Control List) filters relevant. E.g. =ICMP= (Internet Control
+    Message Protocol) for the =ping= command.
 
-  19) Configure the =Event List= of the =Simulation= panel: Click on =Show
-      All/None= to see all (or none) of the available service
-      events. Choose =Edit Filters= and check only those ACL (Access
-      Control List) filters relevant. E.g. =ICMP= (Internet Control
-      Message Protocol) for the =ping= command.
-
-  20) Run the web service again as before with all filters unselected,
-      and you should only see =TCP= and =HTTP=.
+20) Run the web service again as before with all filters unselected,
+    and you should only see =TCP= and =HTTP=.
