@@ -195,6 +195,7 @@
 [[../img/nerd.jpg]]
 
 - [ ] TCP/IP model
+- [ ] IP addresses and domains
 - [ ] What is a Cisco network?
 - [ ] Test 1 (Deadline Friday, 31 January)
 
@@ -205,6 +206,7 @@
    #+begin_quote
    Laptop or desktop computer with Windows, Linux or MacOS.
    #+end_quote
+   
 2. What are things you can do with Cisco Packet Tracer?
    #+begin_quote
    1. Simulate physical equipment like a server rack.
@@ -216,7 +218,35 @@
    7. Build a network topology from scratch.
    8. Complete assessments towards a Cisco certificate.
    #+end_quote
-3. 
+3. Which connection is automatically picked for the network?
+   #+begin_quote
+   The Ethernet connection.
+   #+end_quote
+4. What's the difference between the PC and the server devices?
+   #+begin_quote
+   The server has =services=.
+   #+end_quote
+5. Can you change the MAC address of a device?
+   #+begin_quote
+   In the simulation tool yes, in reality no - the MAC address is
+   composed of two permanent parts: For the producer and the product.
+   #+end_quote
+6. Sketch the steps of our last lab exercise!
+   #+begin_quote
+   1) Open Cisco Packet Tracer app on the PC
+   2) Login with Cisco net academy using your Google account
+   3) Create a simple 2-host network (PC and server)
+   4) Set the MAC & IP address for PC (10.1.1.1), server (10.1.1.2)
+   5) Ping each device from the other
+   6) Open a web page on the PC using HTTP and HTTPS services
+   7) Switch off the HTTP service and try to connect again
+   #+end_quote
+
+7. Revisit your actions:
+   - =ping= the server from the PC
+   - =ping= the PC from the server
+   - Open a web page on the PC using the server
+   - Open a web page on the server using the PC
 
 ** C Programming Basics Review: Control & Functions & Pointers
 
