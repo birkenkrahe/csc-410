@@ -1,7 +1,7 @@
 #+title: Agenda Notebook
 #+author: Marcus Birkenkrahe
 #+subtitle: CSC 410 - Data Communications and Networking - Spring 2025
-#+SEQ_TODO: TODO NEXT IN_PROGRESS PRACTICE | DONE CANCELLED
+#+SEQ_TODO: TODO NEXT IN_PROGRESS PRACTICE WAITING | DONE CANCELLED
 #+startup: overview hideblocks indent
 :PROPERTIES:
 :header-args:C:      :main yes :includes <stdio.h> :results output :exports both
@@ -194,12 +194,13 @@
 #+caption: The Nerd And The Network
 [[../img/nerd.jpg]]
 
-- [ ] TCP/IP model
+- [X] Cisco Packet Tracer Review
+- [X] TCP/IP model
 - [ ] IP addresses and domains
 - [ ] What is a Cisco network?
 - [ ] Test 1 (Deadline Friday, 31 January)
 
-** TODO Cisco Packet Tracer review
+** DONE Cisco Packet Tracer review
 
 1. Which physical equipment do you need to use Cisco Packet
    Tracer?
@@ -218,6 +219,7 @@
    7. Build a network topology from scratch.
    8. Complete assessments towards a Cisco certificate.
    #+end_quote
+
 3. Which connection is automatically picked for the network?
    #+begin_quote
    The Ethernet connection.
@@ -231,6 +233,7 @@
    In the simulation tool yes, in reality no - the MAC address is
    composed of two permanent parts: For the producer and the product.
    #+end_quote
+
 6. Sketch the steps of our last lab exercise!
    #+begin_quote
    1) Open Cisco Packet Tracer app on the PC
@@ -243,12 +246,138 @@
    #+end_quote
 
 7. Revisit your actions:
+   - Open the .pkt file in your app: tinyurl.com/demo-pkt
    - =ping= the server from the PC
    - =ping= the PC from the server
    - Open a web page on the PC using the server
    - Open a web page on the server using the PC
 
-** C Programming Basics Review: Control & Functions & Pointers
+
+** DONE Projects - sprint review coming soon
+#+attr_html: :width 600px: 
+[[../img/projects.png]]
+
+
+** DONE Test 1
+
+- Tests are not time limited per attempt
+- Only the first attempt is graded
+- Subsequent attempts are for drilling (final exam)
+- Tests are open book: use all resources that you can find
+- Tests were created with the help of ChatGPT
+- All course materials used up to now were used
+- Test 1 deadline is Friday 31 Jan (max 100%)
+- Test 1 is available only until Friday 7 Feb (max 50%)
+
+
+** DONE DataCamp review: CLoud Computing - Deployment
+
+1. Why is "cloud deployment" an issue and what is it?
+   #+begin_quote
+   The cloud computing environment can be hacked into.
+
+   Deployment means choosing between a private, a public or a hybrid
+   cloud. 
+   #+end_quote
+
+2. How is Lyon's cloud computing environment deployed?
+   #+begin_quote
+   The infrastructure is hybrid:
+   - Sensitive data (students, grades, personnel) are private
+   - Some services are open to the public (Remote Desktop Service)
+   #+end_quote
+
+3. What's "cloud bursting"?
+   #+begin_quote
+   The private cloud is over capacity and resources are temporarily
+   moved to the public cloud.
+   #+end_quote
+   
+4. What's the GDPR? What does it say?
+   #+begin_quote
+   General Data Protection Regulation in countries of the European
+   Union. A major pain in the butt for corporations. Very expensive.
+
+   - Users must give explicit consent to data collection
+   - Users must be notified of data breaches
+   - Personal information must be anonymized and encrypted
+   - Personal data cannot leave EU borders unless protected
+   - Violations incur fine of up to 4% of worldwide annual revenue
+
+   In the case of Amazon, that's $22 bn of $574 bn total, or $3 bn of
+   the revenue of AWS ($90 bn).
+   #+end_quote
+
+5. What are considered "personal data"? Why are they protected?
+   #+begin_quote
+   - Home address
+   - First and last name
+   - Email address
+   - Location data
+   - IP address
+   - Racial or ethnic origin
+   - Political opinions
+   - Sexual orientation
+   - Health-related data
+
+   Personal data can identify a person leading to potential identity
+   theft with regard to any or all of the categories above.
+   #+end_quote
+   
+
+** TODO Review: TCP/IP model
+
+1. Why do we need another model besides the OSI model at all?
+   #+begin_quote
+   - OSI was theoretical while TCP/IP was developed on real world
+     networking needs.
+   - OSI only supports wired communication, TCP/IP adds wireless
+     communication.
+   - TCP/IP was developed and adopted alongside the internet while the
+     OSI model remains a conceptual reference.
+   #+end_quote
+
+2. What are the four layers of TCP/IP?
+   #+begin_quote
+   1. *Network access:* Physical connection/data framing (MAC address).
+   2. *Internet:* Packet addressing and routing (IP address)
+   3. *Host-to-Host*: TCP and UDP protocols for data management.
+   4. *Application*: HTTP, SMTP, FTP protocols and applications.
+   #+end_quote
+
+3. Remember one Linux command at each level of the TCP/IP model?
+   #+begin_src bash :results output :exports both
+     arp -n # network: mapping IP to MAC addresses
+     hostname -I # internet: IP address of your PC
+     netstat -tul | head -n 10 # host-to-host: TCP and UDP connections
+     wget -O ../src/init.el tinyurl.com/lyon-emacs
+     file ../src/init.el
+   #+end_src
+
+   On my computer at home:
+   #+begin_example
+   Address                  HWtype  HWaddress           Flags Mask            Iface
+   192.168.1.254            ether   6c:4b:b4:6d:65:21   C                     enp4s0
+   192.168.68.52            ether   ae:4b:fd:96:36:90   C                     wlo1
+   192.168.68.1             ether   60:83:e7:71:cb:50   C                     wlo1
+   192.168.68.53                    (incomplete)                              wlo1
+   192.168.1.250 192.168.68.54 2600:1702:4ba0:4b0::49 2600:1702:4ba0:4b0:1028:b5ef:db96:7a53 2600:1702:4ba0:4b0:952e:b307:998b:9078 
+   Active Internet connections (only servers)
+   Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+   tcp        0      0 localhost:ipp           0.0.0.0:*               LISTEN     
+   tcp        0      0 localhost:domain        0.0.0.0:*               LISTEN     
+   tcp6       0      0 [::]:60000              [::]:*                  LISTEN     
+   tcp6       0      0 localhost:ipp           [::]:*                  LISTEN     
+   tcp6       0      0 [::]:1716               [::]:*                  LISTEN     
+   udp        0      0 mdns.mcast.net:mdns     0.0.0.0:*                          
+   udp        0      0 mdns.mcast.net:mdns     0.0.0.0:*                          
+   udp        0      0 mdns.mcast.net:mdns     0.0.0.0:*                          
+   ../src/init.el: Lisp/Scheme program, ASCII text, with CRLF line terminators
+   #+end_example
+
+* Week 4: Cisco networks
+
+** WAITING C Programming Basics Review: Control & Functions & Pointers
 
 1. Using Emacs, create an Org-mode source file.
 2. Solve the problem using pseudocode.

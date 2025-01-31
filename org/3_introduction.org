@@ -1,6 +1,6 @@
 #+title: Introduction to Networks
 #+author: Marcus Birkenkrahe
-#+SEQ_TODO: TODO IN_PROGRESS | DONE
+#+SEQ_TODO: TODO NEXT IN_PROGRESS | DONE
 #+startup: overview hideblocks indent entitiespretty:
 #+property: header-args:C :main yes :includes <stdio.h> :results output :exports both:
 #+property: header-args:python :session *Python* :python python3 :results output :exports both:
@@ -175,6 +175,11 @@ Data chunks have different names depending on the OSI layer:
          arp -n
        #+end_src
 
+       #+RESULTS:
+       : Address                  HWtype  HWaddress           Flags Mask            Iface
+       : 192.168.168.10           ether   00:1a:1e:04:05:f0   C                     wlp0s20f3
+       : 192.168.160.1            ether   70:6b:b9:9a:45:fe   C                     wlp0s20f3
+       
      - Result at my house:
        #+begin_example sh
        : Address                  HWtype  HWaddress           Flags Mask            Iface
@@ -187,13 +192,15 @@ Data chunks have different names depending on the OSI layer:
   2. *Internet Layer*: Addressing packets and routing them over multiple
      interconnected networks. This is where an IP address is defined:
 
-     ExamppeL: Display host name(s) as IP addresses (IPv4 and IPv6):
+     Example: Display host name(s) as IP addresses (IPv4 and IPv6):
      #+begin_src bash :results output :exports both
        hostname -I | cut -d' ' -f1  # use ' ' delimiter, first field only
+       hostname -I  # use this if it's not your own network
      #+end_src
 
      #+RESULTS:
-     : 192.168.1.250
+     : 192.168.168.25
+     : 192.168.168.25 
 
   3. *Host-to-Host Layer:* Provides two protocols, TCP (Transfer
      Communication Protocol) and UDP (User Datagram Protocol) for data
@@ -203,6 +210,20 @@ Data chunks have different names depending on the OSI layer:
        #+begin_src bash :results output :exports both
          netstat -tul | head -n 10
        #+end_src
+
+       #+RESULTS:
+       #+begin_example
+       Active Internet connections (only servers)
+       Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+       tcp        0      0 localhost:ipp           0.0.0.0:*               LISTEN     
+       tcp        0      0 localhost:domain        0.0.0.0:*               LISTEN     
+       tcp6       0      0 [::]:1716               [::]:*                  LISTEN     
+       tcp6       0      0 ip6-localhost:ipp       [::]:*                  LISTEN     
+       udp        0      0 localhost:domain        0.0.0.0:*                          
+       udp        0      0 0.0.0.0:mdns            0.0.0.0:*                          
+       udp        0      0 0.0.0.0:56340           0.0.0.0:*                          
+       udp6       0      0 [::]:1716               [::]:*                             
+       #+end_example
 
      - Results at my house:
        #+begin_example
@@ -230,8 +251,33 @@ Data chunks have different names depending on the OSI layer:
      - Example: resolve network domain names:
        #+begin_src bash :results output :exports both
          nslookup lyon.edu
+         nslookup tinyurl.com
        #+end_src
 
+       #+RESULTS:
+       #+begin_example
+       Server:		127.0.0.53
+       Address:	127.0.0.53#53
+
+       Non-authoritative answer:
+       Name:	lyon.edu
+       Address: 40.119.1.254
+
+       Server:		127.0.0.53
+       Address:	127.0.0.53#53
+
+       Non-authoritative answer:
+       Name:	tinyurl.com
+       Address: 104.18.111.161
+       Name:	tinyurl.com
+       Address: 104.17.112.233
+       Name:	tinyurl.com
+       Address: 2606:4700::6812:6fa1
+       Name:	tinyurl.com
+       Address: 2606:4700::6811:70e9
+
+       #+end_example
+       
      - Answer:
        #+begin_example
        : Server:        127.0.0.53
@@ -506,7 +552,7 @@ Data chunks have different names depending on the OSI layer:
 - Every desktop and smartphone OS supports both IPv4 and IPv6
   (so-called dual-stack configuration). 
 
-* IN_PROGRESS What is an address? IPv4 vs. IPv6
+* What is an address? IPv4 vs. IPv6
 
 - All Internet Protocol (IP) traffic routes to an address - like phone
   calls that must be dialed to phone numbers.
@@ -528,20 +574,126 @@ Data chunks have different names depending on the OSI layer:
 
 - A special address, the *loopback address*, is reserved at
   =127.0.0.1=. To the computer, it means "establish a connection to
-  myself".
+  myself" (that's why we can =ping= the PC from itself).
 
 - You can see this in the file =/etc/hosts/=, or by tracing the path
   with =traceroute=, or by entering =ping 127.0.0.1=, or by opening
-  =127.0.0.1= in your browser (this may not work).
-  
-* Domain names
+  =127.0.0.1= in your browser (this may not work - why?[fn:7]).
 
+* Viewing IP addresses
+
+- One machine can have many IP addresses to accommodate multiple
+  physical devices, virtual networks, etc. To see active addresses on
+  your Linux machine, run:
+  
+  #+begin_src bash :results output :exports both
+  ip address show
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+      link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+      inet 127.0.0.1/8 scope host lo
+         valid_lft forever preferred_lft forever
+      inet6 ::1/128 scope host 
+         valid_lft forever preferred_lft forever
+  2: enp4s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+      link/ether 74:56:3c:b9:74:2d brd ff:ff:ff:ff:ff:ff
+      inet 192.168.1.250/24 brd 192.168.1.255 scope global dynamic noprefixroute enp4s0
+         valid_lft 84518sec preferred_lft 84518sec
+      inet6 2600:1702:4ba0:4b0::49/128 scope global dynamic noprefixroute 
+         valid_lft 3381sec preferred_lft 3381sec
+      inet6 2600:1702:4ba0:4b0:dcb5:815a:4d77:4c15/64 scope global temporary dynamic 
+         valid_lft 3421sec preferred_lft 3421sec
+      inet6 2600:1702:4ba0:4b0:952e:b307:998b:9078/64 scope global dynamic mngtmpaddr noprefixroute 
+         valid_lft 3421sec preferred_lft 3421sec
+      inet6 fe80::3411:8f1:989f:c525/64 scope link noprefixroute 
+         valid_lft forever preferred_lft forever
+  3: wlo1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+      link/ether 28:c5:d2:33:f1:c6 brd ff:ff:ff:ff:ff:ff
+      altname wlp0s20f3
+      inet 192.168.68.54/22 brd 192.168.71.255 scope global dynamic noprefixroute wlo1
+         valid_lft 5318sec preferred_lft 5318sec
+      inet6 fe80::7c2f:481f:e10a:abe8/64 scope link noprefixroute 
+         valid_lft forever preferred_lft forever
+  #+end_example
+
+- Output is grouped by physical interface and contains information
+  from the internet & the physical layers. On my machine at home:
+  #+begin_example
+  1: lo ... inet 127.0.0.1/8
+  2: enp4s0 ... inet 192.168.1.250/24
+  3: wlo1 ... inet 192.168.68.54/22
+  #+end_example
+
+- Let's understand the =inet= notation, which is called CIDR (Classless
+  Inter-Domain Routing). 
+
+* Subnets
+#+attr_html: :width 500px: 
+#+caption: Subnet (LAN) with three hosts and a router
+[[../img/subnet.png]]
+
+- A subnet is a group of hosts with IP addresses in a particular
+  range, usually on the same physical network, like:
+  #+begin_quote
+  =10.23.2.1.= ... =10.23.2.254=
+  =10.23.1.1.= ... =10.23.255.254=
+  #+end_quote
+
+- A subnet is defined with two pieces:
+
+  1. A network (routing) prefix
+
+  2. A subnet (network/routing) mask
+
+- The *network prefix* is /common/ to all addresses in the subnet -
+  together with the subnet mask, it gives you all IP addresses in the
+  range. The *subnet mask* masks these common locations.
+
+- In the example, that's =10.23.2.0= with a subnet mask
+  =255.255.255.0=. To see how it works, look at the binary form:
+  #+begin_example
+  10.23.2.0:      00001010 00010111 00000010 00000000
+  255.255.255.0:  11111111 11111111 11111111 00000000
+  #+end_example
+
+- The subnet mask switches those bits on (1) that constitute the
+  network prefix, and switches those off (0) that are not.
+
+- For example, the Host A in the figure with the IP address
+  =10.23.2.4= has the subnet address =00000100=.
+
+* IN_PROGRESS CIDR - Classless Inter-Domain Routing
+
+- Most tools will list subnets in CIDR notation:
+  #+begin_example
+  10.23.2.0/255.255.255.0 = 10.23.2.0/24
+  #+end_example
+
+- CIDR notation identifies the subnet mask by the number of leading 1s
+  in the subnet mask: for =255.255.255.0=, that is 24 1-bits + 8 0-bits.
+
+- Examples:
+  | Long form       | CIDR form |
+  |-----------------+-----------|
+  | =255.0.0.0=       | =/8=        |
+  | =255.255.0.0=     | =/16=       |
+  | =255.240.0.0=     | =/12=       |
+  | =255.255.255.0=   | =/24=       |
+  | =255.255.255.192= | =/26=       |
+
+- Show this for =/12= and =/26=:
+
+  
+
+* Domain names
 * Internet routing
 
 * Local networks
 
 * Subnetting and CIDR
-
 * Multicast, broadcast, and anycast
 
 * Port numbers
@@ -553,6 +705,12 @@ Data chunks have different names depending on the OSI layer:
 * What's your address?
 
 * Footnotes
+
+[fn:7] Because you may not have a web server running on your
+computer. Remember that web pages must be served to the browser to be
+found via address. You can of course *render* any HTML page using a
+browser (but then instead of an address, the status line shows a file
+location).
 
 [fn:1] Divide and conquer in other areas: Fourier transform (signal
 processing), sorting algorithms (binary sort), mob control (break mob
