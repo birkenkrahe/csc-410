@@ -1,0 +1,543 @@
+#+title: Introduction to Networks
+#+author: Marcus Birkenkrahe
+#+SEQ_TODO: TODO NEXT IN_PROGRESS | DONE
+#+startup: overview hideblocks indent entitiespretty:
+#+property: header-args:C :main yes :includes <stdio.h> :results output :exports both:
+#+property: header-args:python :session *Python* :python python3 :results output :exports both:
+#+src R :file :session *R* :results graphics output file :exports both:
+#+property: header-args:C++ :main yes :includes <iostream> :results output :exports both:
+* Objectives                                                 :lecture:csc410:
+
+The following topics are covered:
+
+- [X] Network programming and C
+- [X] OSI layer model
+- [ ] TCP/IP reference model
+- [ ] Data encapsulation
+
+Next: Listing your IP addresses programmatically from C
+
+* Networks
+
+- A network is a system of connected nodes or network devices that
+  exchange data (like files) and resources (like power).
+
+- The simplest network:
+  #+attr_html: :width 200px:
+  #+Caption: Connecting two hosts (Bonaventure, 2021)
+  [[../img/network.png]]
+
+* The Internet is C
+
+- Approximately *23 bn devices* are currently connected to the Internet:
+  20 bn IoT (sensors), 3 bn computers & smartphones (though 85% or
+  nearly 7 bn people own smartphones). These are very rough estimates.
+
+- Almost every network stack (= software to connect to a network) is
+  *programmed in C*, and all the network-relevant kernel code, including
+  network-capable device drivers.
+
+- Looking at C implementations alone would therefore unlock ALL
+  networking secrets. But networking contains many different levels of
+  *abstraction* (where the details of C are not helpful but hindering).
+
+- *"The Internet is C"* is more true than to say "The Web is HTML"
+  (which is what most people think): The Internet is based on C but
+  the Web (a subset of the Internet) is build on a diverse tech stack.
+
+* Layering structure = Divide and conquer
+
+- Internet standards are called protocols: They define everything from
+  voltage levels on an Ethernet cable to the compression factor of a
+  JPG image on a web page.
+
+- If you're programming an Internet router, you don't want to have to
+  think of image compression for a web application, and vice
+  versa. The structural answer: Divide and conquer (Caesar: /Divide et
+  impera./) *Can you think of examples?* [fn:1]
+
+- The basic structuring technique is *layering*: The whole problem is
+  broken down in layers. Each layer provides services for the layer on
+  top of it, and each upper layer relies on the layers underneath
+  without needing to know how they work.
+
+- *Can you think of an example for applied layering?*[fn:2]
+
+- The conceptual benefits (example[fn:3]):
+  1) *Modularity* (independent design, development and maintenance)
+  2) *Abstraction* (layers don't need to know details elsewhere)
+  3) *Interchangeability* (components can be replaced by layer)
+  4) *Interoperability* (systems from different vendors work together)
+
+* OSI Layer Model
+
+The Open Systems Interconnection (OSI) model is from 1977, published
+as [[https://www.iso.org/standard/20269.html][ISO 7498]] ([[https://cdn.standards.iteh.ai/samples/20269/4b12bcad0c6247dba2875b7cdf47b807/ISO-IEC-7498-1-1994.pdf][PDF sample]]). It's worth looking at this document.
+#+attr_html: :width 200px:
+#+caption: OSI Layer Model
+[[../img/osi.png]]
+
+Let's briefly look at each layer[fn:4]
+
+1. *Physical Layer:* Physical communication in the real world.
+   - Voltage levels on an Ethernet cable
+   - What each pin on a connector is for
+   - Radio frequency of Wi-Fi (Wireless Fidelity)
+   - Light flashes over an optic fiber
+
+2. *Data Link*: Protocols connecting two network nodes[fn:5].
+   - How a direct message between nodes starts and ends (framing)
+   - How messaging errors are detected and corrected
+   - How message flow is controlled (e.g. based on MAC address)
+
+3. *Network Layer*: Methods to transmit packets between nodes in
+   different networks.
+   - Layer for the Internet protocol (IP)
+   - Example for a command: =ping lyon.edu=
+   - Determines best path for data transmission (datagram)
+   - Routers maintain routing and forwarding tables
+   - Diagrams show network topology (connectivity abstraction)
+     #+attr_html: :width 400px:
+     #+caption: A simple network with two hosts and four routers
+     [[../img/topology.png]]
+   - Networks are modeled as directed weighted graphs[fn:6]
+
+4. *Transport Layer:* Methods to deliver variable length data between
+   hosts.
+   - Layer for the TCP (Transfer Communication Protocol)
+   - Splitting data up and recombine it
+   - Ensuring data arrives in order and without errors
+
+5. *Session Layer*: Manages dialogs between applications.
+   - Establish, maintain, terminate a connection
+   - A video conference session
+   - A SSH (Secure Shell, remote login) session
+   - Checkpoint (handshake), suspend (pause), resume dialogs
+
+6. *Presentation Layer:* Manage data translation to applications.
+   - Data encoding, compression and encryption
+   - Converting image files so that an app can open (PNG, JPG, GIF)
+   - Data compression in video streaming
+
+7. *Application Layer:* User applications
+   - Web browser using HTTP to load a web page
+   - Email client using SMTP (Simple Mail Transfer Protocol)
+   - FTP (File Transfer Protocol) for transferring files between PCs
+
+* OSI Application: Web browser
+
+- An application like a web browser, exists in the application layer.
+
+- The HTTP used to transmit web pages (https://github.com/birkenkrahe)
+  does not care HOW the data is transmitted.
+  #+attr_html: :width 400px:
+  #+caption: Abstracted (visible) vs. actual (hidden) connection
+  [[../img/browser.png]]
+
+* Frames, packets, segments, and datagrams
+
+Data chunks have different names depending on the OSI layer:
+- A data unit on layer 2 (data link) is called a *frame*
+- A data unit on layer 3 (network) is called a *packet*
+- A data unit on layer 4 (transport) is called a *segment* if it is
+  part of a TCP connection, but a *datagram* if it's a UDP message
+
+* TCP/IP Layer Model
+
+- TCP/IP model is the most common network communication model in
+  use. The same functions are performed in both models with different
+  divisions.
+
+  #+attr_html: :width 400px:
+  #+caption: OSI and TCP/IP layer models
+  [[../img/tcpip.png]]
+
+- The OSI model is used to reason and understand networking concerns
+  but the TCP/IP model reflects the real network implementation
+  better.
+
+- Its layers are as follows:
+
+  1. *Network Access Layer:* Physical host connection and data framing,
+     like sending an Ethernet or Wi-Fi packet over the network. This
+     is where the (hardwired) MAC address is used:
+
+     - Example: Mapping IP addresses to MAC addresses
+       #+begin_src bash :results output :exports both
+         arp -n
+       #+end_src
+
+       #+RESULTS:
+       : Address                  HWtype  HWaddress           Flags Mask            Iface
+       : 192.168.168.10           ether   00:1a:1e:04:05:f0   C                     wlp0s20f3
+       : 192.168.160.1            ether   70:6b:b9:9a:45:fe   C                     wlp0s20f3
+       
+     - Result at my house:
+       #+begin_example sh
+       : Address                  HWtype  HWaddress           Flags Mask            Iface
+       : 192.168.68.53            ether   78:80:38:cc:71:88   C                     wlo1
+       : 192.168.68.57            ether   ae:4b:fd:96:38:90   C                     wlo1
+       : 192.168.68.1             ether   60:83:e7:71:ed:50   C                     wlo1
+       : 192.168.1.254            ether   6c:4b:b4:6f:65:21   C                     enp4s0
+       #+end_example
+
+  2. *Internet Layer*: Addressing packets and routing them over multiple
+     interconnected networks. This is where an IP address is defined:
+
+     Example: Display host name(s) as IP addresses (IPv4 and IPv6):
+     #+begin_src bash :results output :exports both
+       hostname -I | cut -d' ' -f1  # use ' ' delimiter, first field only
+       hostname -I  # use this if it's not your own network
+     #+end_src
+
+     #+RESULTS:
+     : 192.168.168.25
+     : 192.168.168.25 
+
+  3. *Host-to-Host Layer:* Provides two protocols, TCP (Transfer
+     Communication Protocol) and UDP (User Datagram Protocol) for data
+     order, data segmentation, network congestion, error correction.
+
+     - Example: Show active TCP and UDP connections and listening ports:
+       #+begin_src bash :results output :exports both
+         netstat -tul | head -n 10
+       #+end_src
+
+       #+RESULTS:
+       #+begin_example
+       Active Internet connections (only servers)
+       Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+       tcp        0      0 localhost:ipp           0.0.0.0:*               LISTEN     
+       tcp        0      0 localhost:domain        0.0.0.0:*               LISTEN     
+       tcp6       0      0 [::]:1716               [::]:*                  LISTEN     
+       tcp6       0      0 ip6-localhost:ipp       [::]:*                  LISTEN     
+       udp        0      0 localhost:domain        0.0.0.0:*                          
+       udp        0      0 0.0.0.0:mdns            0.0.0.0:*                          
+       udp        0      0 0.0.0.0:56340           0.0.0.0:*                          
+       udp6       0      0 [::]:1716               [::]:*                             
+       #+end_example
+
+     - Results at my house:
+       #+begin_example
+       Active Internet connections (only servers)
+       Proto Recv-Q Send-Q Local Address           Foreign Address         State
+       tcp        0      0 localhost:domain        0.0.0.0:*               LISTEN
+       tcp        0      0 localhost:ipp           0.0.0.0:*               LISTEN
+       tcp6       0      0 localhost:ipp           [::]:*                  LISTEN
+       tcp6       0      0 [::]:60000              [::]:*                  LISTEN
+       tcp6       0      0 [::]:1716               [::]:*                  LISTEN
+       udp        0      0 localhost:domain        0.0.0.0:*
+       udp        0      0 localhost:323           0.0.0.0:*
+       udp        0      0 0.0.0.0:33442           0.0.0.0:*
+       #+end_example
+
+  4. *Process/Application Layer:* Implements protocols such as HTTP,
+     SMTP, FTP, Telnet, =wget=. Socket programming happens here making
+     use of Linux' implementation of the lower layers.
+
+     - Example: Get URL from web & store in =.emacs= configuration file
+       #+begin_example sh
+       wget -O .emacs tinyurl.com/lyon-emacs
+       #+end_example
+
+     - Example: resolve network domain names:
+       #+begin_src bash :results output :exports both
+         nslookup lyon.edu
+         nslookup tinyurl.com
+       #+end_src
+
+       #+RESULTS:
+       #+begin_example
+       Server:		127.0.0.53
+       Address:	127.0.0.53#53
+
+       Non-authoritative answer:
+       Name:	lyon.edu
+       Address: 40.119.1.254
+
+       Server:		127.0.0.53
+       Address:	127.0.0.53#53
+
+       Non-authoritative answer:
+       Name:	tinyurl.com
+       Address: 104.18.111.161
+       Name:	tinyurl.com
+       Address: 104.17.112.233
+       Name:	tinyurl.com
+       Address: 2606:4700::6812:6fa1
+       Name:	tinyurl.com
+       Address: 2606:4700::6811:70e9
+
+       #+end_example
+       
+     - Answer:
+       #+begin_example
+       : Server:        127.0.0.53
+       : Address: 127.0.0.53#53
+       :
+       : Non-authoritative answer:
+       : Name:    lyon.edu
+       : Address: 40.119.1.254
+       #+end_example
+
+* Data encapsulation
+
+- Lower-levels handle data from higher levels: their data structures
+  must encapsulate data from higher levels.
+
+- Example: A web browser only implements the protocols dealing with
+  websites - HTTP, HTML, CSS, etc. It doesn't need to bother with
+  TCP/IP or Wi-Fi.
+
+- A web server, *Host A*, transmits a web page to the receiver, *Host B*:
+  #+attr_html: :width 400px:
+  #+caption: Host A sends web page to Host B
+  [[../img/web_server.png]]
+
+- The journey of the data up and down the layers looks like this:
+
+  1. Text is encoded in an HTML structure before it can be sent:
+     #+attr_html: :width 200px:
+     [[../img/text_to_html.png]]
+
+     - The text:
+       #+begin_example
+       * Welcome to My HTML Page
+
+       This is a simple HTML page in Org-mode format.
+       #+end_example
+
+     - The HTML encoding:
+       #+begin_example html
+       <!DOCTYPE html>
+       <html lang="en">
+       <head>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <meta name="author" content="Marcus Birkenkrahe">
+         <meta name="description" content="A simple HTML starter page">
+         <meta name="keywords" content="HTML, Org-mode, Example">
+         <title>Example HTML Page</title>
+       </head>
+       <body>
+         <h1>Welcome to My HTML Page</h1>
+         <p>This is a simple HTML page in Org-mode format.</p>
+       </body>
+       #+end_example
+
+     - This is essentially what Emacs does when you dynamically
+       (on-the-fly) render an Org-mode page with =C-c C-e h o=
+       ("Org-mode dispatch as HTML open file").
+
+  2. The HTML file cannot be send as such either! It must be
+     transmitted as part of a HTTP response.
+     #+attr_html: :width 200px:
+     [[../img/html_to_http.png]]
+
+     - The web server does this by applying the appropriate HTTP
+       header to the HTML:
+       #+begin_example
+       HTTP/1.1 200 OK
+       Date: Fri, 17 Jan 2025 10:00:00 GMT
+       Content-Type: text/html; charset=UTF-8
+       Content-Length: 1234
+       Connection: keep-alive
+       Server: Apache/2.4.54 (Unix)
+       #+end_example
+
+  3. The HTTP response is transmitted as part of a TCP session. This
+     is taken care of by the operating system's TCP/IP stack:
+     #+attr_html: :width 200px:
+     [[../img/http_to_tcp.png]]
+
+     This (still untested) Python program defines HTML content and
+     HTTP header, and creates a TCP socket (to localhost) to access
+     the server in your browser at http://localhost:8080:
+
+     1. =html_content= contains the HTML file
+     2. =http_response= includes HTTL header and HTML content
+     3. A TCP/IP socket is created and bound to =localhost:8080=
+     4. The server listens for incoming connections.
+     5. The server accepts connections, reads the request, and sends
+        the HTTP response.
+
+        #+begin_src python :python python3 :session *Python* :tangle socket.py
+          import socket
+
+          # HTML content to be served
+          html_content = """
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Simple HTML File</title>
+          </head>
+          <body>
+              <h1>Hello, World!</h1>
+              <p>This is a simple HTML file served via a basic HTTP server.</p>
+          </body>
+          </html>
+          """
+
+          # HTTP response
+          http_response = f"""\
+          HTTP/1.1 200 OK
+          Content-Type: text/html; charset=UTF-8
+          Content-Length: {len(html_content)}
+
+          {html_content}
+          """
+
+          # Create a TCP socket
+          server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          server_socket.bind(("localhost", 8080))  # Bind to localhost and port 8080
+          server_socket.listen(1)  # Listen for incoming connections
+
+          print("Server is running at http://localhost:8080")
+          try:
+              while True:
+                  # Accept an incoming connection
+                  client_socket, client_address = server_socket.accept()
+                  print(f"Connection received from {client_address}")
+
+                  # Read the request (not parsed here for simplicity)
+                  request = client_socket.recv(1024).decode('utf-8')
+                  print(f"Request:\n{request}\n")
+
+                  # Send the HTTP response
+                  client_socket.sendall(http_response.encode('utf-8'))
+
+                  # Close the connection client_socket.close() except
+                  KeyboardInterrupt:
+              print("Shutting down the server...")
+          finally:
+              server_socket.close()
+        #+end_src
+
+  4. The TCP packet is routed by an IP packet.
+     #+attr_html: :width 200px:
+     [[../img/tcp_to_ip.png]]
+
+     - The =traceroute= command prints the trace to the network host -
+       it assumes a maximum of 30 "hops" between routers until it
+       reaches the destination
+       #+begin_src bash :results output :exports both
+         traceroute lyon.edu
+       #+end_src
+
+     - This is what I get at home:
+       #+begin_example bash
+       traceroute to lyon.edu (40.119.1.254), 30 hops max, 60 byte packets
+       1  dsldevice.attlocal.net (192.168.1.254)  0.976 ms  1.242 ms  1.473 ms
+       2  69.234.156.1 (69.234.156.1)  6.150 ms  6.160 ms  6.171 ms
+       3  71.154.103.130 (71.154.103.130)  12.077 ms  12.090 ms  21.021 ms
+       4  32.130.17.194 (32.130.17.194)  21.008 ms  21.022 ms  21.035 ms
+       5  32.130.17.39 (32.130.17.39)  21.087 ms  21.043 ms  21.122 ms
+       6  * * 12.90.152.70 (12.90.152.70)  24.274 ms
+       7  ae21-0.icr03.sn6.ntwk.msn.net (104.44.230.116)  31.217 ms  31.202 ms ae32-0.icr01.sn6.ntwk.msn.net (104.44.230.112)  29.308 ms
+       ...
+       #+end_example
+
+     - How many hops to get to yourself as the host? (=localhost=)
+       #+begin_src bash :results output :exports both
+         traceroute localhost
+       #+end_src
+
+     - On my machine:
+       #+begin_example
+       : traceroute to localhost (127.0.0.1), 30 hops max, 60 byte packets
+       :  1  localhost (127.0.0.1)  0.010 ms  0.001 ms  0.001 ms
+       #+end_example
+
+  5. The IP packet is transmitted over the wire in an Ethernet frame. 
+     #+attr_html: :width 200px:
+     [[../img/ip_to_ethernet.png]]
+
+     - The =tcpdump= command shows a hexadecimal representation of the
+       full packet including Ethernet headers.
+
+     - First you have to find out what your ethernet link is called:
+       #+begin_src bash :results output :exports both
+       ip link show
+       #+end_src
+
+       #+RESULTS:
+       : 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+       :     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+       : 2: wlp0s20f3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DORMANT group default qlen 1000
+       :     link/ether 04:56:e5:25:d2:5d brd ff:ff:ff:ff:ff:ff
+
+     - On my machine it's not =eth0= but =enp4s0=
+       #+begin_example
+       : 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+       :     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+       : 2: enp4s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+       :     link/ether 74:56:3c:b9:74:2d brd ff:ff:ff:ff:ff:ff
+       : 3: wlo1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DORMANT group default qlen 1000
+       :     link/ether 28:c5:d2:33:f1:c6 brd ff:ff:ff:ff:ff:ff
+       :     altname wlp0s20f3
+       #+end_example
+
+     - Or you can use =nmcli= (Network Manager Command Line Interface):
+       #+begin_src bash :results output :exports both
+       nmcli device status
+       #+end_src
+
+       #+RESULTS:
+       : DEVICE        TYPE      STATE         CONNECTION         
+       : enp4s0        ethernet  connected     Wired connection 1 
+       : wlo1          wifi      connected     deco2024           
+       : p2p-dev-wlo1  wifi-p2p  disconnected  --                 
+       : lo            loopback  unmanaged     --                 
+       
+     - On my machine:
+       #+begin_example
+       DEVICE        TYPE      STATE         CONNECTION         
+       enp4s0        ethernet  connected     Wired connection 1 
+       wlo1          wifi      connected     deco2024           
+       p2p-dev-wlo1  wifi-p2p  disconnected  --                 
+       lo            loopback  unmanaged     --                 
+       #+end_example
+       
+     - Dump the frame:
+       #+begin_example bash
+       sudo tcpdump -i enp4s0 -vv -X
+       #+end_example
+
+       The result shows individual packets. It begins like this:
+       #+begin_example sh
+       tcpdump: listening on enp4s0, link-type EN10MB (Ethernet), 
+       snapshot length 262144 bytes
+       22:36:09.752500 ARP, Ethernet (len 6), IPv4 (len 4), 
+       Request who-has 192.168.1.94 tell dsldevice.attlocal.net, length 46
+               0x0000:  0001 0800 0604 0001 6c4b b46d 6521 c0a8  ........lK.me!..
+  	         0x0010:  01fe 0000 0000 0000 c0a8 015e 0000 0000  ...........^....
+	         0x0020:  0000 0000 0000 0000 0000 0000 0000       ..............
+       #+end_example
+
+* Footnotes
+
+[fn:1] Divide and conquer in other areas: Fourier transform (signal
+processing), sorting algorithms (binary sort), mob control (break mob
+up in parts).
+
+[fn:2] Layers in building construction: Foundation, building skeleton
+(frame), utilities (plumbing, electrics, HVAC), finish (walls,
+flooring, paint).
+
+[fn:3] In house building, modularity = interior & exterior design;
+abstraction = wall paint is independent of electric circuitry;
+interchangeability = replace plumbing without changing foundation;
+interoperability = choose freely which lamp to plug in.
+
+[fn:4] For much more detail, see Bonaventure, [[https://beta.computer-networking.info/syllabus/default/principles/reliability.html#][Connecting two hosts
+together]] - in his interactive ebook (2021).
+
+[fn:5] Sample question on this layer: "Consider two hosts connected by
+a physical cable. The two hosts are separated by a distance of 830
+kilometers and the propagation delay is 5 microseconds per
+kilometer. What is the delay required to send one bit from the sender
+to the receiver (in milliseconds)?" (Source: Bonaventure, 2021).
+
+[fn:6]A directed weighted graph can for example model a road network:
+vertices = cities, edges = roads connecting cities, weights =
+distances.
