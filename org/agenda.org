@@ -497,6 +497,10 @@ application, an image, or some other code to the relevant step.
 
 ** TODO Practice: Python web server
 
+Download and complete: [[https://tinyurl.com/3-networks-practice-org][tinyurl.com/3-networks-practice-org]]
+
+Upload your solution to Canvas before we discuss it.
+
 1. Find out if your =localhost= is active.
 2. Start a simple web server (=python3=) and retrieve data using (=curl=).
 3. Find out which IP address corresponds to =localhost=.
