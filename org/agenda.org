@@ -396,13 +396,15 @@
    #+end_example
 
 * Week 4: IP addresses, subnets, domains
+#+attr_html: :width 600px: 
+[[../img/subnets.png]]
 
 - [ ] Missing tests? Complete this week for 50%
 - [ ] Review of *Data Encapsulation*
 - [ ] Practice exercise: Python web server
 - [ ] Continue with IP addresses and subnets
 
-** TODO Review - Data Encapsulation
+** DONE Review - Data Encapsulation
 
 Check if you can answer these questions and attach a command-line
 application, an image, or some other code to the relevant step.
@@ -411,7 +413,8 @@ application, an image, or some other code to the relevant step.
    #+begin_quote
    Data encapsulation is the process of wrapping data (e.g. text) with
    protocol-specific meta data (headers and footers) as it moves
-   through the TCP/IP network stack.
+   through the TCP/IP network stack (the instance of the TCP/IP
+   model).
 
    Data encapsulation allows modular communication, ensuring that
    higher layers (e.g., web applications) do not need to manage
@@ -493,7 +496,15 @@ application, an image, or some other code to the relevant step.
    # sudo tcpdump -i [device] -vv -X
    #+end_src
 
-
+   #+RESULTS:
+   : 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+   :     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+   : 2: wlp0s20f3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DORMANT group default qlen 1000
+   :     link/ether 04:56:e5:25:d2:5d brd ff:ff:ff:ff:ff:ff
+   : DEVICE             TYPE      STATE         CONNECTION      
+   : wlp0s20f3          wifi      connected     Auto Lyon-Guest 
+   : p2p-dev-wlp0s20f3  wifi-p2p  disconnected  --              
+   : lo                 loopback  unmanaged     --              
 
 ** TODO Practice: Python web server
 
