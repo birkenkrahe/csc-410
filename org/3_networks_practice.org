@@ -1,0 +1,61 @@
+#+title: Networks Introduction Practice
+#+startup: overview hideblocks indent entitiespretty:
+#+options: toc:nil num:nil ^:nil:
+* *Examining a Simple HTTP Transaction*
+
+To learn more: [[https://realpython.com/python-http-server/][RealPython tutorial]]
+
+Run the following commands in a shell. Write answers and findings
+below the question. You can e.g. use =example= code blocks (=<e TAB=).
+
+1. Find out if your =localhost= is active.
+2. Start a simple web server (=python3=) and retrieve data using (=curl=).
+3. Find out which IP address corresponds to =localhost=.
+4. Find out what happens if you change the port number
+5. Change the directory information served by the server.
+6. Shut down the web server(s).
+
+-----
+
+1) Is your loopback interface (aka =localhost=) alive and contactable?
+   How would you find out? Is there a way to poke it?
+
+2) Execute the code below, which starts a built-in Python HTTP
+   server. Once the server is started, you can also open the URL in a
+   browser - the quickest way is inside Emacs with =M-x eww
+   localhost:8080=
+
+   #+begin_example bash
+     python3 -m http.server 8080 &
+     curl http://localhost:8080
+   #+end_example
+
+   What exactly happens in these two lines of code? Take a few minutes
+   to query the commands and options and write down your observations.
+
+3) Which IP address (as a number) corresponds to =localhost=? What is
+   the host name of your machine (or Linux VM)?
+
+4) What happens if you change the port number in the =curl= command:
+
+5) By default, the server serves the files in =pwd= where you started
+   the server. You can change this by using an option for the Python
+   =http.server= module. To find all options run
+
+   #+begin_example bash
+     python3 -m http.server --help
+   #+end_example
+
+   Now change the directory information served by the web server to
+   your =Download= directory.
+
+   What did you learn?
+
+6) Shut down the web server if you started it in the background, with
+   
+   #+begin_example bash
+     pkill -f "python3 -m http.server"
+   #+end_example
+
+   You can also =kill= the process with the process number (=PID=), which
+   you can get from the =ps= command: =kill [PID]=.
