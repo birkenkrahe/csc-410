@@ -1,0 +1,690 @@
+#+title: Agenda Notebook
+#+author: Marcus Birkenkrahe
+#+subtitle: CSC 410 - Data Communications and Networking - Spring 2025
+#+SEQ_TODO: TODO NEXT IN_PROGRESS PRACTICE WAITING | DONE CANCELLED
+#+startup: overview hideblocks indent
+:PROPERTIES:
+:header-args:C:      :main yes :includes <stdio.h> :results output :exports both
+:header-args:python: :session *Python* :python python3 :results output :exports both
+:header-args:R:      :session *R* :results graphics output file :exports both
+:header-args:C++:    :main yes :includes <iostream> :results output :exports both
+:END:
+* Week 1: Course overview
+#+attr_html: :width 400px
+[[../img/cover.jpg]]
+
+- [X] Course overview
+- [X] Installing Cisco Packet Tracer
+- [X] Introducing Networks and Protocols
+- [ ] Getting started with Cisco Packet Tracer
+- [ ] C Programming Basics Review: "FizzBuzz"
+
+** DONE [[file:1_overview.org][Course overview]]: Content, Grading, Projects, Platforms
+
+** DONE Review (Overview)
+
+1. Remember at least 2 topics that will be addressed in this class.
+   #+begin_quote
+   1. Cloud computing
+   2. Microservice technologies
+   3. Networking and Internet protocols
+   4. Cisco Packet Tracer simulation
+   5. Socket programming with C
+   #+end_quote
+
+2. What is "Termux"?
+   #+begin_quote
+   A Linux emulator for Android phones.
+   #+end_quote
+
+3. Why is Linux relevant for computer networks?
+   #+begin_quote
+   1. Dominant operating system for servers (97% of web servers, 90%
+      of cloud computing servers, > 70% of global market overall).
+   2. Free and open source.
+   3. Core platform for microservices like Docker and Kubernetes.
+   4. Powerful command-line networking tools for configuration,
+      firewalling, monitoring, analysis.
+   #+end_quote
+
+4. What is an Internet "packet"?
+   #+begin_quote
+   An Internet packet (= header + payload) is a small unit of data
+   transmitted over a network as part of a message. Packets are
+   independently routed through the network and then reassembled at
+   their destination to recreate the original message.
+   #+end_quote
+
+5. What is Cisco Packet Tracer?
+   #+begin_quote
+   Cisco packet tracer is a cross-platform network simulation tool
+   developed by Cisco Systems, the dominant firm in networking.
+   #+end_quote
+
+** IN_PROGRESS Introducing Networks and Protocols
+
+- [X] Network programming and C
+- [ ] OSI layer model
+- [ ] TCP/IP reference model
+- [ ] The Internet Protocol (IP)
+- [ ] IPv4 and IPv6 addresses
+- [ ] Domain names
+- [ ] Internet protocol routing
+- [ ] Network address translation
+- [ ] Client-Server paradigm
+- [ ] Listing your IP addresses using C
+
+* Week 2: Introduction to networking
+#+attr_html: :width 600px:
+#+caption: Building (Retro)
+[[../img/builder.jpg]]
+
+- [X] The Internet is C
+- [X] Layering principle
+- [X] OSI model
+- [ ] Cisco Packet Tracer
+- [ ] Test 1 (Deadline Friday, 31 January)
+
+** Review / Preview (next test sometime this week)
+
+1. What is a network?
+   #+begin_quote
+   A collection of interconnected nodes or devices that exchange data.
+   #+end_quote
+
+2. Which areas of mathematics are most relevant for networks?
+   #+begin_quote
+   - *Graph theory* (theory of nodes connected by weighted edges) for
+     network optimization and routing algorithms.
+   - *Probability and statistics* for traffic modeling and performance
+     analysis.
+   - *Fourier analysis* (approximations of general functions by sums of
+     simpler trigonometric functions) for signal processing.
+   #+end_quote
+
+3. In which sense it "The Internet is C" true?
+   #+begin_quote
+   - Network stacks (layered software supporting the network) is
+     programmed in C.
+   - All network-relevant (processes, files, sockets) kernel code is
+     programmed in C.
+   #+end_quote
+
+4. Name at least two benefits of a "layering" approach to building:
+   #+begin_quote
+   - *Modularity* = independent design, development, maintenance
+   - *Abstraction* = layer details hidden from other layers
+   - *Interchangeability* = component replacement by layer
+   - *Interoperability* = different systems working together
+   #+end_quote
+
+5. Name at least two of the layers of the OSI model.
+   #+begin_quote
+   1) Application
+   2) Presentation
+   3) Session
+   4) Transport
+   5) Network
+   6) Data Link
+   7) Physical
+   #+end_quote
+
+6. What does "on-premise" computing mean and what else is there?
+   #+caption: Cloud service models - car analogy (DataCamp, 2020)
+   #+attr_html: :width 600px
+   [[../img/services.png]]
+
+   #+begin_comment
+   - On-premise: Run infrastructrure (servers), platform (apps),
+   and (end-customer) software.
+
+   - Cloud: Outsource infrastructure, platform(s), and software.
+   #+end_comment
+
+7. What do different cloud services (business models) deliver?
+   #+caption: IaaS vs. PaaS vs. SaaS (DataCamp, 2020)
+   #+attr_html: :width 600px
+   [[../img/services1.png]]
+
+8. What is the relationship between "control" and "abstraction" in
+   cloud computing?
+   #+caption: Control vs. Abstraction (DataCamp, 2020)
+   #+attr_html: :width 500px
+   [[../img/pyramid.png]]
+
+9. Who dominates the cloud market?
+   #+attr_html: :width 600px:
+   #+caption: Source: Synergy Research Group (not checked)
+   [[../img/cloud_market.png]]
+
+10. What is the size of the global IT services market?
+    #+attr_html: :width 600px:
+    #+caption: Source: Precedence Research (not checked)
+    [[../img/it_market.png]]
+
+    #+begin_quote
+    The size of the market for cloud computing is 5.6% of the market
+    for global IT services.
+
+    The rest (estimated via ChatGPT - not checked):
+
+    | Segment                            | Bn USD |
+    |------------------------------------+--------|
+    | IT Infrastructure Management       |    300 |
+    | Managed IT Services                |    200 |
+    | Enterprise Software & Apps         |    250 |
+    | Consulting Services                |    150 |
+    | Cybersecurity                      |    120 |
+    | IT Support & Maintenance           |    100 |
+    | System Integration                 |     90 |
+    | Telecommunications & Connectivity  |     80 |
+    | Business Process Outsourcing (BPO) |     80 |
+    | Emerging Technologies              |     50 |
+    | Training & Professional Services   |     30 |
+    |------------------------------------+--------|
+    | *Total*                              |  *1,250* |
+
+    #+end_quote
+
+
+** IN_PROGRESS [[./2_packettracer.org][Cisco Packet Tracer]]: Intro & Installation & Getting started
+
+* Week 3: TCP/IP & Cisco networks
+#+attr_html: :width 600px:
+#+caption: The Nerd And The Network
+[[../img/nerd.jpg]]
+
+- [X] Cisco Packet Tracer Review
+- [X] TCP/IP model
+- [ ] IP addresses and domains
+- [ ] What is a Cisco network?
+- [X] Test 1 (Deadline Friday, 31 January)
+
+** Cisco Packet Tracer review
+
+1. Which physical equipment do you need to use Cisco Packet
+   Tracer?
+   #+begin_quote
+   Laptop or desktop computer with Windows, Linux or MacOS.
+   #+end_quote
+
+2. What are things you can do with Cisco Packet Tracer?
+   #+begin_quote
+   1. Simulate physical equipment like a server rack.
+   2. Design, plan and test IP networks.
+   3. Configure wireless devices and wireless security.
+   4. Configure and program IoT devices such as sensors.
+   5. Build and configure smart home components.
+   6. Watch data flow across the network and watch packets.
+   7. Build a network topology from scratch.
+   8. Complete assessments towards a Cisco certificate.
+   #+end_quote
+
+3. Which connection is automatically picked for the network?
+   #+begin_quote
+   The Ethernet connection.
+   #+end_quote
+4. What's the difference between the PC and the server devices?
+   #+begin_quote
+   The server has =services=.
+   #+end_quote
+5. Can you change the MAC address of a device?
+   #+begin_quote
+   In the simulation tool yes, in reality no - the MAC address is
+   composed of two permanent parts: For the producer and the product.
+   #+end_quote
+
+6. Sketch the steps of our last lab exercise!
+   #+begin_quote
+   1) Open Cisco Packet Tracer app on the PC
+   2) Login with Cisco net academy using your Google account
+   3) Create a simple 2-host network (PC and server)
+   4) Set the MAC & IP address for PC (10.1.1.1), server (10.1.1.2)
+   5) Ping each device from the other
+   6) Open a web page on the PC using HTTP and HTTPS services
+   7) Switch off the HTTP service and try to connect again
+   #+end_quote
+
+7. Revisit your actions:
+   - Open the .pkt file in your app: tinyurl.com/demo-pkt
+   - =ping= the server from the PC
+   - =ping= the PC from the server
+   - Open a web page on the PC using the server
+   - Open a web page on the server using the PC
+
+
+** Projects - sprint review coming soon
+#+attr_html: :width 600px:
+[[../img/projects.png]]
+
+
+** Test 1
+
+- Tests are not time limited per attempt
+- Only the first attempt is graded
+- Subsequent attempts are for drilling (final exam)
+- Tests are open book: use all resources that you can find
+- Tests were created with the help of ChatGPT
+- All course materials used up to now were used
+- Test 1 deadline is Friday 31 Jan (max 100%)
+- Test 1 is available only until Friday 7 Feb (max 50%)
+
+
+** DataCamp review: Cloud Computing - Deployment
+
+1. Why is "cloud deployment" an issue and what is it?
+   #+begin_quote
+   The cloud computing environment can be hacked into.
+
+   Deployment means choosing between a private, a public or a hybrid
+   cloud.
+   #+end_quote
+
+2. How is Lyon's cloud computing environment deployed?
+   #+begin_quote
+   The infrastructure is hybrid:
+   - Sensitive data (students, grades, personnel) are private
+   - Some services are open to the public (Remote Desktop Service)
+   #+end_quote
+
+3. What's "cloud bursting"?
+   #+begin_quote
+   The private cloud is over capacity and resources are temporarily
+   moved to the public cloud.
+   #+end_quote
+
+4. What's the GDPR? What does it say?
+   #+begin_quote
+   General Data Protection Regulation in countries of the European
+   Union. A major pain in the butt for corporations. Very expensive.
+
+   - Users must give explicit consent to data collection
+   - Users must be notified of data breaches
+   - Personal information must be anonymized and encrypted
+   - Personal data cannot leave EU borders unless protected
+   - Violations incur fine of up to 4% of worldwide annual revenue
+
+   In the case of Amazon, that's $22 bn of $574 bn total, or $3 bn of
+   the revenue of AWS ($90 bn).
+   #+end_quote
+
+5. What are considered "personal data"? Why are they protected?
+   #+begin_quote
+   - Home address
+   - First and last name
+   - Email address
+   - Location data
+   - IP address
+   - Racial or ethnic origin
+   - Political opinions
+   - Sexual orientation
+   - Health-related data
+
+   Personal data can identify a person leading to potential identity
+   theft with regard to any or all of the categories above.
+   #+end_quote
+
+** Review: TCP/IP model
+
+1. Why do we need another model besides the OSI model at all?
+   #+begin_quote
+   - OSI was theoretical while TCP/IP was developed on real world
+     networking needs.
+   - OSI only supports wired communication, TCP/IP adds wireless
+     communication.
+   - TCP/IP was developed and adopted alongside the internet while the
+     OSI model remains a conceptual reference.
+   #+end_quote
+
+2. What are the four layers of TCP/IP?
+   #+begin_quote
+   1. *Application*: HTTP, SMTP, FTP protocols and applications.
+   2. *Host-to-Host*: TCP and UDP protocols for data management.
+   3. *Internet:* Packet addressing and routing (IP address)
+   4. *Network access:* Physical connection/data framing (MAC address).
+   #+end_quote
+
+3. Remember one Linux command at each level of the TCP/IP model?
+   #+begin_src bash :results output :exports both
+     arp -n # network: mapping IP to MAC addresses
+     hostname -I # internet: IP address of your PC
+     netstat -tul | head -n 10 # host-to-host: TCP and UDP connections
+     wget -O ../src/init.el tinyurl.com/lyon-emacs
+     file ../src/init.el
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   Address                  HWtype  HWaddress           Flags Mask            Iface
+   192.168.160.107                  (incomplete)                              wlp0s20f3
+   192.168.168.10           ether   00:1a:1e:04:05:f0   C                     wlp0s20f3
+   192.168.160.1            ether   70:6b:b9:9a:45:fe   C                     wlp0s20f3
+   192.168.168.25
+   Active Internet connections (only servers)
+   Proto Recv-Q Send-Q Local Address           Foreign Address         State
+   tcp        0      0 localhost:ipp           0.0.0.0:*               LISTEN
+   tcp        0      0 localhost:domain        0.0.0.0:*               LISTEN
+   tcp6       0      0 [::]:1716               [::]:*                  LISTEN
+   tcp6       0      0 ip6-localhost:ipp       [::]:*                  LISTEN
+   udp        0      0 localhost:domain        0.0.0.0:*
+   udp        0      0 0.0.0.0:mdns            0.0.0.0:*
+   udp        0      0 0.0.0.0:56340           0.0.0.0:*
+   udp6       0      0 [::]:1716               [::]:*
+   ../src/init.el: Lisp/Scheme program, ASCII text, with CRLF line terminators
+   #+end_example
+
+   On my computer at home:
+   #+begin_example
+   Address                  HWtype  HWaddress           Flags Mask            Iface
+   192.168.1.254            ether   6c:4b:b4:6d:65:21   C                     enp4s0
+   192.168.68.52            ether   ae:4b:fd:96:36:90   C                     wlo1
+   192.168.68.1             ether   60:83:e7:71:cb:50   C                     wlo1
+   192.168.68.53                    (incomplete)                              wlo1
+   192.168.1.250 192.168.68.54 2600:1702:4ba0:4b0::49 2600:1702:4ba0:4b0:1028:b5ef:db96:7a53 2600:1702:4ba0:4b0:952e:b307:998b:9078
+   Active Internet connections (only servers)
+   Proto Recv-Q Send-Q Local Address           Foreign Address         State
+   tcp        0      0 localhost:ipp           0.0.0.0:*               LISTEN
+   tcp        0      0 localhost:domain        0.0.0.0:*               LISTEN
+   tcp6       0      0 [::]:60000              [::]:*                  LISTEN
+   tcp6       0      0 localhost:ipp           [::]:*                  LISTEN
+   tcp6       0      0 [::]:1716               [::]:*                  LISTEN
+   udp        0      0 mdns.mcast.net:mdns     0.0.0.0:*
+   udp        0      0 mdns.mcast.net:mdns     0.0.0.0:*
+   udp        0      0 mdns.mcast.net:mdns     0.0.0.0:*
+   ../src/init.el: Lisp/Scheme program, ASCII text, with CRLF line terminators
+   #+end_example
+
+* Week 4: IP addresses, subnets, domains
+#+attr_html: :width 600px: 
+[[../img/subnets.png]]
+
+- [X] Missing tests? Complete this week for 50%
+- [X] Review of *Data Encapsulation*
+- [ ] Practice exercise: Python web server
+- [ ] DataCamp review: Understanding cloud computing
+- [ ] Continue with IP addresses and subnets
+- [ ] Home assignment: Build a Cisco network
+
+** DONE Review - Data Encapsulation
+
+Check if you can answer these questions and attach a command-line
+application, an image, or some other code to the relevant step.
+
+1. What is data encapsulation in networking? Why is it important?
+   #+begin_quote
+   Data encapsulation is the process of wrapping data (e.g. text) with
+   protocol-specific meta data (headers and footers) as it moves
+   through the TCP/IP network stack.
+
+   Data encapsulation allows modular communication, ensuring that
+   higher layers (e.g., web applications) do not need to manage
+   lower-level details (e.g., TCP, IP, Ethernet).
+   #+end_quote
+   #+attr_html: :width 200px:
+   [[../img/ip_to_ethernet.png]]
+
+2. Give a step by step data encapsulation breakdown for a web request
+   by TCP/IP layer.
+   #+begin_quote
+   | *LAYER*             | *ENCAPSULATION*                                               |
+   |-------------------+-------------------------------------------------------------|
+   | Application Layer | A HTTP request is generated by the web browser              |
+   | Transport Layer   | TCP segments add sequence numbers and reliability checks    |
+   | Network Layer     | Segment is wrapped in an IP packet with destination address |
+   | Data Link Layer   | Packet is encapsulated in Ethernet frame with MAC address   |
+   | Physical Layer    | Frame is converted into signals for transmission            |
+   #+end_quote
+
+3. Why can't a web browser directly send an HTML file over the
+   network?
+   #+begin_quote
+   The web browser cannot send an HTML file directly because the
+   network requires structure communication protocols: 
+   - HTML content must be included in a HTTP response
+   - HTTP response must be encapsulated in a TCP segment
+   - TCP segment must be wrapped inside an IP packet
+   - IP packet must be placed in an Ethernet frame for transmission.
+   #+end_quote
+   #+begin_example
+   HTTP/1.1 200 OK
+   Date: Fri, 17 Jan 2025 10:00:00 GMT
+   Content-Type: text/html; charset=UTF-8
+   Content-Length: 1234
+   Connection: keep-alive
+   Server: Apache/2.4.54 (Unix)
+   #+end_example
+
+4. What role does TCP play in the encapsulation process when
+   transmitting a web page?
+   #+begin_quote
+   TCP (Transmission Control Protocol) ensures that the HTTP response
+   (which contains the HTML page) is reliably delivered. It segments
+   large data into smaller chunks, ensures in-order delivery,
+   retransmits lost packets, and manages congestion. The TCP segment
+   is then passed down to the IP layer for addressing and routing.
+   #+end_quote
+   #+attr_html: :width 700px: 
+   [[../img/socket.svg]]
+
+5. How does a router handle an encapsulated HTTP response as it
+   forwards it to the destination?
+   #+begin_quote
+   The router checks the IP packet's destination address and
+   determines the nex best hop. It forwards the packet based on
+   routing tables, strips the previous Ethernet frame and encapsulates
+   the IP packet in a new frame for the next network segment.
+   #+end_quote
+   #+begin_src bash :results output :exports both
+   traceroute lyon.edu
+   #+end_src
+
+6. How can you observe real-time data encapsulation happening on your
+   network? What is a condition to do this?
+   #+begin_quote
+   You can use tools like =tcpdump= or Wireshark (=tshark=) to capture
+   packets in real-time. Running =sudo tcpdump -i eth0 -vv= allows you
+   to see Ethernet frames, IP packets, and TCP segments, revealing the
+   encapsulated layers as data moves through the network. 
+
+   A condition to do this is that you have =sudo= rights because the
+   information could easily be used to design an efficient network
+   attack.
+   #+end_quote
+   #+begin_src bash :results output :exports both
+   ip link show
+   nmcli device status
+   # sudo tcpdump -i [device] -vv -X
+   #+end_src
+
+
+
+** TODO Review: Python web server
+
+We're going to review the content first, and then we'll look at the
+exercise again. 
+
+1. What was the exercise about?
+   #+begin_quote
+   - Starting a web server, using it, shutting it down.
+   - Exploring the =localhost= destination address.
+   - Understanding how to use ports with web requests.
+   - Finding stuff out by yourself instead of being told everything.
+   #+end_quote
+   
+2. What exactly does a web server do?
+   #+begin_quote
+   The web server listens for incoming HTTP requests on a specific
+   port and responds by serving files or handling requests. In this
+   case, the Python HTTP server serves files from the specified
+   directory to clients like web browsers.
+   #+end_quote
+
+3. What function does =curl= have?
+   #+begin_quote
+   The =curl= command is a /client/ of the server - it makes an HTTP
+   request that the server fulfils.
+   #+end_quote
+
+4. What exactly is the port number?  
+   #+begin_quote
+   The port number is a specific communication endpoint on a computer
+   that allows network services to operate. It helps direct internet
+   traffic to the correct application. For example, in
+   =http://localhost:8080=, port =8080= is where the web server listens
+   for requests.
+   #+end_quote
+
+5. What were the implications of using a different port number?
+   #+begin_quote
+   Requests on a different port than the one specified when the server
+   was started are not fulfilled. A new server that listens on that
+   port must be started.
+   #+end_quote
+
+6. What are the implications of repeating the =python3= command?
+   #+begin_quote
+   You get an "address already in use" error. To use the same port,
+   you have to shut the server down, or you must change the port.
+   #+end_quote
+
+7. Could this web server be used from outside of the computer?
+   #+begin_quote
+   By default, the Python HTTP server listens on =localhost=, meaning it
+   can only be accessed from the same computer. However, if started
+   with =python3 -m http.server 8080 --bind 0.0.0.0=, it would be
+   accessible from other devices on the same network (now it is bound
+   to the default gateway). To make it accessible over the internet,
+   additional steps like firewall configuration and port forwarding
+   would be needed.
+   #+end_quote
+
+8. How can the web server be shut down?
+   #+begin_quote
+   You can kill the terminal where it was started, or you can shut it
+   down explicitly using the =PID=, the process number, which you get
+   with =ps=. You can then =kill= the process. Or you can use =pkill= on
+   (part of) the process name.
+   #+end_quote
+
+9. What is a daemon? What is an example?
+   #+begin_quote
+   A daemon is a service program that sits in the background listening
+   to requests related to a persistent process. When a request is
+   made, the daemon wakes the process. A daemon cannot be communicated
+   with directly (except that it can be started, shut down, and asked
+   for a status).
+
+   An example is =systemd=, a daemon that initializes the system and
+   manages other daemons.
+   #+end_quote
+
+10. Does the Python web server =http.server= have a daemon?
+    #+begin_quote
+    No it does not because it is not a persistent system service. It
+    can be put in the background itself with =&= but it ends when the
+    terminal session ends or when the process is killed.
+    #+end_quote
+
+** IN_PROGRESS Practice: Python web server
+
+Download and complete: [[https://tinyurl.com/3-networks-practice-org][tinyurl.com/3-networks-practice-org]]
+
+Upload your solution to Canvas before we discuss it.
+
+1. Find out if your =localhost= is active.
+2. Start a simple web server (=python3=) and retrieve data using (=curl=).
+3. Find out which IP address corresponds to =localhost=.
+4. Find out what happens if you change the port number
+5. Change the directory information served by the server.
+6. Shut down the web server(s).
+
+** TODO DataCamp review: Cloud Providers and Case Studies
+
+1. Which cloud provider has the largest market share as of the lesson?
+   Do you still remember what this means in terms of revenue?
+
+   #+BEGIN_QUOTE
+   Amazon Web Services (AWS) holds the largest market share at 31%,
+   followed by Microsoft Azure at 24% and Google Cloud at 11%.
+
+   AWS revenue is $90 bn while Amazon's total revenue is $574 bn (15%)
+   #+END_QUOTE
+
+2. What is a key advantage of Microsoft Azure in the cloud market?
+
+   #+BEGIN_QUOTE
+   Azure benefits from strong integration with Microsoft products
+   (customer "lock-in"), making it a top-of-mind choice for
+   enterprises already using Microsoft services (such as: MS Windows,
+   MS Office, MS SQL server).
+   #+END_QUOTE
+
+3. What cloud service does Amazon SageMaker provide? How long would it
+   take to learn how to use it (for someone new to ML)?
+
+   #+BEGIN_QUOTE
+   Amazon SageMaker is a cloud machine learning platform that helps
+   organizations streamline machine learning processes.
+
+   ChatGPT breaks the training down and estimates 4-8 weeks for
+   someone who is new to Machine Learning. Sounds like a summer job!
+   #+END_QUOTE
+
+4. Which Google Cloud service is specifically designed for data
+   warehousing? How long would it take to learn?
+
+   #+BEGIN_QUOTE
+   BigQuery is Google Cloud's data warehousing service, designed for
+   large-scale data analytics.
+
+   ChatGPT estimates that a total beginner (no SQL, data warehousing
+   or Google Cloud knowledge) needs 4-6 weeks to learn to use it.
+   #+END_QUOTE
+
+5. In the AWS case study, what improvement did NerdWallet experience
+   after adopting Amazon SageMaker? What questions would you have?
+
+   #+BEGIN_QUOTE
+   NerdWallet used Amazon SageMaker to significantly reduce *training
+   times* to days and cut *costs* by 75%, modernizing their data science
+   practices.
+
+   Important questions: What company is this? What's their business?
+   How long did it take them? How long was the case study?
+   #+END_QUOTE
+
+6. What could be the case against cloud computing?
+
+   #+begin_quote
+   Chapters of the CIO article of the same title:
+   - Migrating apps (cost, knowledge, skills)
+   - Managing risk (loss of data, loss of control)
+   - Meeting SLAs (Service Level Agreements)
+   - TCO (Total Cost of Ownership)
+   #+end_quote
+
+** TODO Home assignment: Build a Cisco network
+
+*How?* You need to install Cisco Packet Tracer on your PC unless you
+want to have to come to the lab in Lyon 104. Ask for help if needed.
+
+*Why?* This is a review of the short packet tracer demo from week 1, and
+a preparation for looking at Cisco network switches, MAC address
+tables, and the ARP protocol used to map IP addresses to a MAC
+address.
+
+*What?* Build the following network in Cisco Packet Tracer, test it and
+upload the =.pkt= file to Canvas (Deadline: Monday 10 February, 11 am).
+
+Demo: How to switch off automatic labeling and create notes.
+
+#+attr_html: :width 400px: 
+[[../img/pt_network.png]]
+
+*Requires:*
+1) Creating network hosts
+2) Setting static IP addresses, subnet masks, MAC addresses
+3) Testing the network with your own "hello world" HTML file
+5) Saving the network configuration and upload to Canvas
+
+
