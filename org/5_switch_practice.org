@@ -1,0 +1,165 @@
+#+Title: Network Switches
+#+startup: overview hideblocks indent entitiespretty: 
+#+options: toc:nil num:nil ^:nil: 
+* README
+
+- The entry point for this exercise is a home assignment where you
+  built your own network with three hosts using Cisco Packet Tracer -
+  2 laptops and 1 server connected by one switch device.
+
+- In this exercise, you will explore the switch. In the following
+  exercise, we will look at the Address Resolution Protocol (ARP).
+
+- Objectives:
+  1) 
+
+* How does a Switch learn MAC addresses? What's a MAC address table
+
+- Use the 2-laptop-1-server-1-switch network (.pkt) file:
+  https://tinyurl.com/2-laptops-1-server-pkt
+
+- Open switch > CLI
+
+- The switch is a bootable device. It runs IOS-XE, a stripped down OS
+  with its own shell that shows the =Switch>= prompt (User mode).
+
+- You can reset and reboot the switch with
+  #+begin_example
+  Switch> enable
+  Switch> reload
+  #+end_example
+
+- When asked if you'd like to enter the initial configuration dialog,
+  say =no=.
+
+- You can see the interfaces:
+  #+begin_example
+  Switch> show ip interface brief
+  #+end_example
+
+- You can enter an interface for configuration:
+  #+begin_example
+  Switch> interface GigabitEthernet1/0/1
+  #+end_example
+
+- Enter =?= to see executable commands:
+  #+begin_example
+  Switch>?
+  Exec commands:
+    <1-99>      Session number to resume
+    connect     Open a terminal connection
+    disable     Turn off privileged commands
+    disconnect  Disconnect an existing network connection
+    enable      Turn on privileged commands
+    exit        Exit from the EXEC
+    logout      Exit from the EXEC
+    ping        Send echo messages
+    resume      Resume an active network connection
+    show        Show running system information
+    ssh         Open a secure shell client connection
+    telnet      Open a telnet connection
+    terminal    Set terminal line parameters
+    traceroute  Trace route to destination
+  #+end_example
+
+- The physical switch device has a lot more commands available, this
+  is only a small subset of the available CLI commands.
+
+- For example, 
+  #+begin_example
+  Switch> traceroute -m 
+  #+end_example
+
+- To do this on a Windows machine when connected to a switch, you
+  could use the program Putty. You then have to identify the serial
+  COM port and you can log into the switch CLI.
+
+- The IOS-XE shell has different modes. The =enable= command goes
+  straight from user to privilege (root) mode:
+  #+begin_example
+  Switch> enable
+  Switch# ?
+  Switch# disable
+  #+end_example
+
+- From the privileged mode, you can go to global config mode:
+  #+begin_example
+  Switch# config [terminal]
+  Switch(config)# ?
+  Switch(config)# exit
+  #+end_example
+
+- At each level, you have different sets of commands available.
+
+- Go to global configure mode and use the =hostname= command to change
+  the name of the switch to =S1= so that the prompt in user mode looks
+  like this: =S1>=. Five steps:
+
+  #+begin_example
+  Switch> enable
+  Switch# configure t
+  Switch(config)# hostname S1
+  S1(config)# exit
+  S1# disable
+  S1>
+  #+end_example
+
+- When the network is established, the switch has not learnt the MAC
+  addresses of the hosts. Check the current MAC address table:
+  #+begin_example
+  S1> show mac address-table
+  #+end_example
+  #+attr_html: :width 500px: 
+  #+caption: Unitialized MAC address table on a switch
+  [[./img/mactable.png]]
+
+- The reason for this is that no traffic has been sent through the
+  switch yet. If you'd do this on a Windows PC, you'd see a bunch of
+  /static/ and a few /dynamic/ type addresses trained on specific ports of
+  the switch (these are not the ports of an IP address).
+
+- Activating the MAC address table on the switch:
+  1) Open the =Command Prompt= on the =Laptop1=.
+  2) Enter =ping 192.168.1.2= to test the connection to =Laptop2=.
+  3) On the switch, =show mac address-table= again to see both network
+     hosts and their connecting ports on the switch:
+  #+attr_html: :width 500px: 
+  #+caption: MAC address table on a switch after a ping
+  [[./img/mactable1.png]]
+     
+- Do the same thing by opening a web page on =Laptop2=:
+  1) Open the =Web Browser= on the =Laptop2=.
+  2) Enter the address of the web server =http://192.168.1.3=.
+  3) On the switch, =show mac address-table= to see all hosts:
+  #+attr_html: :width 500px: 
+  #+caption: MAC address table on a switch with three active hosts
+  [[./img/mactable2.png]]
+     
+- What if we unplug =Laptop1=? To pull the plug, delete the connection
+  between =Laptop1= and the switch. Select the =Delete= tool from the tool
+  bar and click on the connection:
+  #+attr_html: :width 500px: 
+  #+caption: Severed network - Laptop1 and switch not connected
+  [[./img/mactable3.png]]
+  
+- Delesect =Delete= and activate the =Select= tool, then look at the =CLI=
+  tab of the switch: The line is shown as down.
+  #+attr_html: :width 600px: 
+  #+caption: Switch has realized that a connection dropped
+  [[./img/mactable4.png]]
+
+- The switch is reset and the MAC address table is empty (it should
+  have maintained its knowledge of the other two connections!)
+
+- Now connect the =Laptop1= to a different GigabitEthernet port,
+  say 10. Change the line label to =G1/0/10=. Wait until the connection
+  goes green, then check the switch =CLI=: the new line should be up.
+
+- Ping the other two hosts from =Laptop1= and =show mac address-table=:
+  #+attr_html: :width 500px: 
+  #+caption: Switch has learnt a new GigabitEthernet port connection
+  [[./img/mactable5.png]]
+  
+- Finally, change the name of the switch back to =Switch= - you can
+  either change the =hostname= configuration, or restart the switch.
+

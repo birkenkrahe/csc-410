@@ -20,6 +20,10 @@ below the question. You can e.g. use =example= code blocks (=<e TAB=).
 1) Is your loopback interface (aka =localhost=) alive and contactable?
    How would you find out? Is there a way to poke it?
 
+   #+begin_example
+     ping localhost
+   #+end_example
+
 2) Execute the code below, which starts a built-in Python HTTP
    server. Once the server is started, you can also open the URL in a
    browser - the quickest way is inside Emacs with =M-x eww

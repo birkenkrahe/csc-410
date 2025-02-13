@@ -324,7 +324,6 @@
    theft with regard to any or all of the categories above.
    #+end_quote
 
-
 ** Review: TCP/IP model
 
 1. Why do we need another model besides the OSI model at all?
@@ -395,16 +394,18 @@
    ../src/init.el: Lisp/Scheme program, ASCII text, with CRLF line terminators
    #+end_example
 
-* Week 4: IP addresses, subnets, domains
+* Week 4: Python web server, IP addresses
 #+attr_html: :width 600px: 
 [[../img/subnets.png]]
 
-- [ ] Missing tests? Complete this week for 50%
-- [ ] Review of *Data Encapsulation*
-- [ ] Practice exercise: Python web server
+- [X] Missing tests? Complete this week for 50%
+- [X] Review of *Data Encapsulation*
+- [X] Practice exercise: Python web server
+- [ ] DataCamp review: Understanding cloud computing
 - [ ] Continue with IP addresses and subnets
+- [ ] Home assignment: Build a Cisco network
 
-** DONE Review - Data Encapsulation
+** Review - Data Encapsulation
 
 Check if you can answer these questions and attach a command-line
 application, an image, or some other code to the relevant step.
@@ -413,8 +414,7 @@ application, an image, or some other code to the relevant step.
    #+begin_quote
    Data encapsulation is the process of wrapping data (e.g. text) with
    protocol-specific meta data (headers and footers) as it moves
-   through the TCP/IP network stack (the instance of the TCP/IP
-   model).
+   through the TCP/IP network stack.
 
    Data encapsulation allows modular communication, ensuring that
    higher layers (e.g., web applications) do not need to manage
@@ -496,17 +496,97 @@ application, an image, or some other code to the relevant step.
    # sudo tcpdump -i [device] -vv -X
    #+end_src
 
-   #+RESULTS:
-   : 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
-   :     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-   : 2: wlp0s20f3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DORMANT group default qlen 1000
-   :     link/ether 04:56:e5:25:d2:5d brd ff:ff:ff:ff:ff:ff
-   : DEVICE             TYPE      STATE         CONNECTION      
-   : wlp0s20f3          wifi      connected     Auto Lyon-Guest 
-   : p2p-dev-wlp0s20f3  wifi-p2p  disconnected  --              
-   : lo                 loopback  unmanaged     --              
 
-** TODO Practice: Python web server
+
+** Review: Python web server
+
+We're going to review the content first, and then we'll look at the
+exercise again. 
+
+1. What was the exercise about?
+   #+begin_quote
+   - Starting a web server, using it, shutting it down.
+   - Exploring the =localhost= destination address.
+   - Understanding how to use ports with web requests.
+   - Finding stuff out by yourself instead of being told everything.
+   #+end_quote
+   
+2. What exactly does a web server do?
+   #+begin_quote
+   The web server listens for incoming HTTP requests on a specific
+   port and responds by serving files or handling requests. In this
+   case, the Python HTTP server serves files from the specified
+   directory to clients like web browsers.
+   #+end_quote
+
+3. What function does =curl= have?
+   #+begin_quote
+   The =curl= command is a /client/ of the server - it makes an HTTP
+   request that the server fulfils.
+   #+end_quote
+
+4. What exactly is the port number?  
+   #+begin_quote
+   The port number is a specific communication endpoint on a computer
+   that allows network services to operate. It helps direct internet
+   traffic to the correct application. For example, in
+   =http://localhost:8080=, port =8080= is where the web server listens
+   for requests.
+   #+end_quote
+
+5. What were the implications of using a different port number?
+   #+begin_quote
+   Requests on a different port than the one specified when the server
+   was started are not fulfilled. A new server that listens on that
+   port must be started.
+   #+end_quote
+
+6. What are the implications of repeating the =python3= command?
+   #+begin_quote
+   You get an "address already in use" error. To use the same port,
+   you have to shut the server down, or you must change the port.
+   #+end_quote
+
+7. Could this web server be used from outside of the computer?
+   #+begin_quote
+   By default, the Python HTTP server listens on =localhost=, meaning it
+   can only be accessed from the same computer. However, if started
+   with =python3 -m http.server 8080 --bind 0.0.0.0=, it would be
+   accessible from other devices on the same network (now it is bound
+   to the default gateway). To make it accessible over the internet,
+   additional steps like firewall configuration and port forwarding
+   would be needed.
+   #+end_quote
+
+8. How can the web server be shut down?
+   #+begin_quote
+   You can kill the terminal where it was started, or you can shut it
+   down explicitly using the =PID=, the process number, which you get
+   with =ps=. You can then =kill= the process. Or you can use =pkill= on
+   (part of) the process name.
+   #+end_quote
+
+9. What is a daemon? What is an example?
+   #+begin_quote
+   A daemon is a service program that sits in the background listening
+   to requests related to a persistent process. When a request is
+   made, the daemon wakes the process. A daemon cannot be communicated
+   with directly (except that it can be started, shut down, and asked
+   for a status).
+
+   An example is =systemd=, a daemon that initializes the system and
+   manages other daemons.
+   #+end_quote
+
+10. Does the Python web server =http.server= have a daemon?
+    #+begin_quote
+    No it does not because it is not a persistent system service. It
+    can be put in the background itself with =&= but it ends when the
+    terminal session ends or when the process is killed.
+    #+end_quote
+
+
+** Practice: Python web server
 
 Download and complete: [[https://tinyurl.com/3-networks-practice-org][tinyurl.com/3-networks-practice-org]]
 
@@ -518,3 +598,151 @@ Upload your solution to Canvas before we discuss it.
 4. Find out what happens if you change the port number
 5. Change the directory information served by the server.
 6. Shut down the web server(s).
+
+
+** Test 2 coming up (stuff from the last week)
+
+- Remember that Test 1 will only be open until tonight!
+
+
+** Home assignment: Build a Cisco network
+
+*How?* You need to install Cisco Packet Tracer on your PC unless you
+want to have to come to the lab in Lyon 104. Ask for help if needed.
+
+*Why?* This is a review of the short packet tracer demo from week 1, and
+a preparation for looking at Cisco network switches, MAC address
+tables, and the ARP protocol used to map IP addresses to a MAC
+address.
+
+*What?* Build the following network in Cisco Packet Tracer, test it and
+upload the =.pkt= file to Canvas (Deadline: Monday 10 February, 11 am).
+
+Demo: How to switch off automatic labeling and create notes.
+
+#+attr_html: :width 400px: 
+[[../img/pt_network.png]]
+
+*Requires:*
+1) Creating network hosts
+2) Setting static IP addresses, subnet masks, MAC addresses
+3) Testing the network with your own "hello world" HTML file
+5) Saving the network configuration and upload to Canvas
+
+
+** DataCamp review: Cloud Providers and Case Studies
+
+1. Which cloud provider has the largest market share as of the lesson?
+   Do you still remember what this means in terms of revenue?
+
+   #+BEGIN_QUOTE
+   Amazon Web Services (AWS) holds the largest market share at 31%,
+   followed by Microsoft Azure at 24% and Google Cloud at 11%.
+
+   AWS revenue is $90 bn while Amazon's total revenue is $574 bn (15%)
+   #+END_QUOTE
+
+2. What is a key advantage of Microsoft Azure in the cloud market?
+
+   #+BEGIN_QUOTE
+   Azure benefits from strong integration with Microsoft products
+   (customer "lock-in"), making it a top-of-mind choice for
+   enterprises already using Microsoft services (such as: MS Windows,
+   MS Office, MS SQL server).
+   #+END_QUOTE
+
+3. What cloud service does Amazon SageMaker provide? How long would it
+   take to learn how to use it (for someone new to ML)?
+
+   #+BEGIN_QUOTE
+   Amazon SageMaker is a cloud machine learning platform that helps
+   "organizations streamline machine learning processes".
+
+   ChatGPT breaks the training down and estimates 4-8 weeks for
+   someone who is new to Machine Learning. Sounds like a summer job!
+
+   If you have 4-8 weeks, better work through an ML book (with code).
+   #+END_QUOTE
+
+4. Which Google Cloud service is specifically designed for data
+   warehousing? How long would it take to learn?
+
+   #+BEGIN_QUOTE
+   BigQuery is Google Cloud's data warehousing service, designed for
+   large-scale data analytics - uses SQL.
+
+   ChatGPT estimates that a total beginner (no SQL, data warehousing
+   or Google Cloud knowledge) needs 4-6 weeks to learn to use it.
+   #+END_QUOTE
+
+5. In the AWS case study, what improvement did NerdWallet experience
+   after adopting Amazon SageMaker? What questions would you have?
+
+   #+BEGIN_QUOTE
+   NerdWallet used Amazon SageMaker to significantly reduce *training
+   times* to days and cut *costs* by 75%, "modernizing their data science
+   practices".
+
+   Important questions: What company is this? What's their business?
+   How long did it take them? How long was the case study?
+   #+END_QUOTE
+
+6. What could be the case against cloud computing?
+
+   #+begin_quote
+   Chapters of the "CIO" article of the same title (2009):
+   - Migrating apps (cost, knowledge, skills)
+   - Managing risk (loss of data, loss of control)
+   - Meeting SLAs (Service Level Agreements)
+   - TCO (Total Cost of Ownership)
+   #+end_quote
+
+* Week 5: Subnets, domains, switches
+#+attr_html: :width 400px: 
+[[../img/monks.png]]
+
+- [ ] *Lab*: Anatomy of a switch and the IOS-XE shell
+
+- [ ] *Lecture*: Subnets, domains, routing
+- [ ] *Practice:* Revisit C programming ("FizzBuzz", loops, ifelse)
+- [ ] *Assignment*: Convert MAC addresses into binary
+- [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays)
+- [ ] *Test*: Subnets, domains, switches
+
+** DONE Project proposal submissions
+
+- Everybody submitted on time (never happened before)
+- You should add your project to the Canvas pages
+- You should put your submission into GDrive
+- You should submit the URL to Canvas (1 per team)
+
+** TODO Review
+
+1. Do all networked devices need MAC addresses?
+   #+begin_quote
+   No. MAC addresses are used to identify multiple devices on a single
+   (switched) network, usually connected via Ethernet. When devices
+   are directly connected (e.g. via serial cable) there is no need for
+   a MAC address.
+   #+end_quote
+
+
+
+* Week 6: Address resolution
+
+- [ ] *Lecture*: Broadcasting across a Cisco network
+- [ ] *Lab:* Exploring the Address Resolution Protocol (ARP)
+
+** TODO Review
+
+1. How can you see the ARP table and where is it located?
+   #+begin_quote
+   To see the ARP table for a specific device, enter =arp -a= on the
+   Windows shell (need admin rights), or on the PowerShell, or on
+   Linux use =ip neigh show=.
+
+   ARP tables are local to each machine. When a device needs to
+   communicate, it resolves MAC addresses via ARP request and stores
+   the result in its own ARP table.
+   #+end_quote
+
