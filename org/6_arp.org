@@ -1,0 +1,139 @@
+#+Title: Address Resolution Protocol
+#+startup: overview hideblocks indent entitiespretty: 
+#+options: toc:nil num:nil ^:nil: 
+* README
+
+- The entry point for this exercise is a home assignment where you
+  built your own network with three hosts using Cisco Packet Tracer -
+  2 laptops and 1 server connected by one switch device.
+
+- In this exercise, you will explore the switch. In the following
+  exercise, we will look at the Address Resolution Protocol (ARP).
+
+- Objectives:
+  1) 
+
+** 13 Why is ARP used in networks?
+
+- Do all networks use MAC addresses? 
+  #+begin_quote
+  | Feature      | MAC Address (Ethernet/WiFi) | Serial/Point-to-Point Cable |
+  |--------------+-----------------------------+-----------------------------|
+  | *OSI Layer*    | Layer 2 (Data Link)         | Layer 1 (Physical)          |
+  | *Addressing*   | MAC address                 | Direct connection           |
+  | *Topology*     | Shared/Switched (LAN)       | Direct (one-to-one)         |
+  | *Medium*       | Ethernet, Wi-Fi             | Serial, USB, Fiber, RS-232  |
+  | *Transmission* | Broadcast                   | Unicast only                |
+  | *Use Case*     | Networked communication     | Direct device-to-device/WAN |
+  #+end_quote
+
+- Ethernet is the de facto standard for all Internet connection. What
+  does that mean for connections?
+  #+begin_quote
+  | *Network Type*                  | *Data Link Layer Protocol* | *Frame Type*       |
+  |-------------------------------+--------------------------+------------------|
+  | *Ethernet (Wired LAN)*          | Ethernet (IEEE 802.3)    | Ethernet Frames  |
+  | *Wi-Fi (Wireless LAN)*          | Wi-Fi (IEEE 802.11)      | Wi-Fi Frames     |
+  | *Fiber (GPON, EPON)*            | Ethernet/PON-specific    | GPON/EPON Frames |
+  | *Cellular (4G/5G LTE)*          | PPP, GTP, MAC (varies)   | LTE MAC Frames   |
+  | *WAN (Leased Lines, DSL, etc.)* | PPP, HDLC, Frame Relay   | PPP/HDLC Frames  |
+  #+end_quote
+
+- How are MAC addresses discovered?
+  #+begin_quote
+  The Address Resolution Protocol (ARP) is used to discover MAC
+  addresses belonging to a destination IP address.
+  #+end_quote
+ 
+- Try it on the console of any of your hosts.
+  #+attr_html: :width 500px: 
+  [[./img/arp1.png]]
+
+- On Linux, use another command:
+  #+begin_src bash :results output :exports both
+  ip neigh show
+  #+end_src
+
+- Output on my computer at home:
+  #+begin_example
+  : 192.168.68.53 dev wlo1 lladdr 78:80:38:cc:71:98 STALE
+  : 192.168.68.1 dev wlo1  FAILED
+  : 192.168.1.254 dev enp4s0 lladdr 6c:4b:b4:6d:65:21 REACHABLE
+  : 2600:1702:4ba0:4b0::1 dev enp4s0 lladdr 6c:4b:b4:6d:65:21 router STALE
+  : fe80::6e4b:b4ff:fe6d:6521 dev enp4s0 lladdr 6c:4b:b4:6d:65:21 router REACHABLE
+  #+end_example
+
+- ARP tables contain hardware-specific, sensitive information. On many
+  systems, they are aggressively cleaned. You can delete your table:
+  #+begin_example 
+    arp -d
+  #+end_example
+
+- If you now look for =arp -a=, you are told: =No ARP Entries found=. I
+  you =ping= another host again, the ARP table will be repopulated. Test
+  that!
+
+- We're going to make this visible using =Simulation= mode in packet
+  tracer:
+
+  1) Open =Simulation= mode.
+
+  2) Open =Show All/None= and set it to: =None=.
+
+  3) Open =Edit Filters=.
+
+  4) Activate only =IPv4 > ARP= and =Misc > HTTP=.
+
+  5) The =Simulation= sidebar should now show =ARP, HTTP= as visible.
+
+  6) Open =Laptop1= and make sure on the =Command Prompt= that =No ARP
+     Entries Found=.
+
+  7) Using the Web Browser, browse to =192.168.1.3= and click =Go=.
+
+  8) A packet appears (green envelope). Hover over it: =Type ARP=.
+
+  9) Open it and you'll see all of ARP's information in the OSI Layer
+     2 (Data Link). In the Output PDU ("Protocol Data Unit") Details,
+     you can see =Source= and =Target= information for MAC/IP, and you can
+     see that the =Target= MAC address has not been identified yet!
+
+     To find the MAC address that belongs to =192.168.1.3=, the laptop
+     has to send an ARP request to all networks members.
+
+  10) Press the =Forward= button in the =Simulation= window: 
+      - The packet moves to the switch.
+      - Press again, and two packets are sent to the other hosts.
+        #+attr_html: :width 600px: 
+        #+caption: An ARP request has reached network hosts
+        [[./img/arp2.png]]
+      - =Laptop2= drops the packet (blinks red) because the =Inbound=
+        target information asks for =192.168.1.3= (server).
+
+  11) Open the packet at the server: Here, the server is replying back
+      to =Laptop1=, and the =Outbound= information includes its MAC
+      address as =Source MAC=, with the =Laptop1='s MAC/IP details as
+      destination.
+
+  12) You can hit the =Backward= button on the =Play Controls= to see this
+      step replayed.
+
+  13) Move =Forward= twice, to send the ARP request from the server to
+      the =Laptop1=.
+
+  14) Open the =OSI Model= tab for the quick information that both MAC
+      and IP addresses of =Laptop1= and =Server0= are now known.
+
+  15) Check the ARP table entry with the =Command Prompt= and =arp -a=.
+
+  16) Once that's done, pressing =Go= in the =Web Browser= will initiate
+      and complete an HTTP request from =Laptop1= to =Server0=.
+      #+attr_html: :width 600px: 
+      [[./img/http.png]]
+
+  17) If you open the purple-colored packet, you see how multiple
+      layers were traverse in order to display the web page.
+      #+attr_html: :width 400px: 
+      [[./img/http1.png]]
+
+
