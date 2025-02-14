@@ -697,18 +697,19 @@ Demo: How to switch off automatic labeling and create notes.
    - TCO (Total Cost of Ownership)
    #+end_quote
 
-* Week 5: Subnets, domains, switches
+* Week 5: Switches, address resolution, subnets and domains
 #+attr_html: :width 400px: 
 [[../img/monks.png]]
 
-- [ ] *Lab*: Anatomy of a switch and the IOS-XE shell
+- [X] *Lab*: Anatomy of a switch and the IOS-XE shell
+- [ ] *Lab*: Address Resolution with ARP (simulation)
 
 - [ ] *Lecture*: Subnets, domains, routing
 - [ ] *Practice:* Revisit C programming ("FizzBuzz", loops, ifelse)
 - [ ] *Assignment*: Convert MAC addresses into binary
 - [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays)
 - [ ] *Test*: Subnets, domains, switches
-
+  
 ** DONE Project proposal submissions
 
 - Everybody submitted on time (never happened before)
@@ -716,7 +717,70 @@ Demo: How to switch off automatic labeling and create notes.
 - You should put your submission into GDrive
 - You should submit the URL to Canvas (1 per team)
 
-** TODO Review
+** DONE Review: The ol' switcheroo
+
+1. What do you know about the network switch?
+   #+begin_quote
+   - It connects network hosts "intelligently" (not a hub)
+   - It runs a stripped down version of Linux with a CLI.
+   - The CLI has three access levels: user, privilege, configure.
+   - The CLI has auto-completion (Type =sh=)
+   #+end_quote
+
+2. How can you see which commands the CLI has?
+   #+begin_quote
+   Type =?= at any level of access.
+   #+end_quote
+
+3. What's the name of the switch?
+   #+begin_quote
+   You can give it any name you like with the =hostname= command.
+   #+end_quote
+
+4. Why does it take so long for the switch to start?
+   #+begin_quote
+   It has to boot the Linux OS! (IOS XE)
+   #+end_quote
+
+5. How can you change the name of the switch?
+   #+begin_quote
+   On the CLI. You have to =enable= privileged user level, then enter
+   =config terminal= mode, then you can set =hostname= to anything you
+   like.
+   #+end_quote
+
+6. What does the switch know when it first wakes up?
+   #+begin_quote
+   The switch only knows its name and which =interface= it is connected
+   to. You can see that with =show ip interface brief=.
+   #+end_quote
+
+7. Does the switch know anything about other physical devices?
+   #+begin_quote
+   No. You can see that with =show mac address-table=. 
+   #+end_quote
+
+8. Does the switch know anything about the network at all?
+   #+begin_quote
+   Yes! It knows the IP addresses of other hosts, which you can check
+   with =ping=.
+   #+end_quote
+
+9. How can the switch learn more about the network? How do we know?
+   #+begin_quote
+   When you =ping= hosts from other hosts, or when you open applications
+   that require a network connection (e.g. HTTP request), the MAC
+   address table is populated.
+   #+end_quote
+
+10. Does the switch have an IP address?
+    #+begin_quote
+    No - a layer 2 (host-to-host) switch does not need one. A Layer 3
+    (network) switch is a router and needs an IP address (more later).
+    #+end_quote
+
+
+** TODO Review: Playing the ARP
 
 1. Do all networked devices need MAC addresses?
    #+begin_quote
@@ -726,23 +790,118 @@ Demo: How to switch off automatic labeling and create notes.
    a MAC address.
    #+end_quote
 
+2. What does ARP stand for and what does it do?
+   #+begin_quote
+   The Address Resolution Protocol is a network protocol used to map
+   an IP address to a corresponding MAC address in a local network. 
+   #+end_quote
 
+3. At which level of the network model does ARP operate?
+   #+begin_quote
+   ARP operates at the data link layer (layer 2) of the OSI model but
+   interacts with the network layer (layer 3).
+   #+end_quote
 
-* Week 6: Address resolution
+4. How exactly does ARP operate?
+   #+begin_quote
+   When a device wants to send data to another device on the same
+   network:
+   1) it checks its ARP table (storing IP-to-MAC mappings)
+   2) if it doesn't find the destination IP address, it broadcasts an
+      ARP request on the network
+   3) The device with the matching IP address responds with an ARP
+      reply and provides its MAC address
+   4) The sender updates its ARP table and sends the data.
 
-- [ ] *Lecture*: Broadcasting across a Cisco network
-- [ ] *Lab:* Exploring the Address Resolution Protocol (ARP)
+   An ARP request is a raw Ethernet frame with an ARP packet inside,
+   realized as a raw (direct access) socket whose header must be
+   constructed manually.
+   #+end_quote
 
-** TODO Review
+5. What could go wrong with this in terms of security?
+   #+begin_quote
+   ARP does not have built-in authenticication - attackers can send
+   fake ARP replies to associate their MAC address with another
+   device's IP: this is the so-called "Man-in-the-Middle" attack.
+   #+end_quote
 
-1. How can you see the ARP table and where is it located?
+6. What exactly then is a "network protocol"?
+   #+begin_quote
+   A network protocol is a set of rules and conventions that define
+   how data is formatted, addressed, transmitted, how errors are
+   detected and handled, and how devices establish and terminate
+   communication.
+   #+end_quote
+
+7. How can you see the ARP table?
    #+begin_quote
    To see the ARP table for a specific device, enter =arp -a= on the
    Windows shell (need admin rights), or on the PowerShell, or on
    Linux use =ip neigh show=.
+   #+end_quote
 
+8. Where is the ARP table located?
+   #+begin_quote
    ARP tables are local to each machine. When a device needs to
    communicate, it resolves MAC addresses via ARP request and stores
    the result in its own ARP table.
    #+end_quote
 
+9. How can I see the ARP table on a Linux shell?
+   #+begin_src bash :results output :exports both
+   ip neigh show
+   #+end_src
+
+   #+RESULTS:
+   : 192.168.1.254 dev enp4s0 lladdr 6c:4b:b4:6d:65:21 REACHABLE
+   : 192.168.68.51 dev wlo1 lladdr ae:4b:fd:96:36:90 REACHABLE
+   : 192.168.68.53 dev wlo1 lladdr 78:80:38:cc:71:98 REACHABLE
+   : 192.168.68.1 dev wlo1 lladdr 60:83:e7:71:cb:50 STALE
+   : 2600:1702:4ba0:4b0::1 dev enp4s0 lladdr 6c:4b:b4:6d:65:21 router STALE
+   : fe80::6e4b:b4ff:fe6d:6521 dev enp4s0 lladdr 6c:4b:b4:6d:65:21 router REACHABLE
+
+10. Can you write a program to see the ARP table?
+       #+begin_src C :results output
+     #include <stdio.h>
+     #include <stdlib.h>
+
+     #define ARP_TABLE "/proc/net/arp" // standard Linux location
+
+     int main() {
+       FILE *file = fopen(ARP_TABLE, "r");
+       if (!file) {
+         perror("Failed to open ARP table");
+         return 1;
+       }
+
+       char line[256];
+
+       // Read and print the ARP table header
+       if (fgets(line, sizeof(line), file)) {
+         printf("ARP Table:\n%s", line);
+       }
+
+       // Read and print each ARP entry
+       while (fgets(line, sizeof(line), file)) {
+         printf("%s", line);
+       }
+
+       fclose(file);
+       return 0;
+     }
+   #+end_src
+
+   On my machine at home:
+   #+begin_example
+   : ARP Table:
+   : IP address       HW type     Flags       HW address            Mask     Device
+   : 192.168.1.254    0x1         0x2         6c:4b:b4:6d:65:21     *        enp4s0
+   : 192.168.68.51    0x1         0x2         ae:4b:fd:96:36:90     *        wlo1
+   : 192.168.68.53    0x1         0x2         78:80:38:cc:71:98     *        wlo1
+   : 192.168.68.1     0x1         0x2         60:83:e7:71:cb:50     *        wlo1
+   #+end_example
+
+* Week 6: Address resolution
+
+- [ ] *Lecture*: Broadcasting across a Cisco network
+  

@@ -11,12 +11,20 @@
   exercise, we will look at the Address Resolution Protocol (ARP).
 
 - Objectives:
-  1) 
+  1) Download a Cisco packet tracer network file.
+  2) Interact with the switch on its own command-line.
+  3) Change the =hostname= of the switch.
+  4) Understand how the switch learns MAC addresses.
+  5) Show and change the =interface= used by the switch.
 
-* How does a Switch learn MAC addresses? What's a MAC address table
+* Download a Cisco packet tracer network file
 
 - Use the 2-laptop-1-server-1-switch network (.pkt) file:
   https://tinyurl.com/2-laptops-1-server-pkt
+
+- Download the file to your PC and open it in Cisco Packet Tracer.
+
+* Interact with the switch on its own command-line
 
 - Open switch > CLI
 
@@ -65,15 +73,6 @@
 - The physical switch device has a lot more commands available, this
   is only a small subset of the available CLI commands.
 
-- For example, 
-  #+begin_example
-  Switch> traceroute -m 
-  #+end_example
-
-- To do this on a Windows machine when connected to a switch, you
-  could use the program Putty. You then have to identify the serial
-  COM port and you can log into the switch CLI.
-
 - The IOS-XE shell has different modes. The =enable= command goes
   straight from user to privilege (root) mode:
   #+begin_example
@@ -91,6 +90,8 @@
 
 - At each level, you have different sets of commands available.
 
+* Change the =hostname= of the switch  
+
 - Go to global configure mode and use the =hostname= command to change
   the name of the switch to =S1= so that the prompt in user mode looks
   like this: =S1>=. Five steps:
@@ -104,6 +105,8 @@
   S1>
   #+end_example
 
+* Understand how the switch learns MAC addresses
+
 - When the network is established, the switch has not learnt the MAC
   addresses of the hosts. Check the current MAC address table:
   #+begin_example
@@ -111,7 +114,7 @@
   #+end_example
   #+attr_html: :width 500px: 
   #+caption: Unitialized MAC address table on a switch
-  [[./img/mactable.png]]
+  [[../img/mactable.png]]
 
 - The reason for this is that no traffic has been sent through the
   switch yet. If you'd do this on a Windows PC, you'd see a bunch of
@@ -125,7 +128,7 @@
      hosts and their connecting ports on the switch:
   #+attr_html: :width 500px: 
   #+caption: MAC address table on a switch after a ping
-  [[./img/mactable1.png]]
+  [[../img/mactable1.png]]
      
 - Do the same thing by opening a web page on =Laptop2=:
   1) Open the =Web Browser= on the =Laptop2=.
@@ -133,20 +136,22 @@
   3) On the switch, =show mac address-table= to see all hosts:
   #+attr_html: :width 500px: 
   #+caption: MAC address table on a switch with three active hosts
-  [[./img/mactable2.png]]
+  [[../img/mactable2.png]]
      
+* Show and change the =interface= used by the switch
+
 - What if we unplug =Laptop1=? To pull the plug, delete the connection
   between =Laptop1= and the switch. Select the =Delete= tool from the tool
   bar and click on the connection:
   #+attr_html: :width 500px: 
   #+caption: Severed network - Laptop1 and switch not connected
-  [[./img/mactable3.png]]
+  [[../img/mactable3.png]]
   
 - Delesect =Delete= and activate the =Select= tool, then look at the =CLI=
   tab of the switch: The line is shown as down.
   #+attr_html: :width 600px: 
   #+caption: Switch has realized that a connection dropped
-  [[./img/mactable4.png]]
+  [[../img/mactable4.png]]
 
 - The switch is reset and the MAC address table is empty (it should
   have maintained its knowledge of the other two connections!)
@@ -158,7 +163,7 @@
 - Ping the other two hosts from =Laptop1= and =show mac address-table=:
   #+attr_html: :width 500px: 
   #+caption: Switch has learnt a new GigabitEthernet port connection
-  [[./img/mactable5.png]]
+  [[../img/mactable5.png]]
   
 - Finally, change the name of the switch back to =Switch= - you can
   either change the =hostname= configuration, or restart the switch.
