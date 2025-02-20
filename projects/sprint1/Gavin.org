@@ -1,0 +1,67 @@
+#+TITLE: Game sync Project
+#+AUTHOR: Gavin Malloy Pledged
+#+STARTUP:overview hideblocks indent
+#+OPTIONS: toc:nil num:nil ^:nil
+#+PROPERTY: header-args:R :session *R* :results output :exports both :noweb yes
+
+
+
+* Topic
+
+- I wanted to use the network to sync a game between to
+  pcs.
+
+
+* Proposal
+
+** Problem Description:
+
+- I want to create a simple multiplayer game and sync it
+  on both ends with fair accuracy.
+
+
+** Reason:
+
+- I want to create games in the future and this would be a
+  decent start.
+
+
+** Constraints:
+
+- I have to figure out how I could develop a simple
+  pingpong game.
+
+- I have to learn how to sync two games over a network.
+
+- Time could be an issue when ever I get a part time
+  job.
+
+- How can it be downloaded on multiple machines without going
+  through proper sources like google play, steam, ect.
+
+
+** Goals:
+
+- True Goals:
+
+  -- Successfully sync two games over a network.
+
+  -- Learn a little about game development.
+
+- NonGoals:
+
+  -- create an amazing game.
+
+
+** Metrics:
+
+- I could try to figure out packet loss and ping during live tests
+  to determine success.
+
+- I could base success off of lag on both ends without ping and packet loss (are players lagging
+  all over the place?)
+
+
+** References:
+
+- I used ChatGPT to get this idea.

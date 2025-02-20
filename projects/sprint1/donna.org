@@ -1,0 +1,278 @@
+#+TITLE: 1st Sprint Review - Advanced Data Science - DSC 205 01
+#+TITLE: 1st Sprint Review - Data Communications and Networks - CSC 2410 01
+#+SUBTITLE: Dr. Marcus Birkenkrahe
+#+AUTHOR: Donna Terrell (Pledged) 2/7/25
+#+STARTUP: overview hideblocks indent inlineimages
+#+PROPERTY: header-args:R :exports both :results output :session *R*
+
+Analyzing Crisis Communication of the 2025 California Fires via Twitter APIs
+
+By intergrating communication, networking, and data visualization techniques,
+this project aims to provide insights into the effectivness of social media
+information distribution during disasters. 
+
+The findings could help emergency management services refine their
+communication strategies and enhance public response effortsin future crises.
+
+* DONE Problem Description:
+
+Analyze the speed and distribution of vital information during
+emergencies, identifying key amplifiers and their role in 
+spreading critical updates.
+
+* DONE Reason:
+** 1. Identifying Twitter accounts that are fast and reliable.
+
+    a. Knowing where to turn for updates during a crisis is 
+       crucial for first responders, California residents,
+       and the family members of those in danger.
+
+** 2. Quick and accurate information saves lives,
+
+    By helping emergency teams and residents
+    understand where the danger is and how to
+    respond effectively.
+
+    a. The Califorina wildfire were intensified
+       by 80mph winds, which rapidly spread 
+       embers all across the state.
+
+    b. The extreme conditions made it 
+       challenging to coordinate evacuations
+       and stretched first responders thin.
+    
+** 3. Understanding who controls the flow of infromation is crucial.  
+    
+    a. The entities that shape public perception during 
+       emergencies may have underlying motives, influencing the
+       response to the crisis and the safety of those affected.
+
+    b. Those in control of information can spread false or 
+       misleading narratives, leading to confusion, panic, or
+       delayed emergency responses.
+    
+    c. Information may be selectively presented to align with
+       political, economic, or ideological interests rather than
+       prioritizing public safety.
+
+    d. When people recognize that information is being
+       manipulated, they may lose trust in even credible sources,
+       increasing the risk of ignoring life-saving guidance in
+       critical situations.
+ 
+* DONE Constraints:
+** 1. Knowledge and Technical Restraints
+*** a. Limited Experience with APIs
+      - No prior experience working with APIs, 
+        meaning I will need to learn how to authenticate,
+        request, and handle responses from Twitter's APIs.
+*** b. No Experience with Named Entity Recognition (NER)
+      - Extracting and analyzing entities
+        (Ex.locations, organizations, people) from 
+        tweets is unfamiliar territory,
+        meaning there wll be extra learning will be
+        for NER tools like spacy textTinyR (R).
+*** c. R is my most familiar language
+     - It would be preferable to use R  libraries like
+       rtweet(for Twitter API), tidytext (for text analysis),
+       igraph (for network analysis), and ggplot 
+       (for visualizations). 
+** 2. Personal Restraints
+*** a. Time Constraints
+      - I am a full-time student with a work-study job,
+      learning new skills takes extra time.
+*** b. Best Programming Language is R 
+      - Might face challenges if documentation and 
+        tutorials are more Python-focused.
+*** c. Large Scale data
+      - May take longer to process and visualize
+        large datasets efficiently.
+*** d. Limited Access
+      - Twitter Free API Limits (2025)
+
+        1.Tweet Retrieval: 1 request per 15-minute 
+                           window (recent tweets only).
+
+
+        2. Tweet Posting: Max 1,500 tweets per month
+                          (application level).
+ 
+        3. Historical Data: Limited to recent tweets 
+                            (typically past 7 days only).
+
+        4. Rate Limits: Strict limits on API calls;
+                        exceeding them results in a 
+                        429 "Too Many Requests" error.
+
+        5. Limited Endpoints: No access to certain endpoints 
+                             (e.x., detailed engagement metrics,
+                              user mentions).
+
+        6. Monthly Tweet Cap: Up to 500,000 tweets per month 
+                              from search and stream endpoints.
+
+        7. Authentication: Uses OAuth 2.0 Bearer Token 
+                           (limits apply at the application level).
+
+        8. No Access to Premium Features: Advanced filters, full archive search,
+                                          and additional analytics require a paid
+                                          tier.
+
+* DONE Goals:[0/4]
+
+ 1. [ ] Create a Network Graph:
+        a. Visualizes how tweets, retweets, and 
+           mentions connect users and spread
+           information.
+        b. Identifies key influencers driving the
+           spread of information.
+       
+ 2. [ ] Conduct Anaylsis and Visualizations:
+          
+        a. Heap Map
+           - Visualize fires
+           - Show where fire-related tweets originate
+             and how the discussion spreads 
+             geographically.
+
+        b. Histogram
+           - Show engagement levels vary across
+             different tweets. (Tweets and likes
+              
+        c. Time-Series
+           - Show how fast wildfire-related tweets 
+             increase over time.                    
+
+
+ 3. [ ] Scrape Twitter to collect tweets referencing
+	  the Califorina fires.
+
+ 4. [ ] Apply Named Entity Recongnition (NER) to 
+        extract key entities such as locations, 
+        emergency agencies, and crisis related
+        keywords.
+
+
+* TODO Metrics:
+** 1. Data Collection
+   a. Successfully collecting a majoirty of the available
+      fire-related tweets within Twitter’s Free API limits.
+
+   b. Keeping consistent API calls without exceeding rate limits.
+   
+   c. Obtaining a diverse dataset including tweets from official
+      sources, citizens, and emergency responders.
+
+   d. Capturing a heafty amount of tweets (depending on API constraints)
+** 2. Accuracy & Reliability of Findings
+   a. Successfully pinpointing at least the top 10 influential Twitter
+      accounts spreading critical fire-related information.
+   
+   b. Determining how fast fire-related tweets reach 1,000+ retweets
+      or key emergency hashtags.
+
+   c. Identifying at least 5 misinformation cases by comparing
+      tweets with official reports.
+
+** 3. Visualization 
+   a. Creating at least 3 key visualizations that clearly
+      show how information spread.
+
+   b. Mapping how tweets travel from their origin to key 
+      amplifiers and identifying clusters of information flow.
+
+   c. Successfully plotting tweet volume trends and
+      correlating them with events. (e.x. the start of another fire)
+** 4. Impact & Practical Usefulness
+   a. Being able to demonstrate how information spread patterns can 
+      help first responders identify trusted sources faster.
+
+   b. Highlighting key accounts people should follow during future 
+      California crises for reliable updates.
+
+   c. Sucesfully document findings that can improve disaster
+      communication strategies for wildfire response teams.
+* TODO References:
+
+- Jason. Pulling tweets into R. Towards Data Science.
+  Published [2024, Feb 4]; Accessed [today's date]. Available from:
+  https://medium.com/towards-data-science/pulling-tweets-into-r-e17d4981cfe2
+
+- Gimenez, O. (2021, July 28). Quick and dirty analysis of a Twitter
+  social network. [Blog post]. Retrieved from
+  https://oliviergimenez.github.io/blog/twitter-social-network/
+
+- Onrec. (2024, December 4). Available Twitter APIs for data analysis. 
+  Onrec.
+  https://www.onrec.com/news/news-archive/available-twitter-apis-for-data-analysis
+
+- Andronico, M. (2023, June 15). How to use Hoaxy to track the spread
+  of information on Twitter. MakeUseOf.
+  https://www.makeuseof.com/hoaxy-track-twitter-information-spread/
+
+- Google. (2025). Google search engine. https://www.google.com
+
+- OpenAI. (2025). ChatGPT (February 6 version) [Large language model].
+  Retrieved February 6, 2025, from https://openai.com
+
+* Questions I Had and Topics To Research:
+** What is Webscraping? 
+Data scraping is the process of using a program to extract data
+from a website and save it in a structured format.
+
+ - This is what a general DIY web scraping process looks like:
+
+   1. Identify the target website.
+
+   2. Collect URLs of the target pages.
+
+   3. Make a request to these URLs to get the HTML of the page.
+
+   4. Use locators to find the information in the HTML.
+
+   5. Save the data in a JSON or CSV file or some other structured format.
+
+https://www.zyte.com/learn/what-is-web-scraping/
+** What is Named Entity Recognition (NER)?
+NER is a task of natural language processing, which identifies and
+tags entities within a text. These entities can be people, dates,
+companies, or locations. 
+ - Rstats has several great packages for natural language
+   processing, including openNLP and spacyr.
+
+Source: https://medium.com/towards-data-science/quick-guide-to-entity-recognition-and-geocoding-with-r-c0a915932895
+
+
+Link to instruction manual of R pakcage 'nametagger'
+https://cran.r-project.org/web/packages/nametagger/nametagger.pdf
+
+
+** How To Get Twitter API?
+https://docs.x.com/x-api/introduction
+
+*** Access Levels
+- Free
+For write-only use cases and testing the X API
+Low rate-limit access to v2 posts and media upload endpoints
+1,500 Posts per month - posting limit at the app level
+1 Project, 1 App per Project, 1 Environment
+Login with X, Access to Ads API
+Cost: Free
+​
+- Basic
+For hobbyists or prototypes
+Low-rate limit access to suite of v2 endpoints
+3,000 Posts per month (user level), 50,000 Posts per month (app level)
+10,000/month Posts read-limit rate cap
+1 Project, 2 Apps per Project
+Login with X, Access to Ads API
+Cost: $100 per month
+
+** Third-Party Analytics Tools - Tracking Tweets Without API Access
+
+- Explanation of Twitter Analystics
+  https://www.klipfolio.com/resources/dashboard-examples/social-media/twitter-analytics#:~:text=A%20Twitter%20analytics%20dashboard%20displays,engagement%2C%20or%20drive%20performance%20outcomes.
+  
+- Tools for Twitter Analytics
+  https://followerwonk.com/
+
