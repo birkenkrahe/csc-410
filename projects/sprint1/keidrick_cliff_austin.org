@@ -1,0 +1,57 @@
+#+title: CSC 410.01 Sprint Review
+#+author: Keidrick Wooten, Clifford Washington, Austin Swaim (pledged)
+#+SUBTITLE: 1st Sprint Review (Proposal)
+#+STARTUP:overview hideblocks indent
+#+OPTIONS: toc:nil num:nil ^:nil
+#+PROPERTY: header-args:R :session *R* :results output :exports both :noweb yes
+  
+VPN setup and Performance Analysis
+
+* Sprint 1
+
+** Problem
+ What are you trying to do? Setup a VPN to secure internet traffic and
+ analyze its impact on network performace. Explore both the configuration
+ of a secure VPN and the evaluation of its performace. 
+
+** Reason
+ Why is this problem interesting to you or others? VPN's provide privacy
+ and security for internet users. Understanding the performance impact and
+ the VPN's configuration will help with making informed decisions with 
+ digital security without sacrificing performance. It's interesting because
+ we(group) don't know how to choose VPN's, without fully understanding
+ how if effects internet experience, positively or negatively.
+
+** Constraints
+ Which difficulties do you foresee? Limited experience with advanced networking
+ or VPN setup, additional research and learning. Limited access to VPN 
+ infrastructur and resources. Compatibility of VPN with different operating
+ systems. Limited experience with Cisco Packet Tracer implementation. 
+
+** Goals
+ What deliverable(s) are you going to develop? 1. Set up and configure a secure
+ VPN, Measure and compare the performance of different VPN configurations.
+ 2. Measure trade-offs between different VPN configurations, such as speed
+ vs. security.
+ Non-Goals: Not including VPN troubleshooting, Not include a full implementation 
+ guide for VPN protocol just focus on performance analysis and comparison,
+ Develop a commercial-grade VPN service outside the scope of this project.
+
+** Metrics
+ How are you going to measure if your project is successful or not? VPN
+ setup is successful, detailed comparison of VPN performance, The analysis
+ shows what to look for in certian VPN's and what use they have. 
+
+** References
+ Which sources have you used to develop the proposal?
+
+McGillicuddy, D. (2021). Virtual Private Networks: A Practical Guide to Setup and Security. Tech Press.
+
+Herrington, J., & Zhang, M. (2020). WireGuard: Performance and Security Analysis. Journal of Network Security, 32(4), 45-56.
+
+Davis, K. (2022). "How VPNs Affect Internet Speed," NetworkWorld. Retrieved from https://www.networkworld.com
+
+OpenVPN Documentation. (n.d.). OpenVPN: The Open-Source VPN. OpenVPN Technologies, Inc. Available at https://openvpn.net
+
+Speedtest by Ookla. (2023). Speedtest.net. Retrieved from https://www.speedtest.net
+
