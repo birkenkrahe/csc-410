@@ -697,27 +697,22 @@ Demo: How to switch off automatic labeling and create notes.
    - TCO (Total Cost of Ownership)
    #+end_quote
 
-* Week 5: Switches, address resolution, subnets and domains
+* Week 5: Switches, address resolution
 #+attr_html: :width 400px: 
 [[../img/monks.png]]
 
 - [X] *Lab*: Anatomy of a switch and the IOS-XE shell
-- [ ] *Lab*: Address Resolution with ARP (simulation)
-
-- [ ] *Lecture*: Subnets, domains, routing
-- [ ] *Practice:* Revisit C programming ("FizzBuzz", loops, ifelse)
-- [ ] *Assignment*: Convert MAC addresses into binary
-- [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays)
-- [ ] *Test*: Subnets, domains, switches
+- [X] *Lab*: Address Resolution with ARP (simulation)
+- [X] *Lecture*: Broadcasting across a Cisco network
   
-** DONE Project proposal submissions
+** Project proposal submissions
 
 - Everybody submitted on time (never happened before)
 - You should add your project to the Canvas pages
 - You should put your submission into GDrive
 - You should submit the URL to Canvas (1 per team)
 
-** DONE Review: The ol' switcheroo
+** Review: The ol' switcheroo
 
 1. What do you know about the network switch?
    #+begin_quote
@@ -779,8 +774,9 @@ Demo: How to switch off automatic labeling and create notes.
     (network) switch is a router and needs an IP address (more later).
     #+end_quote
 
-
-** TODO Review: Playing the ARP
+** Review: Playing the ARP
+#+attr_html: :width 400px:
+[[../img/harp.jpg]]
 
 1. Do all networked devices need MAC addresses?
    #+begin_quote
@@ -852,16 +848,18 @@ Demo: How to switch off automatic labeling and create notes.
    ip neigh show
    #+end_src
 
-   #+RESULTS:
+   On my machine at home:
+   #+begin_example
    : 192.168.1.254 dev enp4s0 lladdr 6c:4b:b4:6d:65:21 REACHABLE
    : 192.168.68.51 dev wlo1 lladdr ae:4b:fd:96:36:90 REACHABLE
    : 192.168.68.53 dev wlo1 lladdr 78:80:38:cc:71:98 REACHABLE
    : 192.168.68.1 dev wlo1 lladdr 60:83:e7:71:cb:50 STALE
    : 2600:1702:4ba0:4b0::1 dev enp4s0 lladdr 6c:4b:b4:6d:65:21 router STALE
    : fe80::6e4b:b4ff:fe6d:6521 dev enp4s0 lladdr 6c:4b:b4:6d:65:21 router REACHABLE
+   #+end_example
 
 10. Can you write a program to see the ARP table?
-       #+begin_src C :results output
+    #+begin_src C :results output
      #include <stdio.h>
      #include <stdlib.h>
 
@@ -891,6 +889,12 @@ Demo: How to switch off automatic labeling and create notes.
      }
    #+end_src
 
+   #+RESULTS:
+   : ARP Table:
+   : IP address       HW type     Flags       HW address            Mask     Device
+   : 10.1.4.1         0x1         0x2         d4:77:98:f0:d9:7f     *        wlp0s20f3
+   : 10.1.4.3         0x1         0x2         a4:10:b6:b1:42:9f     *        wlp0s20f3
+
    On my machine at home:
    #+begin_example
    : ARP Table:
@@ -901,7 +905,100 @@ Demo: How to switch off automatic labeling and create notes.
    : 192.168.68.1     0x1         0x2         60:83:e7:71:cb:50     *        wlo1
    #+end_example
 
-* Week 6: Address resolution
+* Week 6: Subnets and domains
 
-- [ ] *Lecture*: Broadcasting across a Cisco network
-  
+*Home assignments all due by Friday 21 February:*
+- [X] *Test*: Switches, Address resolution (40 questions - 60')
+- [X] *Assignment*: Exploaring ARP and MAC address learning (30')
+- [X] *Assignment*: Simulating ARP and HTTP events (30')
+
+*Projects:*
+- [X] Feedback on your proposals will be forthcoming this week.
+- [X] There is no reason not to keep working on the project!
+- [X] Next sprint review assignment is published ([[https://lyon.instructure.com/courses/3114/assignments/41958][Canvas]])
+
+*Planning:*
+- [X] *Lecture*: Subnets, domains, routing
+
+- [ ] *Tests & Assignments*: Removing only 1 point per late day now.
+
+- [ ] *Practice:* Revisit C programming ("FizzBuzz", loops, ifelse)
+- [ ] *Assignment*: Convert MAC addresses into binary
+- [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays)
+
+** TODO Review: Domains
+
+1. Explain the term "IPv4"!
+   #+begin_quote
+   IPv4 stands for "Internet Protocol version 4", a way to write
+   Internet addresses using 32 bits or 4 numbers of 8-bit length.
+   #+end_quote
+
+2. What is the smallest, and what is the largest IPv4 address?
+   #+begin_quote
+   Smallest: ~0.0.0.0~ to ~255.255.255.255~ (in decimals)
+   #+end_quote
+
+3. What is another name for the smallest IPv4 address?
+   #+begin_quote
+   The default gateway or default route.
+   #+end_quote
+
+4. What's special about the address ~127.0.0.1~?
+   #+begin_src bash :results output :exports both
+     ip address show | grep 127.0.0.1
+   #+end_src
+
+   #+RESULTS:
+   :     inet 127.0.0.1/8 scope host lo
+
+5. What does the ~/24~ after the IP address mean?
+   #+begin_quote
+   ~/24~ is the subnet mask in CIDR (Classless Inter-Domain Routing)
+   notation. It means that the first 24 bits of the IP address are
+   used for the network portion, leaving the remaining 8 bits for host
+   addresses.
+
+   Example ~192.168.1.0/24~:
+   - network portion: ~192.168.1.~
+   - hosts: ~0-255~
+   #+end_quote
+
+6. What is the long form of ~127.0.0.1/8~?
+   #+begin_quote
+   The first 8 bits (first section) is the network portion, and the
+   remaining 24 bits (3 sections) are for host addresses. The long
+   form (in decimal) is therefore: 127.0.0.1/255.0.0.0.
+   #+end_quote
+
+7. How many hosts can a =/18= subnet domain have?
+   #+begin_quote
+   1) Number of host bits: 32 - 18 = 14
+   2) Total host addresses: 2^14 = 16,384
+   3) Total usable hosts (excluding .0 and .1) = 16,382
+   #+end_quote
+
+8. How can you convert decimal 255 to binary using the command-line?
+   #+begin_src bash :results output :exports both
+     echo 'obase=2; ibase=10; 255' | bc
+   #+end_src
+
+   #+RESULTS:
+   : 11111111
+
+9. What's the first step to find a route from your PC to ~google.com~?
+   #+begin_quote
+   The URL ~google.com~ must undergo Network Address Translation (NAT)
+   before packets can be sent to the corresponding IP address.
+   #+end_quote
+
+10. How can you see the IP routing table on Linux?
+    #+begin_src bash :results output :exports both
+      ip route show
+    #+end_src
+    #+begin_src bash :results output :exports both
+      netstat -r
+    #+end_src
+
+* Week 7:
+
