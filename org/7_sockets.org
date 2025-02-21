@@ -1,0 +1,110 @@
+#+title: Introduction to Sockets
+#+author: Marcus Birkenkrahe
+#+SEQ_TODO: TODO NEXT IN_PROGRESS | DONE
+#+startup: overview hideblocks indent entitiespretty:
+#+property: header-args:C :main yes :includes <stdio.h> :results output :exports both:
+#+property: header-args:python :session *Python* :python python3 :results output :exports both:
+#+src R :file :session *R* :results graphics output file :exports both:
+#+property: header-args:C++ :main yes :includes <iostream> :results output :exports both:
+* Objectives                                                 :lecture:csc410:
+
+The following topics are covered:
+
+- [ ] The client-server paradigm
+- [ ] Network sockets
+- [ ] Listing your IP addresses programmatically from C
+
+
+- [ ] What are port numbers?
+- [ ] How to find port numbers on Linux?
+- [ ] What is the client-server model?
+- [ ] What's a socket?
+- [ ] What's your IP address?
+- [ ] How can you list network adapters using C?
+
+* Port numbers
+
+- How does a packet know, which application is responsible for it
+  once it arrives at a specific system?
+
+- To direct a packet to the right application, *port* numbers are
+  used. If IP addresses are phone numbers, then port numbers are like
+  phone extensions.
+
+- Applications on your system with specific ports: 
+  + multiple web browsers
+  + an email client
+  + a video-conferencing clientii
+
+- When a packet arrives, the OS looks at the destination port number,
+  and it is used to determine which application could handle it.
+
+- Port numbers are stored as unsigned 16-bit integers - what's their
+  range therefore?
+  #+begin_src R
+    2^16
+  #+end_src
+
+- Some port numbers for common protocols:
+  #+attr_html: :width 700px: 
+  [[../img/ports.png]]
+
+- The listed port numbers are assigned by the IANA (Internet Assigned
+  Numbers Authority). 
+
+* Linux example
+
+- To see some of these in Linux:
+  #+begin_src bash :results output :exports both
+  netstat -tulnp
+  #+end_src
+
+  On my machine at home:
+  #+begin_example
+  Active Internet connections (only servers)
+  Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+  tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      -                   
+  tcp        0      0 127.0.0.1:631           0.0.0.0:*               LISTEN      -                   
+  tcp6       0      0 :::60000                :::*                    LISTEN      -                   
+  tcp6       0      0 ::1:631                 :::*                    LISTEN      -                   
+  udp        0      0 127.0.0.53:53           0.0.0.0:*                           -                   
+  udp        0      0 127.0.0.1:323           0.0.0.0:*                           -                   
+  udp        0      0 224.0.0.251:5353        0.0.0.0:*                           251338/chrome --pro 
+  udp        0      0 224.0.0.251:5353        0.0.0.0:*                           251338/chrome --pro 
+  udp        0      0 224.0.0.251:5353        0.0.0.0:*                           251387/chrome --typ 
+  udp        0      0 224.0.0.251:5353        0.0.0.0:*                           251387/chrome --typ 
+  udp        0      0 0.0.0.0:5353            0.0.0.0:*                           -                   
+  udp        0      0 0.0.0.0:46510           0.0.0.0:*                           -                   
+  udp6       0      0 ::1:323                 :::*                                -                   
+  udp6       0      0 fe80::3411:8f1:989f:546 :::*                                -                   
+  udp6       0      0 :::5353                 :::*                                -                   
+  udp6       0      0 :::47923                :::*                                -                   
+  #+end_example
+
+- Web server example (do this on the shell): 
+  1) start a web server with ~python3~ on port ~8080~
+  2) ~grep~ for ~8080~ in the ~netstat -tulnp~ output
+  #+begin_example sh
+  python3 -m http.server 8080 &
+  netstat -tulnp | grep 8080
+  #+end_example
+     
+- Output:
+  #+begin_example
+  tcp  0  0 0.0.0.0:8080 0.0.0.0:* LISTEN  274074/python3      
+  #+end_example
+
+* Clients and servers
+
+* Sockets
+
+* What's your IP address
+
+* Interlude: C review
+
+- FizzBuzz (loops, if else)
+- FizzBuzz reloaded (functions, pointers, arrays)
+- Lookup tables: Convert MAC addresses into binary
+
+* Listing network adapters from C
+
