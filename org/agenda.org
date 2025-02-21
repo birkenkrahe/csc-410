@@ -918,13 +918,10 @@ Demo: How to switch off automatic labeling and create notes.
 - [X] Next sprint review assignment is published ([[https://lyon.instructure.com/courses/3114/assignments/41958][Canvas]])
 
 *Planning:*
+
 - [X] *Lecture*: Subnets, domains, routing
-
 - [ ] *Tests & Assignments*: Removing only 1 point per late day now.
-
-- [ ] *Practice:* Revisit C programming ("FizzBuzz", loops, ifelse)
-- [ ] *Assignment*: Convert MAC addresses into binary
-- [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays)
+- [ ] Ports, client-server, sockets
 
 ** TODO Review: Domains
 
@@ -986,19 +983,61 @@ Demo: How to switch off automatic labeling and create notes.
    #+RESULTS:
    : 11111111
 
-9. What's the first step to find a route from your PC to ~google.com~?
+9. What is the routing table and how can you see it on Linux?
    #+begin_quote
-   The URL ~google.com~ must undergo Network Address Translation (NAT)
-   before packets can be sent to the corresponding IP address.
+   A routing table is a table stored in a router (or host) that
+   contains rules for directing network traffic. It lists:
+   - destination networks
+   - next-hop gateway
+   - interface to forward packets through
+   #+end_quote
+   #+begin_src bash :results output :exports both
+     ip route show 
+   #+end_src
+   #+begin_src bash :results output :exports both
+     netstat -r
+   #+end_src
+   Example:
+   #+begin_example
+   $ ip route show
+   default via 192.168.1.1 dev eth0 proto dhcp metric 100
+   192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.100
+   10.0.0.0/8 via 192.168.1.254 dev eth0
+   #+end_example
+   #+begin_quote
+   *Default route: ~default via 192.168.1.1 dev eth0 proto dhcp metric 100~
+   1) default route is via ~192.168.1.1~ (router IP on the LAN)
+   2) Uses Ethernet (~eth0~) interface
+   3) Route was assigned via ~dhcp~ (Dynamic Host Configuration
+      Protocol)
+   4) =metric= indicates the cost or priority of a route (low=preferred)
+
+   *Local network route:* 
+   ~192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.100~
+   1) Directly connected network (private address range).
+   2) Traffic for the subnet goes through =eth0= (Ethernet cable)
+   3) =proto kernel=: OS kernel adds address when interface is up
+   4) =scope link=: a directly reachable network
+   5) =src 192.168.1.100=: the local machine's assigned network IP
+
+   *Static route to another network:*
+   ~10.0.0.0/8 via 192.168.1.254 dev eth0~
+   1) ~10.0.0.0/8~ is the destination network (any host ~10.x.x.x~)
+   2) Traffic for the destination goes through ~192.168.1.254~
+   3) Packets are sent via ~eth0~
    #+end_quote
 
-10. How can you see the IP routing table on Linux?
-    #+begin_src bash :results output :exports both
-      ip route show
-    #+end_src
-    #+begin_src bash :results output :exports both
-      netstat -r
-    #+end_src
+10. What's the first step to find a route from your PC to ~google.com~?
+    #+begin_quote
+    The URL ~google.com~ must undergo Network Address Translation (NAT)
+    before packets can be sent to the corresponding IP address. This
+    includes finding public IP addresses and computing checksums.
+    #+end_quote
 
-* Week 7:
+
+* Week 7: C review and listing network adapters from C
+
+- [ ] *Practice:* Revisit C programming ("FizzBuzz", loops, ifelse)
+- [ ] *Assignment*: Convert MAC addresses into binary
+- [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays)
 
