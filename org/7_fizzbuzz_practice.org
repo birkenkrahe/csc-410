@@ -1,0 +1,31 @@
+#+title: Practice: FizzBuzz
+#+author: Marcus Birkenkrahe
+#+subtitle: CSC 410
+#+SEQ_TODO: TODO IN_PROGRESS | DONE
+#+startup: overview hideblocks indent
+#+property: header-args:C :main yes :includes <stdio.h> <stdlib.h> :results output :exports both:
+* In-class: FizzBuzz
+
+Write a C program that prints numbers from 1 to 100 with the following
+conditions:
+- If a number is divisible by 3, print *"Fizz"* instead of the number.
+- If a number is divisible by 5, print *"Buzz"* instead of the number.
+- If a number is divisible by both 3 and 5, print *"FizzBuzz"* instead
+  of the number.
+- Otherwise, print the number itself.
+
+Each output should be printed on a new line.
+
+*Tip:* Use a =for= loop, =if= .. =elseif= .. =else=, and the =%= operator to do this.
+
+*Solution:*
+#+begin_src C :main no :includes
+  /**********************************************************************/
+  /* fizzbuzz.c: print integers from 1 to 100 depending on divisibility */
+  /* Input: None                                                        */
+  /* Output: print "Fizz"/"Buzz"/"FizzBuzz" if number is divisible by   */
+  /* 3 / 5 / 3 and 5, or otherwise the number itself.                   */
+  /* Author: __________________ License: GNU GPLv3 Date: 02/09/2025     */
+  /**********************************************************************/
+  
+#+end_src
