@@ -921,7 +921,7 @@ Demo: How to switch off automatic labeling and create notes.
 
 - [X] *Lecture*: Subnets, domains, routing
 - [ ] *Tests & Assignments*: Removing only 1 point per late day now.
-- [ ] Ports, client-server, sockets
+- [ ] *Lecture:* Ports, client-server, sockets
 
 ** TODO Review: Domains
 
@@ -945,9 +945,6 @@ Demo: How to switch off automatic labeling and create notes.
    #+begin_src bash :results output :exports both
      ip address show | grep 127.0.0.1
    #+end_src
-
-   #+RESULTS:
-   :     inet 127.0.0.1/8 scope host lo
 
 5. What does the ~/24~ after the IP address mean?
    #+begin_quote
@@ -979,9 +976,6 @@ Demo: How to switch off automatic labeling and create notes.
    #+begin_src bash :results output :exports both
      echo 'obase=2; ibase=10; 255' | bc
    #+end_src
-
-   #+RESULTS:
-   : 11111111
 
 9. What is the routing table and how can you see it on Linux?
    #+begin_quote
@@ -1034,10 +1028,13 @@ Demo: How to switch off automatic labeling and create notes.
     includes finding public IP addresses and computing checksums.
     #+end_quote
 
-
 * Week 7: C review and listing network adapters from C
 
 - [ ] *Practice:* Revisit C programming ("FizzBuzz", loops, ifelse)
 - [ ] *Assignment*: Convert MAC addresses into binary
 - [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays)
+
+** FizzBuzz
+
+Download and complete: [[https://tinyurl.com/fizzbuzz-practice][tinyurl.com/fizzbuzz-practice]]
 
