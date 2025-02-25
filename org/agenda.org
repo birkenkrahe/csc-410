@@ -923,7 +923,7 @@ Demo: How to switch off automatic labeling and create notes.
 - [ ] *Tests & Assignments*: Removing only 1 point per late day now.
 - [ ] *Lecture:* Ports, client-server, sockets
 
-** TODO Review: Domains
+** DONE Review: Domains
 
 1. Explain the term "IPv4"!
    #+begin_quote
@@ -942,9 +942,16 @@ Demo: How to switch off automatic labeling and create notes.
    #+end_quote
 
 4. What's special about the address ~127.0.0.1~?
+   #+begin_quote
+   It's the inet address for your own computer, also called localhost
+   or loopback address.
+   #+end_quote
    #+begin_src bash :results output :exports both
      ip address show | grep 127.0.0.1
    #+end_src
+
+   #+RESULTS:
+   :     inet 127.0.0.1/8 scope host lo
 
 5. What does the ~/24~ after the IP address mean?
    #+begin_quote
@@ -974,23 +981,40 @@ Demo: How to switch off automatic labeling and create notes.
 
 8. How can you convert decimal 255 to binary using the command-line?
    #+begin_src bash :results output :exports both
-     echo 'obase=2; ibase=10; 255' | bc
+     echo 'obase=2; ibase=10; 255' | bc  # using the bash calculator
    #+end_src
+
+   #+RESULTS:
+   : 11111111
 
 9. What is the routing table and how can you see it on Linux?
    #+begin_quote
    A routing table is a table stored in a router (or host) that
    contains rules for directing network traffic. It lists:
-   - destination networks
-   - next-hop gateway
-   - interface to forward packets through
+   - destination networks (network layer)
+   - next-hop gateway  (host-to-host layer)
+   - interface to forward packets through (physical layer)
    #+end_quote
    #+begin_src bash :results output :exports both
      ip route show 
    #+end_src
+
+   #+RESULTS:
+   : default via 10.1.4.1 dev wlp0s20f3 proto dhcp metric 600 
+   : 10.1.4.0/22 dev wlp0s20f3 proto kernel scope link src 10.1.4.252 metric 600 
+   : 169.254.0.0/16 dev wlp0s20f3 scope link metric 1000 
+
    #+begin_src bash :results output :exports both
-     netstat -r
+     netstat -r # this command is `deprecated`
    #+end_src
+
+   #+RESULTS:
+   : Kernel IP routing table
+   : Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
+   : default         _gateway        0.0.0.0         UG        0 0          0 wlp0s20f3
+   : 10.1.4.0        0.0.0.0         255.255.252.0   U         0 0          0 wlp0s20f3
+   : link-local      0.0.0.0         255.255.0.0     U         0 0          0 wlp0s20f3
+
    Example:
    #+begin_example
    $ ip route show
@@ -999,7 +1023,7 @@ Demo: How to switch off automatic labeling and create notes.
    10.0.0.0/8 via 192.168.1.254 dev eth0
    #+end_example
    #+begin_quote
-   *Default route: ~default via 192.168.1.1 dev eth0 proto dhcp metric 100~
+   *Default route:* ~default via 192.168.1.1 dev eth0 proto dhcp metric 100~
    1) default route is via ~192.168.1.1~ (router IP on the LAN)
    2) Uses Ethernet (~eth0~) interface
    3) Route was assigned via ~dhcp~ (Dynamic Host Configuration
@@ -1031,10 +1055,10 @@ Demo: How to switch off automatic labeling and create notes.
 * Week 7: C review and listing network adapters from C
 
 - [ ] *Practice:* Revisit C programming ("FizzBuzz", loops, ifelse)
-- [ ] *Assignment*: Convert MAC addresses into binary
-- [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays)
+- [ ] *Lecture*: Networking sockets with C
+- [ ] *Assignment*: Convert MAC addresses into binary - 28-Feb
+- [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays) - 3-Mar 
 
 ** FizzBuzz
 
-Download and complete: [[https://tinyurl.com/fizzbuzz-practice][tinyurl.com/fizzbuzz-practice]]
-
+- Download and complete: [[https://tinyurl.com/fizzbuzz-practice][tinyurl.com/fizzbuzz-practice]]
