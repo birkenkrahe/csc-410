@@ -9,6 +9,7 @@
 * Objectives                                                 :lecture:csc410:
 
 The following topics are covered:
+
 - [ ] What are port numbers?
 - [ ] How to find port numbers on Linux?
 - [ ] What is the client-server model?
@@ -204,7 +205,6 @@ The following topics are covered:
   abstraction, *file* handling.
 
 * Hands-on tutorial: ~hello world~
-
 ** Simple hello world program
 
 - Problem: Create a "hello world" program in C.
@@ -306,6 +306,12 @@ The following topics are covered:
   program itself (e.g. ~hello3~), the next elements are the command-line
   arguments.
 
+- The format specifier to print a string in C is ~%s~, for example:
+  #+begin_src C
+    printf("Hello, %s\n", "Jack");
+  #+end_src
+  prints: =Hello, Jack=.
+
 - Starter code:
   #+begin_src C :main no :includes :tangle hello3.c
     /*******************************************************************/
@@ -333,9 +339,13 @@ The following topics are covered:
 - Test the code on the command-line:
   #+begin_src bash :results output :exports both
   gcc hello3.c -o hello3
-  ./hello3 Bob!
+  ./hello3 Bob
   ./hello3
   #+end_src
+
+  #+RESULTS:
+  : Hello, Bob!
+  : Hello, world!
  
 - Expected output:
   #+begin_example
@@ -358,11 +368,13 @@ The following topics are covered:
     int main(int argc, char *argv[])  
     {
       // TODO: Check if an argument is provided
-
-      // TODO: Print "Hello, [Name]!" if a name is given
-
-      // TODO: Otherwise, print "Hello, World!"
-  
+      if (argc > 1) {
+        // TODO: Print "Hello, [Name]!" if a name is given
+        printf("Hello, %s!\n", argv[1]);
+      } else {
+        // TODO: Otherwise, print "Hello, World!"
+        printf("Hello, world!");
+      }
       return 0;
     }
   #+end_src
