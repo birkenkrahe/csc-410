@@ -9,7 +9,6 @@
 * Objectives                                                 :lecture:csc410:
 
 The following topics are covered:
-
 - [ ] What are port numbers?
 - [ ] How to find port numbers on Linux?
 - [ ] What is the client-server model?
