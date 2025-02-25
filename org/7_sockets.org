@@ -1,12 +1,11 @@
 #+title: Introduction to Sockets
 #+author: Marcus Birkenkrahe
-#+SEQ_TODO: TODO NEXT IN_PROGRESS | DONE
 #+startup: overview hideblocks indent entitiespretty:
 #+property: header-args:C :main yes :includes <stdio.h> :results output :exports both:
 #+property: header-args:python :session *Python* :python python3 :results output :exports both:
 #+src R :file :session *R* :results graphics output file :exports both:
 #+property: header-args:C++ :main yes :includes <iostream> :results output :exports both:
-* Objectives                                                 :lecture:csc410:
+* Objectives
 
 The following topics are covered:
 
