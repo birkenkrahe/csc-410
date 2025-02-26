@@ -1,0 +1,65 @@
+#+title: Home assignment: Enhanced Hello World
+#+author: Marcus Birkenkrahe
+#+SEQ_TODO: TODO NEXT IN_PROGRESS | DONE
+#+startup: overview hideblocks indent entitiespretty:
+#+property: header-args:C :main yes :includes <stdio.h> :results output :exports both:
+#+property: header-args:python :session *Python* :python python3 :results output :exports both:
+#+property: header-args:R :session *R* :results output :exports both:
+#+property: header-args:C++ :main yes :includes <iostream> :results output :exports both:
+* Objective  
+
+Modify the command-line *Hello, World!* program (~hello3.c~) to handle
+multiple names as input and print a personalized greeting for each
+name. If no names are provided, it should default to ~"Hello, World!"~.
+
+* Instructions  
+
+1. Modify ~hello3.c~ so that it:
+   - Accepts multiple names as command-line arguments.
+   - Prints ~"Hello, [Name]!"~ for each name provided.
+   - Prints ~"Hello, World!"~ if no names are given.
+   
+2. Compile and run your program with different test cases:
+   #+begin_src bash
+   ./hello4 Alice Bob Charlie
+   ./hello4
+   #+end_src
+
+* Example Outputs  
+#+begin_example
+$ ./hello4 Alice Bob Charlie
+Hello, Alice!
+Hello, Bob!
+Hello, Charlie!
+
+$ ./hello4
+Hello, World!
+#+end_example
+
+* Starter Code  
+#+begin_src C :main no :includes :tangle hello4.c
+/*******************************************************************/
+// hello4.c: command-line version of "hello world" with multiple inputs.
+// Input: [names] (strings) or none. Output: "Hello, [name]!" for each name
+// or "Hello, World!" if no names provided.
+// Author: [Your Name] Date: [Today's Date]
+/*******************************************************************/    
+#include <stdio.h>
+
+int main(int argc, char *argv[])  
+{
+    // TODO: If no arguments are given, print "Hello, World!"
+
+    // TODO: Otherwise, iterate through all names and print "Hello, [Name]!"
+    
+    return 0;
+}
+#+end_src
+
+* Expected Learning Outcomes  
+- Reinforces handling command-line arguments.
+- Introduces looping through arguments (~for~ loop).
+- Encourages careful handling of ~argc~ and ~argv~.
+
+* Submission
+- Submit your solution as an Org-mode file with output.
