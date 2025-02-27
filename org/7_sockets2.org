@@ -1,3 +1,11 @@
+#+title: Introduction to Sockets
+#+author: Marcus Birkenkrahe
+#+SEQ_TODO: TODO NEXT IN_PROGRESS | DONE
+#+startup: overview hideblocks indent entitiespretty:
+#+property: header-args:C :main yes :includes <stdio.h> :results output :exports both:
+#+property: header-args:python :session *Python* :python python3 :results output :exports both:
+#+property: header-args: R :session *R* :results output :exports both:
+#+property: header-args:C++ :main yes :includes <iostream> :results output :exports both:
 * Objectives
 
 The following topics are covered:
@@ -196,3 +204,587 @@ The following topics are covered:
 - Before looking at socket programming, let's look at a similar
   abstraction, *file* handling.
 
+* Hands-on tutorial: ~hello world~
+** Simple hello world program
+
+- Problem: Create a "hello world" program in C.
+
+- Open Emacs to ~hello.c~ (C-x C-f hello.c <RET>)
+
+- Solution:
+  #+begin_src C :main no :includes :tangle ../src/hello.c
+    /*****************************************************************/    
+    // hello.c: print "Hello, World!" to stdout. Input: NONE. Output:
+    // Hello, World! (string). Author: Marcus Birkenkrahe. Date:
+    // 02/24/2025
+    /*****************************************************************/    
+    // include libraries
+    #include <stdio.h>
+
+    // main: main program
+    // returns: integer (int)
+    // params: none (void)
+    int main(void)
+    {
+      puts("Hello, world!");
+      return 0;
+    }
+  #+end_src
+
+- Compile and run the file on the command-line. The object file
+  (executable) should be called ~hello~:
+  #+begin_src bash :results output :exports both
+  gcc ../src/hello.c -o hello
+  ./hello
+  #+end_src
+
+  #+RESULTS:
+  : Hello, world!
+
+** Simple hello world program with function
+
+- Problem: Modify the "hello world" program with a function ~hello~ that
+  prints the string ="Hello, world!"=. Include a function
+  prototype. Tangle the code to ~hello2.c~
+
+- Solution:
+  #+begin_src C :main no :includes :tangle ../src/hello2.c
+    /*****************************************************************/    
+    // hello2.c: print "Hello, World!" to stdout use a void function
+    //           hello() to print Input: NONE Output: Hello, World!
+    //           (string) Author: Marcus Birkenkrahe Date: 02/24/2025
+    /*****************************************************************/    
+
+    // include libraries
+    #include <stdio.h>
+
+    // prototype functions
+
+    // hello: print hello world
+    // returns: nothing (void)
+    // params: none (void)
+    void hello(void); 
+
+    // main: main program
+    // returns: integer (int)
+    // params: none (void)
+    int main(void)  
+    {
+      hello(); // function call
+      return 0;
+    }
+  
+    // function definition
+    void hello(void)
+    {
+      puts("Hello, world!");  
+    }  
+  #+end_src
+
+- Compile and run the file on the command-line. The object file
+  (executable) should be called ~hello2~:
+  #+begin_src bash :results output :exports both
+  gcc ../src/hello2.c -o hello2
+  ./hello2
+  #+end_src
+
+  #+RESULTS:
+  : Hello, world!
+
+** Hello world with command-line argument
+
+- Modify the "Hello, World!" program to accept a name as a
+  command-line argument and print:
+  1) "Hello, [Name]!" if a name is provided.
+  2) "Hello, World!" if no name is provided.
+
+- To check if an argument is provided, check if =argc= (the number of
+  command-line arguments) is greater than 1.
+
+- The command-line argument itself (if one was given), is stored in
+  the array =argv[]=. Its first element, =argv[0]= is the name of the
+  program itself (e.g. ~hello3~), the next elements are the command-line
+  arguments.
+
+- The format specifier to print a string in C is ~%s~, for example:
+  #+begin_src C
+    printf("Hello, %s\n", "Jack");
+  #+end_src
+  prints: =Hello, Jack=.
+
+- Starter code:
+  #+begin_src C :main no :includes :tangle hello3.c
+    /*******************************************************************/
+    // hello3.c: command-line version of "hello world" with input.  Input:
+    // [name] (string) or none. Output: "Hello, [name]!" or "Hello,
+    // world!". Author: Marcus Birkenkrahe Date: 02/24/2025
+    /*****************************************************************/    
+    #include <stdio.h>
+
+    // main: main program
+    // returns: integer (int)
+    // params: argument count (argc), argument vector (argv)
+    int main(int argc, char *argv[])  
+    {
+      // TODO: Check if an argument is provided
+
+      // TODO: Print "Hello, [Name]!" if a name is given
+
+      // TODO: Otherwise, print "Hello, World!"
+  
+      return 0;
+    }
+  #+end_src
+
+- Test the code on the command-line:
+  #+begin_src bash :results output :exports both
+  gcc hello3.c -o hello3
+  ./hello3 Bob
+  ./hello3
+  #+end_src
+
+  #+RESULTS:
+  : Hello, Bob!
+  : Hello, world!
+ 
+- Expected output:
+  #+begin_example
+  Hello, Bob!
+  Hello, world!
+  #+end_example
+
+- Solution: 
+  #+begin_src C :main no :includes :tangle hello3.c
+    /*******************************************************************/
+    // hello3.c: command-line version of "hello world" with input.  Input:
+    // [name] (string) or none. Output: "Hello, [name]!" or "Hello,
+    // world!". Author: Marcus Birkenkrahe Date: 02/24/2025
+    /*****************************************************************/    
+    #include <stdio.h>
+
+    // main: main program
+    // returns: integer (int)
+    // params: argument count (argc), argument vector (argv)
+    int main(int argc, char *argv[])  
+    {
+      // TODO: Check if an argument is provided
+      if (argc > 1) {
+        // TODO: Print "Hello, [Name]!" if a name is given
+        printf("Hello, %s!\n", argv[1]);
+      } else {
+        // TODO: Otherwise, print "Hello, World!"
+        printf("Hello, world!");
+      }
+      return 0;
+    }
+  #+end_src
+
+<<<<<<< HEAD
+* Files
+
+- A similar abstraction is a *file*, which enables applications to read
+  and write data using a file handle.
+
+- In C for example, the ~FILE *~ type in the standard library is a file
+  handle used with functions like ~fopen~, ~fread~, ~fwrite~, and ~fclose~.
+
+- A lower-level system call ~open~ returns a file descriptor (an integer
+  handle), which can be used with ~read~, ~write~, and ~close~.
+
+- Code along!
+
+- Example 1: Using ~FILE *~ (C Standard Library)
+
+  1) ~fopen~ opens =file= (the 'handle') in write mode.
+  2) =file= is a ~FILE~ pointer to the beginning of the file.
+  3) ~fprintf~ writes text to the file.
+  4) ~fclose~ close the handle.
+
+  #+begin_src C :main no :includes :tangle fileh.c :results none
+    #include <stdio.h>
+
+    int main() {
+      FILE *file = fopen("example.txt", "w");  // Open file for writing
+
+      if (file == NULL) {
+        perror("Error opening file"); // print error to stderr
+        return 1;                     // if no file found
+      }
+
+      fprintf(file, "Hello, File!\n");  // Write to the file
+      fclose(file);  // Close the file handle
+
+      return 0;
+    }
+  #+end_src
+
+- Testing example 1:
+  #+begin_src bash :results output
+    gcc fileh.c -o fileh
+    ./fileh
+    ls -lt example.txt fileh.c fileh
+    cat example.txt
+  #+end_src
+
+- Example 2: Using a file descriptor (~open~, ~write~, ~close~)
+
+  1) ~open~ opens the file with write-only access, creating it if
+     necessary.
+  2) ~write~ writes raw bytes (~char~ array/string) to the file.
+  3) ~close~ closes the file descriptor.
+
+  #+begin_src C :main no :includes :tangle fileh2.c :results none
+    #include <fcntl.h>
+    #include <unistd.h>
+    #include <stdio.h>
+
+    int main() {
+      int fd = open("example2.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
+      if (fd == -1) {
+        perror("Error opening file");
+        return 1;
+      }
+
+      const char *text = "Hello, File Descriptor!\n";
+      write(fd, text, 25);  // Write raw bytes to the file
+
+      close(fd);  // Close the file descriptor
+
+      return 0;
+    }
+  #+end_src
+
+- Testing example 2:
+  #+begin_src bash :results output
+    gcc fileh2.c -o fileh2
+    ./fileh2
+    ls -lt example2.txt fileh2.c fileh2
+    cat example2.txt
+  #+end_src
+
+  #+RESULTS:
+  : -rw-r--r-- 1 marcus marcus    25 Feb 21 10:43 example2.txt
+  : -rwxrwxr-x 1 marcus marcus 16088 Feb 21 10:43 fileh2
+  : -rw-rw-r-- 1 marcus marcus   377 Feb 21 10:43 fileh2.c
+  : Hello, File Descriptor!
+  :  
+
+* What's your IP address
+
+- You need to be able to find your IP address.
+
+- On Windows: ~ipconfig~ - look for the =IPv4 Address=
+
+- On Unix-based systems (MacOS or Linux): ~ip addr~ (or older: ~ipconfig~)
+
+- If you're behind a NAT, your public IP address may be concealed. You
+  need to contact an internet server to find out, and connect to them
+  in a web browser:
+  + ~api.ipify.org~
+  + ~helloacm.com/api/what-is-my-ip-address~
+  + ~icanhazip.com~
+  + ~ifconfig.me/ip~
+
+- Try one of these now with the Emacs eww browser (~M-x eww~).
+
+- If someone knows your public IP address, they can scan your network
+  for open ports, vulnerability, or DDoS attack.[fn:1] Use of a VPN
+  hides your real IP address, a firewall blocks unauthorized traffic,
+  and dynamic IP addressing will change it (often) to avoid this.
+
+- Getting your local IP address is what we'll try to do directly using
+  C
+
+* Interlude: C review
+
+In-class:
+- Download and complete: [[https://tinyurl.com/fizzbuzz-practice][tinyurl.com/fizzbuzz-practice]]
+
+Home assignments (review in class):
+- FizzBuzz (loops, if else)
+- FizzBuzz reloaded (functions, pointers, arrays)
+- Convert MAC addresses into binary (lookup tables)
+
+* Listing network adapters from C
+
+- It is useful for your network programs what your local address
+  is. To find this out, we need to use an Application Programming
+  Interface (API).
+
+- The API for listing local addresses is very different between
+  systems: The one for Windows is way more complicated than for
+  Unix-based systems (MacOS and Linux).
+
+- The design and practice of socket APIs is not wholly rationally
+  designed: A lot of it has historical reasons. Cp. the changes
+  documented in the ~socket~ man page for Linux (from 2.6).
+
+- We will only cover the Unix case. To start, download the code, and
+  then insert it (~C-x i~) here from the file ~unix_list.c:~
+  #+begin_src bash :results output :exports both
+    wget -O unix_list.c tinyurl.com/unix-list-c
+  #+end_src
+
+- ~unix_list.c~ -
+  #+begin_src C
+    /*
+     ,* MIT License
+     ,*
+     ,* Copyright (c) 2018 Lewis Van Winkle
+     ,*
+     ,* Permission is hereby granted, free of charge, to any person obtaining a copy
+     ,* of this software and associated documentation files (the "Software"), to deal
+     ,* in the Software without restriction, including without limitation the rights
+     ,* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     ,* copies of the Software, and to permit persons to whom the Software is
+     ,* furnished to do so, subject to the following conditions:
+     ,*
+     ,* The above copyright notice and this permission notice shall be included in all
+     ,* copies or substantial portions of the Software.
+     ,*
+     ,* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     ,* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     ,* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     ,* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     ,* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     ,* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+     ,* SOFTWARE.
+     ,*/
+
+    #include <sys/socket.h>
+    #include <netdb.h>
+    #include <ifaddrs.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+
+
+    int main() {
+
+      struct ifaddrs *addresses;
+
+      if (getifaddrs(&addresses) == -1) {
+        printf("getifaddrs call failed\n");
+        return -1;
+      }
+
+      struct ifaddrs *address = addresses;
+      while(address) {
+        if (address->ifa_addr == NULL) {
+          address = address->ifa_next;
+          continue;
+        }
+        int family = address->ifa_addr->sa_family;
+        if (family == AF_INET || family == AF_INET6) {
+
+          printf("%s\t", address->ifa_name);
+          printf("%s\t", family == AF_INET ? "IPv4" : "IPv6");
+
+          char ap[100];
+          const int family_size = family == AF_INET ?
+            sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6);
+          getnameinfo(address->ifa_addr,
+                      family_size, ap, sizeof(ap), 0, 0, NI_NUMERICHOST);
+          printf("\t%s\n", ap);
+
+        }
+        address = address->ifa_next;
+      }
+
+
+      freeifaddrs(addresses);
+      return 0;
+    }
+  #+end_src
+
+- Output on my machine at home:
+  #+begin_example
+  : lo  IPv4            127.0.0.1
+  : enp4s0      IPv4            192.168.1.250
+  : wlo1        IPv4            192.168.68.56
+  : lo  IPv6            ::1
+  : enp4s0      IPv6            2600:1702:4ba0:4b0::42
+  : enp4s0      IPv6            2600:1702:4ba0:4b0:2eca:99eb:1063:393
+  : enp4s0      IPv6            2600:1702:4ba0:4b0:952e:b307:998b:9078
+  : enp4s0      IPv6            fe80::3411:8f1:989f:c525%enp4s0
+  : wlo1        IPv6            fe80::7c2f:481f:e10a:abe8%wlo1
+  #+end_example
+
+- Let's try to understand this file step-by-step.
+
+  1) Include system header files
+  2) Obtain network interface addresses
+  3) Iterate through the interface list
+  4) Skip ~NULL~ addresses
+  5) Filter for IPv4 and IPv6 addresses
+  6) Print interface name and address type
+  7) Convert binary address to string
+  8) Move to the next interface
+  9) Free allocated memory.
+
+* Include system header files
+
+- System header files (~.h~) contain functions and constants that can be
+  used in C programs. They are programmed to be both fast and secure.
+
+- Why are they included as ~<...>~? And what does the ~#include~ mean?
+  #+begin_quote
+  + Header files are included as ~<...>~ when their location is known to
+    the OS (they are in standard locations).
+  + The ~#include~ command means that the files are included by the
+    preprocessor before program compilation, and added to the machine
+    code during the linking phase.
+  #+end_quote
+
+- This is how that looks like for the "hello world" program:
+  #+begin_src C
+    #include <stdio.h>
+    int main(void) {
+      printf("Hello, world!");
+      return 0;
+    }
+  #+end_src
+  #+attr_html: :width 600px:
+  [[../img/compiler_driver.png]]
+
+- And with all the details and intermediate files:
+  #+attr_html: :width 800px:
+  [[../img/compiler_driver2.png]]
+
+- Let's look at the header files one by one:
+  #+name: include system header files
+  #+begin_src C
+    #include <sys/socket.h>
+    #include <netdb.h>
+    #include <ifaddrs.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+  #+end_src
+
+  #+name: system_headers_table
+  | Header File    | Purpose                                                          |
+  |----------------+------------------------------------------------------------------|
+  | ~<sys/socket.h>~ | Socket definition functions (~socket()~, ~bind()~, ~listen()~, etc.).  |
+  | ~<netdb.h>~      | Network database operations (~getaddrinfo()~, ~gethostbyname()~).    |
+  | ~<ifaddrs.h>~    | Retrieves network interface addresses (~getifaddrs()~).            |
+  | ~<stdio.h>~      | Standard I/O functions (~printf()~, ~scanf()~, ~fopen()~).             |
+  | ~<stdlib.h>~     | Memory, conversions, process control (~malloc()~, ~atoi()~, ~exit()~). |
+
+* Obtain network interface addresses
+
+- Code:
+  #+name: obtain network interface addresses
+  #+begin_src C
+    struct ifaddrs *addresses;
+    if (getifaddrs(&addresses) == -1) {
+      printf("getifaddrs call failed\n");
+      return -1;
+     }
+  #+end_src
+
+- Summary:
+
+  We declare a variable, =addresses=, which stores the addresses. A call
+  to =getifaddrs= allocates memory and fills in a linked list of
+  addresses. This function returns =0= on success or =-1= on failure.
+
+- Details:
+
+  1) =ifaddrs= is a linked list (a chain of nodes which each node
+     containing a pointer to the next node, ending with a null
+     pointer).
+
+     It is typically defined like this:
+     #+begin_src C
+       struct ifaddrs {
+         struct ifaddrs  *ifa_next;    /* Pointer to next interface in list */
+         char            *ifa_name;    /* Interface name (e.g., "eth0") */
+         unsigned int     ifa_flags;   /* Interface flags (IFF_UP, IFF_LOOPBACK, etc.) */
+         struct sockaddr *ifa_addr;    /* Address of the interface */
+         struct sockaddr *ifa_netmask; /* Netmask of the interface */
+         struct sockaddr *ifa_broadaddr; /* Broadcast or P2P destination address */
+         struct sockaddr *ifa_dstaddr; /* Point-to-point destination address */
+         void            *ifa_data;    /* Interface-specific data */
+       };
+     #+end_src
+
+  2) =getifaddr(&addresses)= retrieves the list of network interfaces
+     and stores them in the linked list =addresses=.
+
+  3) If the call fails (e.g. because there is no network connection)
+     then the message is printed, the error code =-1= is returned, and
+     the program terminates. Using =EXIT_FAILURE= from ~<stdlib.h>~ is
+     more portable and more readable.
+
+* Iterate through the interface list
+
+- Summary:
+
+  We use a new pointer, =address=, to walk through the linked list of
+  =addresses= using a =while= loop - it will end when the list it
+  finished, and =address= becomes the null pointer.
+
+- Code:
+  #+name: iterate through the interface list
+  #+begin_src C
+    struct ifaddrs *address = addresses; // point to first address
+    while (address) {
+  #+end_src
+
+- Details:
+
+  The long form of this condition test is ~while (address != NULL)~.
+
+* Skipping =NULL= addresses
+
+- Summary:
+
+  Some interfaces might not have assigned addresses so they are
+  skipped.
+
+- Code:
+  #+name: skipping NULL addresses
+  #+begin_src C
+    if (address->ifa_addr == NULL) {
+      address = address->ifa_next;
+      continue;
+     }
+  #+end_src
+
+- Details: 
+  1) =address= is an =ifaddrs= structure. The =->= operator is used to
+     access elements in the list without having to worry about pointer
+     arithmetic. =address->ifa_addr= is short for =(*address).ifa_addr=.
+
+  2) The field =ifa_addr= is a pointer to a =struct sockaddr=, which
+     represents the network access of the interface.
+
+  3) The =sockaddr= structure represents a generic sockeet address:
+     #+begin_example C
+       struct sockaddr {
+          sa_family_t sa_family; // e.g. AF_INET (IPv4), AF_PACKET (MAC address)
+          char        sa_data[]; // Address data (depends on sa_family
+       }
+     #+end_example
+
+* Filter for IPv4 and IPv6 addresses
+* Print interface name and address type
+* Convert binary address to string
+* Move to the next interface
+* Free allocated memory.
+
+* Revisit the whole program
+
+- Code:
+  #+begin_src C :noweb yes :tangle unit_list2.c
+    <<include system header files>>
+    <<obtain network interface addresses>>
+    <<iterate through the interface list>>
+      <<skipping NULL addresses>>
+  #+end_src
+
+  #+RESULTS:
+
+* Footnotes
+
+[fn:1] Distributed Denial of Service, by sending massive amounts of traffic to an address.
