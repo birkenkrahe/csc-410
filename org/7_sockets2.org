@@ -1,5 +1,3 @@
-#+title: Introduction to Sockets
-#+author: Marcus Birkenkrahe
 * Objectives
 
 The following topics are covered:
