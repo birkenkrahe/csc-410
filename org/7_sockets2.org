@@ -379,3 +379,93 @@ The following topics are covered:
   #+end_src
 
 <<<<<<< HEAD
+* Files
+
+- A similar abstraction is a *file*, which enables applications to read
+  and write data using a file handle.
+
+- In C for example, the ~FILE *~ type in the standard library is a file
+  handle used with functions like ~fopen~, ~fread~, ~fwrite~, and ~fclose~.
+
+- A lower-level system call ~open~ returns a file descriptor (an integer
+  handle), which can be used with ~read~, ~write~, and ~close~.
+
+- Code along!
+
+- Example 1: Using ~FILE *~ (C Standard Library)
+
+  1) ~fopen~ opens =file= (the 'handle') in write mode.
+  2) =file= is a ~FILE~ pointer to the beginning of the file.
+  3) ~fprintf~ writes text to the file.
+  4) ~fclose~ close the handle.
+
+  #+begin_src C :main no :includes :tangle fileh.c :results none
+    #include <stdio.h>
+
+    int main() {
+      FILE *file = fopen("example.txt", "w");  // Open file for writing
+
+      if (file == NULL) {
+        perror("Error opening file"); // print error to stderr
+        return 1;                     // if no file found
+      }
+
+      fprintf(file, "Hello, File!\n");  // Write to the file
+      fclose(file);  // Close the file handle
+
+      return 0;
+    }
+  #+end_src
+
+- Testing example 1:
+  #+begin_src bash :results output
+    gcc fileh.c -o fileh
+    ./fileh
+    ls -lt example.txt fileh.c fileh
+    cat example.txt
+  #+end_src
+
+- Example 2: Using a file descriptor (~open~, ~write~, ~close~)
+
+  1) ~open~ opens the file with write-only access, creating it if
+     necessary.
+  2) ~write~ writes raw bytes (~char~ array/string) to the file.
+  3) ~close~ closes the file descriptor.
+
+  #+begin_src C :main no :includes :tangle fileh2.c :results none
+    #include <fcntl.h>
+    #include <unistd.h>
+    #include <stdio.h>
+
+    int main() {
+      int fd = open("example2.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
+      if (fd == -1) {
+        perror("Error opening file");
+        return 1;
+      }
+
+      const char *text = "Hello, File Descriptor!\n";
+      write(fd, text, 25);  // Write raw bytes to the file
+
+      close(fd);  // Close the file descriptor
+
+      return 0;
+    }
+  #+end_src
+
+- Testing example 2:
+  #+begin_src bash :results output
+    gcc fileh2.c -o fileh2
+    ./fileh2
+    ls -lt example2.txt fileh2.c fileh2
+    cat example2.txt
+  #+end_src
+
+  #+RESULTS:
+  : -rw-r--r-- 1 marcus marcus    25 Feb 21 10:43 example2.txt
+  : -rwxrwxr-x 1 marcus marcus 16088 Feb 21 10:43 fileh2
+  : -rw-rw-r-- 1 marcus marcus   377 Feb 21 10:43 fileh2.c
+  : Hello, File Descriptor!
+
+
