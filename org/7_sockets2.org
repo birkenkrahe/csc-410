@@ -468,5 +468,5 @@ The following topics are covered:
   : -rw-rw-r-- 1 marcus marcus   377 Feb 21 10:43 fileh2.c
   : Hello, File Descriptor!
 
- 
+
 
