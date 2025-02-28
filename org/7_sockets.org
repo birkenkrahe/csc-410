@@ -379,7 +379,6 @@ The following topics are covered:
     }
   #+end_src
 
-<<<<<<< HEAD
 * Files
 
 - A similar abstraction is a *file*, which enables applications to read
