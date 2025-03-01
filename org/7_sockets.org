@@ -436,6 +436,7 @@ The following topics are covered:
     #include <fcntl.h>
     #include <unistd.h>
     #include <stdio.h>
+    #include <string.h>
 
     int main() {
       int fd = open("example2.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -446,7 +447,7 @@ The following topics are covered:
       }
 
       const char *text = "Hello, File Descriptor!\n";
-      write(fd, text, 25);  // Write raw bytes to the file
+      write(fd, text, strlen(text));  // Write raw bytes to the file
 
       close(fd);  // Close the file descriptor
 
@@ -488,4 +489,13 @@ The following topics are covered:
     chmod 0644 example.txt
     ls -lt example.txt
   #+end_src
+
+- A short explanation of the included header files:
+
+  | Header   | Purpose                                               |
+  |----------+-------------------------------------------------------|
+  | ~fcntl.h~  | Provides file control options, including ~open()~ flags |
+  | ~unistd.h~ | Defines system calls like ~write()~, ~close()~, etc.      |
+  | ~stdio.h~  | Includes standard I/O functions like ~perror()~         |
+  | ~string.h~ | Provides string manipulation functions like ~strlen()~  |
 
