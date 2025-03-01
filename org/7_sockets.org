@@ -499,3 +499,13 @@ The following topics are covered:
   | ~stdio.h~  | Includes standard I/O functions like ~perror()~         |
   | ~string.h~ | Provides string manipulation functions like ~strlen()~  |
 
+- A short explanation of the header flags
+  
+  | Flag     | Meaning                                         |
+  |----------+-------------------------------------------------|
+  | ~O_WRONLY~ | Open the file for **write-only** access.          |
+  | ~O_CREAT~  | Create the file if it does not exist.           |
+  | ~O_TRUNC~  | Truncate (clear) the file if it already exists. |
+
+- You will get two assignments based on these two examples to ~read~
+  from the example files using a file handle and a file descriptor.
