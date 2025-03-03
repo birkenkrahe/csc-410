@@ -923,7 +923,7 @@ Demo: How to switch off automatic labeling and create notes.
 - [ ] *Tests & Assignments*: Removing only 1 point per late day now.
 - [ ] *Lecture:* Ports, client-server, sockets
 
-** DONE Review: Domains
+** Review: Domains
 
 1. Explain the term "IPv4"!
    #+begin_quote
@@ -1054,11 +1054,105 @@ Demo: How to switch off automatic labeling and create notes.
 
 * Week 7: C review and listing network adapters from C
 
-- [ ] *Practice:* Revisit C programming ("FizzBuzz", loops, ifelse)
-- [ ] *Lecture*: Networking sockets with C
-- [ ] *Assignment*: Convert MAC addresses into binary - 28-Feb
-- [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays) - 3-Mar 
+- [X] *Practice:* Revisit C programming 1: Hello World
+- [ ] *Practice*: Revisit C programming 2: ("FizzBuzz", loops, ifelse)
+- [X] *Lecture*: Networking sockets with C
+- [ ] *Assignment*: Convert MAC addresses into binary 
+- [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays) 
 
-** FizzBuzz
+** DONE Review - Sockets I
 
-- Download and complete: [[https://tinyurl.com/fizzbuzz-practice][tinyurl.com/fizzbuzz-practice]]
+1. What's a socket?
+
+2. What's it good for?
+
+3. Where are they located?
+
+4. Which language are sockets written in?
+
+5. How are sockets written?
+
+6. What's a file descriptor?
+
+
+** DONE Enhanced Hello World program (assignment)
+
+Remember: In C, ~argv~ is an array of strings where:
+- ~argv[0]~ is the program name
+- ~argv[1]~ is the first command-line argument etc.
+- ~argc~ is the total number of arguments
+
+Process:
+1) [X] Program solution with arguments first
+2) [X] Set up compile & run shell block
+3) [X] Add one name as argument on the command-line
+4) [X] Add the ~for~ loop to iterate over > 1 command-line argument
+5) [X] Recreate sample output
+
+Starter code:
+#+begin_src C :main no :includes :tangle hello4.c :results output
+  #include <stdio.h>
+
+  int main(int argc, char *argv[])  
+  {
+    // If no arguments are given, print "Hello, World!"
+    if (argc <= 1) {
+      printf("Hello, World!");
+      // Otherwise, iterate through all names and print "Hello, [Name]!"
+    } else {
+      for (int i=1;i<argc; i++) {
+        // print Hello, [name]!
+        printf("Hello, %s!\n",argv[i]);
+      }
+    }
+    return 0;
+  }
+        #+end_src
+
+#+RESULTS:
+: Hello, World!
+
+Shell block for testing:
+#+begin_src bash :results output
+  ls -lt hello4*    ## list files time-ordered in long format
+  gcc hello4.c -o hello4 
+  ./hello4 Alice Bob Charlie
+#+end_src
+
+#+RESULTS:
+: -rw-rw-r-- 1 marcus marcus   365 Feb 28 11:22 hello4.c
+: -rwxrwxr-x 1 marcus marcus 15960 Feb 28 11:21 hello4
+: Hello, Alice!
+: Hello, Bob!
+: Hello, Charlie!
+
+- To debug, add the ~-g~ flag to the compilation, this produces a file
+  ready for debugging with ~gdb~, the GNU Debugger.
+
+
+* Week 8: More socket programming (Part 1)
+
+- [ ] Test 4 deadline extended to March 10 (midterm: 12-Mar)
+
+** Mandatory Programming assignments
+
+These programs are meant to lay the foundation for an appreciation of
+system programming with C.
+
+- Reading from a file using a handle.
+- Reading from a file using a file descriptor.
+- Hard deadline March 10 (because of midterms: 12-Mar)
+
+** Optional programming assignments
+
+- Download and complete: [[https://tinyurl.com/fizzbuzz-practice][tinyurl.com/fizzbuzz-practice]].
+- Fizzbuzz reloaded: functions returning strings & arrays.
+- Conversion of hexadecimal MAC address to binary (~switch~)
+
+** Socket programming
+
+- Posted very dense 10 minute tutorial "Minimal Web-server in C"
+- We're heading towards: Socket API / HTML client / HTML server
+- Next week we'll continue with more Cisco Packet Tracer stuff
+- Your task until Wednesday (optional): *comment the program.*
+- I will then decide if/how much longer to torture you with C.
