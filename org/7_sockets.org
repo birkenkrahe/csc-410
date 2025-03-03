@@ -536,24 +536,40 @@ The following topics are covered:
   hides your real IP address, a firewall blocks unauthorized traffic,
   and dynamic IP addressing will change it (often) to avoid this.
 
-- Getting your local IP address is what we'll try to do directly using
-  C
-
-* Interlude: C review [optional home assignment]
-
-In-class:
-- Download and complete: [[https://tinyurl.com/fizzbuzz-practice][tinyurl.com/fizzbuzz-practice]]
-
-Home assignments (review in class):
-- FizzBuzz (loops, if else)
-- FizzBuzz reloaded (functions, pointers, arrays)
-- Convert MAC addresses into binary (lookup tables)
+- Getting your local IP address is what we'll do directly with C now.
 
 * Listing network adapters from C
 
-- It is useful for your network programs what your local address
-  is. To find this out, we need to use an Application Programming
-  Interface (API).
+- To call ~socket~, you need to know what your local address is. To find
+  this out, we need to use an Application Programming Interface (API).
+
+- Have you ever used any other API?
+  #+begin_quote
+  1) ~printf~ or ~cout~ are part of ~<stdio.h>~ or ~<iostream>~ in C/C++:
+     These functions activate an API to C/C++ standard libraries.
+  2) =ip addr show= queries the system's network stack via system calls,
+     which is part of the kernel's API (in ~<sys/netlink.h>~).
+  3) When you visit a web page in a browser, a chain of APIs is
+     invoked:
+     1. *Web browser API* (local) calls socket API to create connection
+     2. *System socket API* translates browser request into a network
+        operation using ~AF_INET~ (that's what we'll filter for)
+     3. *System socket API* (local) resolves DNS via ~getaddinfo~ from
+        ~<netdb.h>~.
+     4. *Network stack API* (local) is used to manage the TCP/IP connection to
+        send packets over the network.
+     5. *Web server API* (remote) used by the server to respond with
+        HTTP/CSS/JS to the network request.
+
+  So every one of the five elements of the ~socket~ is managed by a
+  separate API during a network transaction (packet exchange).
+
+  The browser is a sophisticated API client but it hides the C code
+  involved from you. 
+
+  All system operations are run by the *kernel* (lower layers), all
+  application operations (e.g. entering URL) are run by the *user*.
+  #+end_quote
 
 - The API for listing local addresses is very different between
   systems: The one for Windows is way more complicated than for
@@ -570,31 +586,8 @@ Home assignments (review in class):
   #+end_src
 
 - ~unix_list.c~ -
-  #+begin_src C
-    /*
-     ,* MIT License
-     ,*
-     ,* Copyright (c) 2018 Lewis Van Winkle
-     ,*
-     ,* Permission is hereby granted, free of charge, to any person obtaining a copy
-     ,* of this software and associated documentation files (the "Software"), to deal
-     ,* in the Software without restriction, including without limitation the rights
-     ,* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-     ,* copies of the Software, and to permit persons to whom the Software is
-     ,* furnished to do so, subject to the following conditions:
-     ,*
-     ,* The above copyright notice and this permission notice shall be included in all
-     ,* copies or substantial portions of the Software.
-     ,*
-     ,* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-     ,* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-     ,* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-     ,* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-     ,* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-     ,* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-     ,* SOFTWARE.
-     ,*/
-
+  #+begin_src C :noweb yes
+    <<license>>
     #include <sys/socket.h>
     #include <netdb.h>
     #include <ifaddrs.h>
@@ -603,7 +596,7 @@ Home assignments (review in class):
 
 
     int main() {
-  
+
       struct ifaddrs *addresses;
 
       if (getifaddrs(&addresses) == -1) {
@@ -663,6 +656,8 @@ Home assignments (review in class):
   7) [ ] Convert binary address to string
   8) [ ] Move to the next interface
   9) [ ] Free allocated memory.
+
+- Your challenge (home): Add comments to the program!
 
 * Include system header files
 
@@ -736,19 +731,19 @@ Home assignments (review in class):
      containing a pointer to the next node, ending with a null
      pointer).
 
-     It is typically defined in ~<iffaddrs.h>~, =sockaddr= is defined in
-     ~<sys/socket.h>~, a generic socket address data structure.
+     It is typically defined in ~<iffaddrs.h>~, =sockaddr= is a generic
+     socket address data structure from ~<sys/socket.h>~ (see below).
 
      #+begin_src C
        struct ifaddrs {
-         struct ifaddrs  *ifa_next;    /* Pointer to next interface in list */
-         char            *ifa_name;    /* Interface name (e.g., "eth0") */
-         unsigned int     ifa_flags;   /* Interface flags (IFF_UP, IFF_LOOPBACK, etc.) */
-         struct sockaddr *ifa_addr;    /* Address of the interface */
-         struct sockaddr *ifa_netmask; /* Netmask of the interface */
-         struct sockaddr *ifa_broadaddr; /* Broadcast or P2P destination address */
-         struct sockaddr *ifa_dstaddr; /* Point-to-point destination address */
-         void            *ifa_data;    /* Interface-specific data */
+         struct ifaddrs  *ifa_next;    // Pointer to next interface in list
+         char            *ifa_name;    // Interface name (e.g., "eth0")
+         unsigned int     ifa_flags;   // Interface flags (IFF_UP, IFF_LOOPBACK)
+         struct sockaddr *ifa_addr;    // Address of the interface
+         struct sockaddr *ifa_netmask; // Netmask of the interface
+         struct sockaddr *ifa_broadaddr; // Broadcast or P2P destination address
+         struct sockaddr *ifa_dstaddr; // Point-to-point destination address
+         void            *ifa_data;    // Interface-specific data 
        };
      #+end_src
 
@@ -772,13 +767,12 @@ Home assignments (review in class):
   #+name: iterate through the interface list
   #+begin_src C
     struct ifaddrs *address = addresses; // point to first address
-    while (address) {
+    while (address) { // keep going until `address` is NULL ptr
   #+end_src
 
 - Details:
 
   The long form of this condition test is ~while (address != NULL)~.
-
 
 * Skipping =NULL= addresses
 
@@ -804,14 +798,13 @@ Home assignments (review in class):
   2) The field =ifa_addr= is a pointer to a =struct sockaddr=, which
      represents the network access of the interface.
 
-  3) The =sockaddr= structure represents a generic sockeet address:
+  3) The =sockaddr= structure represents a generic socket address:
      #+begin_example C
        struct sockaddr {
           sa_family_t sa_family; // e.g. AF_INET (IPv4), AF_PACKET (MAC address)
-          char        sa_data[]; // Address data (depends on sa_family
+          char        sa_data[]; // Address data (depends on sa_family)
        }
      #+end_example
-
 
 * Filter for IPv4 and IPv6 addresses
 
@@ -833,14 +826,17 @@ Home assignments (review in class):
      the =sockaddr= structure pointed to by =ifa_addr=.
      - =AF_INET= represents IPv4 (Internet Protocol version 4).
      - =AF_INET6= represents IPv6 (Internet Protocol version 6).
-  2) The =if= condition ensures we only proceed with IPv4 or IPv6 addresses, skipping others (e.g., =AF_PACKET= for MAC addresses).
-  3) This filter keeps the output focused on the most common networked IP addresses.
+  2) The =if= condition ensures we only proceed with IPv4 or IPv6
+     addresses, skipping others (e.g., =AF_PACKET= for MAC addresses).
+  3) This filter keeps the output focused on the most common networked
+     IP addresses.
 
 * Print interface name and address type
 
 - Summary:
 
-  For each valid interface, we print its name (e.g., `lo`, `enp4s0`) and whether it’s IPv4 or IPv6.
+  For each valid interface, we print its name (e.g., ~lo~, ~enp4s0~) and
+  whether it’s IPv4 or IPv6.
 
 - Code:
   #+name: print interface name and address type
@@ -851,45 +847,64 @@ Home assignments (review in class):
 
 - Details:
 
-  1) `address->ifa_name` is a string (e.g., `lo` for loopback, `wlo1` for wireless).
-  2) `family == AF_INET ? "IPv4" : "IPv6"` is a ternary operator:
-     - If `family` is `AF_INET`, prints "IPv4".
-     - Otherwise (since we filtered for `AF_INET6`), prints "IPv6".
-  3) `\t` adds a tab for clean, column-aligned output.
+  1) =address->ifa_name= is a string (e.g., =lo= for loopback, =wlo1= for
+     wireless).
+  2) =family == AF_INET ? "IPv4" : "IPv6"= is a ternary operator:
+     - If =family= is =AF_INET=, prints "IPv4".
+     - Otherwise (since we filtered for =AF_INET6=), prints "IPv6".
+  3) =\t= adds a tab for clean, column-aligned output.
 
 * Convert binary address to string
 
 - Summary:
 
-  Network addresses are stored in binary form; we convert them to human-readable strings (e.g., `192.168.1.250`) for display.
+  Network addresses are stored in binary form; we convert them to
+  human-readable strings (e.g., =192.168.1.250=) for display.
 
 - Code:
   #+name: convert binary address to string
   #+begin_src C
     char ap[100];
+
     const int family_size = family == AF_INET ?
       sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6);
+
     getnameinfo(address->ifa_addr,
                 family_size, ap, sizeof(ap), 0, 0, NI_NUMERICHOST);
+    
     printf("\t%s\n", ap);
   #+end_src
 
 - Details:
 
-  1) `char ap[100]` creates a buffer to hold the address string (up to 100 characters).
-  2) `family_size` adjusts based on protocol:
-     - `sizeof(struct sockaddr_in)` for IPv4 (smaller structure).
-     - `sizeof(struct sockaddr_in6)` for IPv6 (larger to accommodate 128-bit addresses).
-  3) `getnameinfo()` converts the binary address (`ifa_addr`) to a string:
-     - Takes the address, its size, and the buffer (`ap`).
-     - `NI_NUMERICHOST` flag ensures numeric output (e.g., `127.0.0.1`, not `localhost`).
-  4) `printf("\t%s\n", ap)` prints the address with a tab and newline.
+  1) =char ap[100]= creates a buffer to hold the address string (up to
+     100 characters).
+  2) =family_size= adjusts based on protocol:
+     - =sizeof(struct sockaddr_in)= for IPv4 (smaller structure).
+     - =sizeof(struct sockaddr_in6)= for IPv6 (larger to accommodate
+       128-bit addresses).
+  3) =getnameinfo()= converts the binary address (=ifa_addr=) to a string:
+     - Takes the address, its size, and the buffer (=ap=).
+     - =NI_NUMERICHOST= flag ensures numeric output (e.g., =127.0.0.1=,
+       not =localhost=).
+  4) =printf("\t%s\n", ap)= prints the address with a tab and newline.
+
+- The long form of the ternary operator for ~family_size~ is:
+  #+begin_src C
+    const int family_size;
+    if (family == AF_INET) {
+      family_size = sizeof(struct sockaddr_in);
+     } else {
+      family_size = sizeof(struct sockaddr_in6);
+     }
+  #+end_src
 
 * Move to the next interface
 
 - Summary:
 
-  After processing an interface, we advance to the next one in the linked list.
+  After processing an interface, we advance to the next one in the
+  linked list.
 
 - Code:
   #+name: move to the next interface
@@ -899,15 +914,18 @@ Home assignments (review in class):
 
 - Details:
 
-  1) `address->ifa_next` is the pointer to the next `ifaddrs` structure in the linked list.
-  2) Assigning it to `address` moves the loop forward.
-  3) When `ifa_next` is `NULL` (end of list), the `while (address)` loop terminates.
+  1) =address->ifa_next= is the pointer to the next =ifaddrs= structure in
+     the linked list.
+  2) Assigning it to =address= moves the loop forward.
+  3) When =ifa_next= is =NULL= (end of list), the =while (address)= loop
+     terminates.
 
 * Free allocated memory
 
 - Summary:
 
-  After we’re done, we release the memory allocated by `getifaddrs()` to avoid leaks.
+  After we’re done, we release the memory allocated by =getifaddrs()=
+  to avoid leaks.
 
 - Code:
   #+name: free allocated memory
@@ -917,15 +935,19 @@ Home assignments (review in class):
 
 - Details:
 
-  1) `getifaddrs()` dynamically allocates the linked list in heap memory.
-  2) `freeifaddrs(addresses)` deallocates it, using the original pointer (`addresses`).
-  3) Failing to free this memory would cause a leak, as C doesn’t have automatic garbage collection.
+  1) =getifaddrs()= dynamically allocates the linked list in heap
+     memory.
+  2) =freeifaddrs(addresses)= deallocates it, using the original pointer
+     (=addresses=).
+  3) Failing to free this memory would cause a leak, as C doesn’t have
+     automatic garbage collection.
 
 * Revisit the whole program
 
 - Summary:
 
-  This program ties all the steps together into a cohesive tool for listing Unix network interfaces.
+  This program ties all the steps together into a cohesive tool for
+  listing Unix network interfaces.
 
 - Code:
   #+begin_src C :noweb yes :tangle unix_list2.c
@@ -948,33 +970,60 @@ Home assignments (review in class):
 
   #+RESULTS:
   : lo	IPv4		127.0.0.1
-  : enp4s0	IPv4		192.168.1.250
-  : wlo1	IPv4		192.168.68.56
+  : wlp0s20f3	IPv4		10.1.6.35
   : lo	IPv6		::1
-  : enp4s0	IPv6		2600:1702:4ba0:4b0::42
-  : enp4s0	IPv6		2600:1702:4ba0:4b0:95bb:3528:bab0:f489
-  : enp4s0	IPv6		2600:1702:4ba0:4b0:952e:b307:998b:9078
-  : enp4s0	IPv6		fe80::3411:8f1:989f:c525%enp4s0
-  : wlo1	IPv6		fe80::7c2f:481f:e10a:abe8%wlo1
+  : wlp0s20f3	IPv6		fe80::28f6:cc78:32ae:3b68%wlp0s20f3
 
 - Explanation:
 
-  1) **Headers**: Provide the necessary functions and structures.
-  2) **Main**: Entry point where execution begins.
-  3) **Get Addresses**: Fetches the interface list or exits on failure.
-  4) **Loop**: Iterates over each interface.
-  5) **Skip NULL**: Avoids invalid entries.
-  6) **Filter**: Targets IPv4/IPv6.
-  7) **Print**: Displays name and type.
-  8) **Convert**: Shows the address as a string.
-  9) **Next**: Advances the loop.
-  10) **Free**: Cleans up.
-  11) **Return**: Exits gracefully.
+  1) *Headers*: Provide the necessary functions and structures.
+  2) *Main*: Entry point where execution begins.
+  3) *Get Addresses*: Fetches the interface list or exits on failure.
+  4) *Loop*: Iterates over each interface.
+  5) *Skip NULL*: Avoids invalid entries.
+  6) *Filter*: Targets IPv4/IPv6.
+  7) *Print*: Displays name and type.
+  8) *Convert*: Shows the address as a string.
+  9) *Next*: Advances the loop.
+  10) *Free*: Cleans up.
+  11) *Return*: Exits gracefully.
 
 - Notes:
 
-  - The tangled file (`unix_list2.c`) will match the original functionality but is structured modularly here.
-  - Compile with: `gcc -o unix_list2 unix_list2.c` and run `./unix_list2` to see your interfaces.
+  - The tangled file (=unix_list2.c=) will match the original
+    functionality but is structured modularly here.
+  - Compile with: =gcc -o unix_list2 unix_list2.c= and run
+    =./unix_list2= to see your interfaces.
+
+* Sources
+
+- MIT License for ~unix_list.c~ by Lewis van Winkle
+  #+name: license
+  #+begin_src C :noweb yes
+    /*
+     * MIT License
+     *
+     * Copyright (c) 2018 Lewis Van Winkle
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in all
+     * copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+     * SOFTWARE.
+     */
+  #+end_src
 
 * Footnotes
 
