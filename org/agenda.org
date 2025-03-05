@@ -9,7 +9,7 @@
 :header-args:R:      :session *R* :results graphics output file :exports both
 :header-args:C++:    :main yes :includes <iostream> :results output :exports both
 :END:
-* Week 1: Course overview
+* DONE Week 1: Course overview
 #+attr_html: :width 400px
 [[../img/cover.jpg]]
 
@@ -74,7 +74,7 @@
 - [ ] Client-Server paradigm
 - [ ] Listing your IP addresses using C
 
-* Week 2: Introduction to networking
+* DONE Week 2: Introduction to networking
 #+attr_html: :width 600px:
 #+caption: Building (Retro)
 [[../img/builder.jpg]]
@@ -189,7 +189,7 @@
 
 ** IN_PROGRESS [[./2_packettracer.org][Cisco Packet Tracer]]: Intro & Installation & Getting started
 
-* Week 3: TCP/IP & Cisco networks
+* DONE Week 3: TCP/IP & Cisco networks
 #+attr_html: :width 600px:
 #+caption: The Nerd And The Network
 [[../img/nerd.jpg]]
@@ -394,8 +394,8 @@
    ../src/init.el: Lisp/Scheme program, ASCII text, with CRLF line terminators
    #+end_example
 
-* Week 4: Python web server, IP addresses
-#+attr_html: :width 600px: 
+* DONE Week 4: Python web server, IP addresses
+#+attr_html: :width 600px:
 [[../img/subnets.png]]
 
 - [X] Missing tests? Complete this week for 50%
@@ -439,7 +439,7 @@ application, an image, or some other code to the relevant step.
    network?
    #+begin_quote
    The web browser cannot send an HTML file directly because the
-   network requires structure communication protocols: 
+   network requires structure communication protocols:
    - HTML content must be included in a HTTP response
    - HTTP response must be encapsulated in a TCP segment
    - TCP segment must be wrapped inside an IP packet
@@ -463,7 +463,7 @@ application, an image, or some other code to the relevant step.
    retransmits lost packets, and manages congestion. The TCP segment
    is then passed down to the IP layer for addressing and routing.
    #+end_quote
-   #+attr_html: :width 700px: 
+   #+attr_html: :width 700px:
    [[../img/socket.svg]]
 
 5. How does a router handle an encapsulated HTTP response as it
@@ -475,7 +475,7 @@ application, an image, or some other code to the relevant step.
    the IP packet in a new frame for the next network segment.
    #+end_quote
    #+begin_src bash :results output :exports both
-   traceroute lyon.edu
+     traceroute lyon.edu
    #+end_src
 
 6. How can you observe real-time data encapsulation happening on your
@@ -484,16 +484,16 @@ application, an image, or some other code to the relevant step.
    You can use tools like =tcpdump= or Wireshark (=tshark=) to capture
    packets in real-time. Running =sudo tcpdump -i eth0 -vv= allows you
    to see Ethernet frames, IP packets, and TCP segments, revealing the
-   encapsulated layers as data moves through the network. 
+   encapsulated layers as data moves through the network.
 
    A condition to do this is that you have =sudo= rights because the
    information could easily be used to design an efficient network
    attack.
    #+end_quote
    #+begin_src bash :results output :exports both
-   ip link show
-   nmcli device status
-   # sudo tcpdump -i [device] -vv -X
+     ip link show
+     nmcli device status
+     # sudo tcpdump -i [device] -vv -X
    #+end_src
 
 
@@ -501,7 +501,7 @@ application, an image, or some other code to the relevant step.
 ** Review: Python web server
 
 We're going to review the content first, and then we'll look at the
-exercise again. 
+exercise again.
 
 1. What was the exercise about?
    #+begin_quote
@@ -510,7 +510,7 @@ exercise again.
    - Understanding how to use ports with web requests.
    - Finding stuff out by yourself instead of being told everything.
    #+end_quote
-   
+
 2. What exactly does a web server do?
    #+begin_quote
    The web server listens for incoming HTTP requests on a specific
@@ -525,7 +525,7 @@ exercise again.
    request that the server fulfils.
    #+end_quote
 
-4. What exactly is the port number?  
+4. What exactly is the port number?
    #+begin_quote
    The port number is a specific communication endpoint on a computer
    that allows network services to operate. It helps direct internet
@@ -620,7 +620,7 @@ upload the =.pkt= file to Canvas (Deadline: Monday 10 February, 11 am).
 
 Demo: How to switch off automatic labeling and create notes.
 
-#+attr_html: :width 400px: 
+#+attr_html: :width 400px:
 [[../img/pt_network.png]]
 
 *Requires:*
@@ -697,14 +697,14 @@ Demo: How to switch off automatic labeling and create notes.
    - TCO (Total Cost of Ownership)
    #+end_quote
 
-* Week 5: Switches, address resolution
-#+attr_html: :width 400px: 
+* DONE Week 5: Switches, address resolution
+#+attr_html: :width 400px:
 [[../img/monks.png]]
 
 - [X] *Lab*: Anatomy of a switch and the IOS-XE shell
 - [X] *Lab*: Address Resolution with ARP (simulation)
 - [X] *Lecture*: Broadcasting across a Cisco network
-  
+
 ** Project proposal submissions
 
 - Everybody submitted on time (never happened before)
@@ -752,7 +752,7 @@ Demo: How to switch off automatic labeling and create notes.
 
 7. Does the switch know anything about other physical devices?
    #+begin_quote
-   No. You can see that with =show mac address-table=. 
+   No. You can see that with =show mac address-table=.
    #+end_quote
 
 8. Does the switch know anything about the network at all?
@@ -789,7 +789,7 @@ Demo: How to switch off automatic labeling and create notes.
 2. What does ARP stand for and what does it do?
    #+begin_quote
    The Address Resolution Protocol is a network protocol used to map
-   an IP address to a corresponding MAC address in a local network. 
+   an IP address to a corresponding MAC address in a local network.
    #+end_quote
 
 3. At which level of the network model does ARP operate?
@@ -845,7 +845,7 @@ Demo: How to switch off automatic labeling and create notes.
 
 9. How can I see the ARP table on a Linux shell?
    #+begin_src bash :results output :exports both
-   ip neigh show
+     ip neigh show
    #+end_src
 
    On my machine at home:
@@ -860,52 +860,52 @@ Demo: How to switch off automatic labeling and create notes.
 
 10. Can you write a program to see the ARP table?
     #+begin_src C :results output
-     #include <stdio.h>
-     #include <stdlib.h>
+      #include <stdio.h>
+      #include <stdlib.h>
 
-     #define ARP_TABLE "/proc/net/arp" // standard Linux location
+      #define ARP_TABLE "/proc/net/arp" // standard Linux location
 
-     int main() {
-       FILE *file = fopen(ARP_TABLE, "r");
-       if (!file) {
-         perror("Failed to open ARP table");
-         return 1;
-       }
+      int main() {
+        FILE *file = fopen(ARP_TABLE, "r");
+        if (!file) {
+          perror("Failed to open ARP table");
+          return 1;
+        }
 
-       char line[256];
+        char line[256];
 
-       // Read and print the ARP table header
-       if (fgets(line, sizeof(line), file)) {
-         printf("ARP Table:\n%s", line);
-       }
+        // Read and print the ARP table header
+        if (fgets(line, sizeof(line), file)) {
+          printf("ARP Table:\n%s", line);
+        }
 
-       // Read and print each ARP entry
-       while (fgets(line, sizeof(line), file)) {
-         printf("%s", line);
-       }
+        // Read and print each ARP entry
+        while (fgets(line, sizeof(line), file)) {
+          printf("%s", line);
+        }
 
-       fclose(file);
-       return 0;
-     }
-   #+end_src
+        fclose(file);
+        return 0;
+      }
+    #+end_src
 
-   #+RESULTS:
-   : ARP Table:
-   : IP address       HW type     Flags       HW address            Mask     Device
-   : 10.1.4.1         0x1         0x2         d4:77:98:f0:d9:7f     *        wlp0s20f3
-   : 10.1.4.3         0x1         0x2         a4:10:b6:b1:42:9f     *        wlp0s20f3
+    #+RESULTS:
+    : ARP Table:
+    : IP address       HW type     Flags       HW address            Mask     Device
+    : 10.1.4.1         0x1         0x2         d4:77:98:f0:d9:7f     *        wlp0s20f3
+    : 10.1.4.3         0x1         0x2         a4:10:b6:b1:42:9f     *        wlp0s20f3
 
-   On my machine at home:
-   #+begin_example
-   : ARP Table:
-   : IP address       HW type     Flags       HW address            Mask     Device
-   : 192.168.1.254    0x1         0x2         6c:4b:b4:6d:65:21     *        enp4s0
-   : 192.168.68.51    0x1         0x2         ae:4b:fd:96:36:90     *        wlo1
-   : 192.168.68.53    0x1         0x2         78:80:38:cc:71:98     *        wlo1
-   : 192.168.68.1     0x1         0x2         60:83:e7:71:cb:50     *        wlo1
-   #+end_example
+    On my machine at home:
+    #+begin_example
+    : ARP Table:
+    : IP address       HW type     Flags       HW address            Mask     Device
+    : 192.168.1.254    0x1         0x2         6c:4b:b4:6d:65:21     *        enp4s0
+    : 192.168.68.51    0x1         0x2         ae:4b:fd:96:36:90     *        wlo1
+    : 192.168.68.53    0x1         0x2         78:80:38:cc:71:98     *        wlo1
+    : 192.168.68.1     0x1         0x2         60:83:e7:71:cb:50     *        wlo1
+    #+end_example
 
-* Week 6: Subnets and domains
+* DONE Week 6: Subnets and domains
 
 *Home assignments all due by Friday 21 February:*
 - [X] *Test*: Switches, Address resolution (40 questions - 60')
@@ -996,13 +996,13 @@ Demo: How to switch off automatic labeling and create notes.
    - interface to forward packets through (physical layer)
    #+end_quote
    #+begin_src bash :results output :exports both
-     ip route show 
+     ip route show
    #+end_src
 
    #+RESULTS:
-   : default via 10.1.4.1 dev wlp0s20f3 proto dhcp metric 600 
-   : 10.1.4.0/22 dev wlp0s20f3 proto kernel scope link src 10.1.4.252 metric 600 
-   : 169.254.0.0/16 dev wlp0s20f3 scope link metric 1000 
+   : default via 10.1.4.1 dev wlp0s20f3 proto dhcp metric 600
+   : 10.1.4.0/22 dev wlp0s20f3 proto kernel scope link src 10.1.4.252 metric 600
+   : 169.254.0.0/16 dev wlp0s20f3 scope link metric 1000
 
    #+begin_src bash :results output :exports both
      netstat -r # this command is `deprecated`
@@ -1030,7 +1030,7 @@ Demo: How to switch off automatic labeling and create notes.
       Protocol)
    4) =metric= indicates the cost or priority of a route (low=preferred)
 
-   *Local network route:* 
+   *Local network route:*
    ~192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.100~
    1) Directly connected network (private address range).
    2) Traffic for the subnet goes through =eth0= (Ethernet cable)
@@ -1052,13 +1052,13 @@ Demo: How to switch off automatic labeling and create notes.
     includes finding public IP addresses and computing checksums.
     #+end_quote
 
-* Week 7: C review and listing network adapters from C
+* DONE Week 7: C review and listing network adapters from C
 
 - [X] *Practice:* Revisit C programming 1: Hello World
 - [ ] *Practice*: Revisit C programming 2: ("FizzBuzz", loops, ifelse)
 - [X] *Lecture*: Networking sockets with C
-- [ ] *Assignment*: Convert MAC addresses into binary 
-- [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays) 
+- [ ] *Assignment*: Convert MAC addresses into binary
+- [ ] *Assignment*: FizzBuzz Reloaded (functions, pointers, arrays)
 
 ** DONE Review - Sockets I
 
@@ -1093,7 +1093,7 @@ Starter code:
 #+begin_src C :main no :includes :tangle hello4.c :results output
   #include <stdio.h>
 
-  int main(int argc, char *argv[])  
+  int main(int argc, char *argv[])
   {
     // If no arguments are given, print "Hello, World!"
     if (argc <= 1) {
@@ -1107,7 +1107,7 @@ Starter code:
     }
     return 0;
   }
-        #+end_src
+#+end_src
 
 #+RESULTS:
 : Hello, World!
@@ -1115,7 +1115,7 @@ Starter code:
 Shell block for testing:
 #+begin_src bash :results output
   ls -lt hello4*    ## list files time-ordered in long format
-  gcc hello4.c -o hello4 
+  gcc hello4.c -o hello4
   ./hello4 Alice Bob Charlie
 #+end_src
 
@@ -1129,12 +1129,14 @@ Shell block for testing:
 - To debug, add the ~-g~ flag to the compilation, this produces a file
   ready for debugging with ~gdb~, the GNU Debugger.
 
+* Week 8: More socket programming
 
-* Week 8: More socket programming (Part 1)
+- [X] Test 4 deadline extended to March 10 (midterm: 12-Mar)
+- [X] Two small assignments until our next session (Wednesday)
+- [ ] Review: Network interface listing with C
+- [ ] Exercises: Network interface listing with C
 
-- [ ] Test 4 deadline extended to March 10 (midterm: 12-Mar)
-
-** Mandatory Programming assignments
+** DONE Mandatory Programming assignments
 
 These programs are meant to lay the foundation for an appreciation of
 system programming with C.
@@ -1143,16 +1145,188 @@ system programming with C.
 - Reading from a file using a file descriptor.
 - Hard deadline March 10 (because of midterms: 12-Mar)
 
-** Optional programming assignments
+** DONE Optional programming assignments
 
 - Download and complete: [[https://tinyurl.com/fizzbuzz-practice][tinyurl.com/fizzbuzz-practice]].
 - Fizzbuzz reloaded: functions returning strings & arrays.
 - Conversion of hexadecimal MAC address to binary (~switch~)
 
-** Socket programming
+** IN_PROGRESS Socket programming
 
-- Posted very dense 10 minute tutorial "Minimal Web-server in C"
-- We're heading towards: Socket API / HTML client / HTML server
-- Next week we'll continue with more Cisco Packet Tracer stuff
-- Your task until Wednesday (optional): *comment the program.*
+- Posted very dense 10 minute tutorial "Minimal Web-server in C".
+- We're heading towards: Socket API / HTML client / HTML server.
+- Next week we'll continue with more Cisco Packet Tracer stuff.
+
+- Two tasks until Wednesday:
+  1) Comment the IP address listing program.
+  2) Find out what the difference is between ~socket(2)~ and ~socket(7)~.
+
 - I will then decide if/how much longer to torture you with C.
+- Note: You really *do need to install Linux on your Windoze PC*.
+
+** TODO Review: Home assignments
+
+*** Sample Solution: Adding Inline Comments to `unix_list.c`
+
+- *Assignment*: "Add inline comments // to the file `unix_list.c` to say
+  what it does - be as specific as you need to be so that someone else
+  (or you in the future) can understand what is going on."
+
+- *Approach*: Comment each logical step, explaining purpose and
+  details - this shows that "literate programming" does not replace
+  insightful comments. Alas, in languages like C/C++ you need both.
+
+  #+begin_src C :tangle unix_list_commented.c
+    /****************************************/
+    // MIT License
+    // ... (license text unchanged) ...
+    /****************************************/
+    #include <sys/socket.h>  // For socket structs (sockaddr) and address families (AF_INET)
+    #include <netdb.h>       // For getnameinfo() to convert addresses to strings
+    #include <ifaddrs.h>     // For getifaddrs() and struct ifaddrs to list interfaces
+    #include <stdio.h>       // For printf() to display output
+    #include <stdlib.h>      // For exit codes (EXIT_FAILURE) and freeifaddrs()
+
+    int main() {
+      struct ifaddrs *addresses;  // Pointer to linked list of network interfaces
+
+      // Get all network interfaces; store in addresses; -1 means failure
+      if (getifaddrs(&addresses) == -1) {
+        printf("getifaddrs call failed\n");  // Print error if fetching interfaces fails
+        return -1;                           // Exit with error code (non-zero)
+      }
+
+      struct ifaddrs *address = addresses;  // Working pointer to traverse the list
+      while (address) {                     // Loop through all interfaces until NULL
+        if (address->ifa_addr == NULL) {    // Skip if no address assigned (inactive)
+          address = address->ifa_next;      // Move to next interface in list
+          continue;                         // Restart loop
+        }
+        // Get address family (e.g., AF_INET for IPv4, AF_INET6 for IPv6)
+        int family = address->ifa_addr->sa_family;
+        if (family == AF_INET || family == AF_INET6) {  // Filter for IP addresses only
+          printf("%s\t", address->ifa_name);            // Print interface name (e.g., lo)
+          // Print address type: IPv4 or IPv6, based on family
+          printf("%s\t", family == AF_INET ? "IPv4" : "IPv6");
+
+          char ap[100];  // Buffer for address string (up to 100 chars)
+          // Set size of address struct: 16 bytes for IPv4, 28 for IPv6
+          const int family_size = family == AF_INET ?
+            sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6);
+          // Convert binary address to string (e.g., 127.0.0.1); NI_NUMERICHOST avoids DNS
+          getnameinfo(address->ifa_addr, family_size, ap, sizeof(ap), 0, 0, NI_NUMERICHOST);
+          printf("\t%s\n", ap);  // Print the address with tab and newline
+        }
+        address = address->ifa_next;  // Advance to next interface
+      }
+
+      freeifaddrs(addresses);  // Free memory allocated by getifaddrs()
+      return 0;                // Exit successfully (zero)
+    }
+  #+end_src
+
+- *Notes*:
+  - Comments explain *what* (e.g., “Print interface name”) and *why* (e.g., “avoids DNS”).
+  - Specifics like struct sizes (16, 28 bytes) and `NI_NUMERICHOST` clarify intent.
+  - Keeps it readable—future you or a peer can follow the flow.
+- *Test*: Tangle (C-c C-v t), compile (`gcc -o unix_list_commented unix_list_commented.c`), run (`./unix_list_commented`).
+
+
+
+*** Sample Solution: Differences Between Linux Manual Pages for Socket
+
+- *Task*: Find the two Linux manual pages for "socket" and figure out
+  their differences.
+
+- *Answer*:
+
+  - Two pages: =socket(2)= (173 lines) and =socket(7)= (462 lines).
+
+  - *socket(2)*: System call to create a socket (e.g., =socket(AF_INET,
+    SOCK_STREAM, 0)=). Focuses on usage—args like =domain=, =type=,
+    =protocol=, and errors. *For coding.*
+
+  - *socket(7)*: Overview of the socket interface. Covers concepts
+    (e.g., =AF_INET=, =SOCK_STREAM=), options (e.g., =SO_REUSEADDR=), and
+    related calls (e.g., =bind=). *For understanding.*
+
+  - *Key Difference*: =socket(2)= is "how to use it"; =socket(7)= is "what
+    it is and how it fits."
+
+- *Check*: Run =man 2 socket= and =man 7 socket= in Emacs (=M-!=).
+
+
+** TODO Review: Network interface listing with C
+
+1. What's a NAT?
+   #+begin_quote
+   Network Address Translation server: a program that translates
+   LAN IP addresses to WAN IP addresses and vice versa.
+   #+end_quote
+
+2. How can you get your public IP address if you're behind a NAT?
+   #+begin_quote
+   You need to contact a public internet server (e.g. via browser)
+   like ~ifconfig.me/ip~ or ~api.ipify.org~.
+   #+end_quote
+
+3. How are the elements of a ~socket~ being used during network traffic?
+   #+begin_quote
+   Separate APIs (Application Programming Interfaces) use each part of
+   the ~socket~: Local and remote web server API, local system socket
+   API (for IPv4 and DNS), and local network stack API (for TCP/IP).
+   #+end_quote
+
+4. When listing local IP addresses - are there portability issues?
+   #+begin_quote
+   All things networking are different between Windows and Unix-based
+   system (Linux, MacOS). However, the preprocessor can take care of
+   that by linking different header files.
+   #+end_quote
+
+5. What's the workflow for listing network addresses with C?
+   #+begin_quote
+   - Include system header files (~socket.h~, ~netdb.h~, ~ifaddrs.h~).
+   - Get network interface addresses (~getifaddrs~, ~address->ifa_addr~).
+   - Iterate through linked list of IP addresses (~addresses~).
+   - Filter for IPv4 or IPv6 addresses (~AF_INET~)
+   - Print network interface name and address type (~address->ifa_name~)
+   - Convert binary IP address to string (~getnameinfo~)
+   - Move to next network interface in the list (~address->ifa_next~)
+   - Check if end of list is reached (~address != NULL~)
+   - When list is finished, free allocated memory (~freeifaddrs~)
+   #+end_quote
+
+6. How can you compare strings in C?
+   #+begin_example C
+   #include <string.h>
+   strcmp(string1,string2);
+   #+end_example
+
+7. What does this code fragment achieve?
+   #+begin_example C
+   int ipv4 = 0, ipv6 = 0;
+   if (family == AF_INET) ipv4++; else ipv6++;
+   #+end_example
+
+8. Where would you look for the definition of ~ifa_flags~?
+   #+begin_quote
+   ~ifa_flags~ is part of the ~ifaddrs~ data structure. You can find the
+   definitions in the man page for ~netdevice(7)~.
+   #+end_quote
+
+9. How would you print ~address->ifa_flags~?
+   #+begin_src C
+     // print unsigned integer
+     printf("\tFlags: %u\n", address->ifa_flags);
+   #+end_src
+
+10. Why might ~unix_list.c~ fail to list all interfaces shown by ~ip addr
+    show~?
+    #+begin_quote
+    ~unix_list.c~ only lists interfaces with assigned IPv4 or IPv6
+    addresses (checks ~ifa_addr~ and filters for ~AF_INET~, ~AF_INET6~).
+
+    ~ip addr show~ includes all interfaces, even those without IPs
+    (e.g., DOWN or non-IP protocols like ~AF_PACKET~).
+    #+end_quote
