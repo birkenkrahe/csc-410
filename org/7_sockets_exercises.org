@@ -1,0 +1,285 @@
+#+title: Network address listing exercises
+#+author: Marcus Birkenkrahe
+#+SEQ_TODO: TODO NEXT IN_PROGRESS | DONE
+#+startup: overview hideblocks indent entitiespretty:
+#+property: header-args:C :main yes :includes <stdio.h> :results output :exports both:
+#+property: header-args:python :session *Python* :python python3 :results output :exports both:
+#+src R :file :session *R* :results graphics output file :exports both:
+#+property: header-args:C++ :main yes :includes <iostream> :results output :exports both:
+* DONE Setup
+
+- *Download file:*
+  #+begin_example
+  wget -O unix_list.c tinyurl.com/unix-list-c
+    #+end_example
+
+- Create an Org-mode file and insert the file in a C code block:
+
+- Put this line at the top of your file and run it (~C-c C-c~):
+  #+begin_example
+  #+property: header-args:C :results output :noweb yes
+  #+end_example
+
+- *Goal*: Tweak and understand the use of ~getifaddrs()~ and socket APIs.
+
+* DONE Match =ip addr show= and =unix_list.c=
+
+- =unix_list.c=:
+  #+begin_src C
+    #include <sys/socket.h>
+    #include <netdb.h>
+    #include <ifaddrs.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+
+
+    int main() {
+
+      struct ifaddrs *addresses;
+
+      if (getifaddrs(&addresses) == -1) {
+        printf("getifaddrs call failed\n");
+        return -1;
+      }
+
+      struct ifaddrs *address = addresses;
+      while(address) {
+        if (address->ifa_addr == NULL) {
+          address = address->ifa_next;
+          continue;
+        }
+        int family = address->ifa_addr->sa_family;
+        if (family == AF_INET || family == AF_INET6) {
+
+          printf("%s\t", address->ifa_name);
+          printf("%s\t", family == AF_INET ? "IPv4" : "IPv6");
+
+          char ap[100];
+          const int family_size = family == AF_INET ?
+        sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6);
+          getnameinfo(address->ifa_addr,
+                  family_size, ap, sizeof(ap), 0, 0, NI_NUMERICHOST);
+          printf("\t%s\n", ap);
+
+        }
+        address = address->ifa_next;
+      }
+
+
+      freeifaddrs(addresses);
+      return 0;
+    }
+
+  #+end_src
+
+- =ip addr show=:
+  #+begin_src bash :results output
+    ip addr show
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+      link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+      inet 127.0.0.1/8 scope host lo
+         valid_lft forever preferred_lft forever
+      inet6 ::1/128 scope host
+         valid_lft forever preferred_lft forever
+  2: wlp0s20f3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+      link/ether 04:56:e5:25:d2:5d brd ff:ff:ff:ff:ff:ff
+      inet 10.1.6.233/22 brd 10.1.7.255 scope global dynamic noprefixroute wlp0s20f3
+         valid_lft 85877sec preferred_lft 85877sec
+      inet6 fe80::28f6:cc78:32ae:3b68/64 scope link noprefixroute
+         valid_lft forever preferred_lft forever
+  #+end_example
+
+- List interfaces and IPs from both in a table:
+
+  | Name   |       Unix IP | ip addr IP       |
+  |--------+---------------+------------------|
+  | lo     |     127.0.0.1 | 127.0.0.1/8      |
+  | enp4s0 | 192.168.1.250 | 192.168.1.250/24 |
+  | wlo1   | 192.168.68.56 | 192.168.68.56/24 |
+
+- What's the difference? Explain!
+  #+begin_quote
+  - ~ip addr show~ includes netmasks (e.g., ~/24~), MAC addresses,
+    and inactive interfaces (e.g., DOWN state) that ~unix_list.c~
+    skips (requires ~ifa_addr~).
+  - ~unix_list.c~ only shows active IPv4/IPv6 addresses.
+  #+end_quote
+
+* TODO Filter one interface only
+
+- Include ~<string.h>~
+
+- Include =string.h= at the top of your file
+  
+- Add this inside the ~while~ loop (including the code block =name=):
+  #+name: filter loopback addresses
+  #+begin_src C
+    // Skip address if it's not a "lo" interface
+    if (strcmp(address->ifa_name,"lo") != 0) {
+      address = address->ifa_next;
+      continue;
+     }
+  #+end_src
+
+- Test the file by inserting the code block name inside double
+  brackets << and >> at the right place of the program.
+  #+begin_src C :noweb yes
+    #include <string.h>
+    #include <sys/socket.h>
+    #include <netdb.h>
+    #include <ifaddrs.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+
+    int main() {
+
+      struct ifaddrs *addresses;
+
+      if (getifaddrs(&addresses) == -1) {
+        printf("getifaddrs call failed\n");
+        return -1;
+      }
+
+      struct ifaddrs *address = addresses;
+      while(address) {
+        <<filter loopback addresses>>
+        if (address->ifa_addr == NULL) { 
+          address = address->ifa_next;
+          continue;
+        }
+        int family = address->ifa_addr->sa_family;
+        if (family == AF_INET || family == AF_INET6) {
+
+          printf("%s\t", address->ifa_name);
+          printf("%s\t", family == AF_INET ? "IPv4" : "IPv6");
+
+          char ap[100];
+          const int family_size = family == AF_INET ?
+    	sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6);
+          getnameinfo(address->ifa_addr,
+    		  family_size, ap, sizeof(ap), 0, 0, NI_NUMERICHOST);
+          printf("\t%s\n", ap);
+
+        }
+        address = address->ifa_next;
+      }
+
+
+      freeifaddrs(addresses);
+      return 0;
+    }
+
+  #+end_src
+
+  #+RESULTS:
+  : lo	IPv4		127.0.0.1
+  : lo	IPv6		::1
+
+* TODO Count address types
+
+- Initialize counters for IPv4 and IPv6 addresses before the ~while~
+  loop:
+  #+name: Initialize IP address counter
+  #+begin_src C
+    // Initialize IP counters for IPv4 and IPv6
+
+  #+end_src
+
+- after the =if(family =...)= block, add:
+  #+name: Increment IP address counters
+  #+begin_src C
+    // Increment IP counters: IPv4 if AF_INET, IPv6 if AF_INET6
+
+  #+end_src
+
+- Outside the loop, before the ~freeifaddrs~ command, add:
+  #+name: print IP address counters
+  #+begin_src C
+    // Print total counts of IPv4 and IPv6 addresses
+
+  #+end_src
+
+- Test:
+  #+begin_src C :noweb yes
+
+  #+end_src
+
+* TODO Add Interface Flags to Printout
+
+- Add the following block inside the =if (family...)= block.
+  #+name: print interface flags
+  #+begin_src C
+
+  #+end_src
+
+- Test:
+  #+begin_src C :noweb yes
+
+  #+end_src
+
+** The IFA_FLAG Values 65609 and 69699
+
+The *IFA_FLAG* values *65609* and *69699* correspond to bitwise flags used
+in network interface programming, typically in the context of *Linux
+Netlink* when dealing with IP addresses:
+
+- *65609* in binary: `1111 1110 0101 1001`
+- *69699* in binary: `1000 1111 1110 0011`
+
+These values are a combination of different flag bits. Some common
+*IFA_FLAGS* values from Linux are:
+| *Flag*                   | *Hex*     | *Binary*           | *Description*                        |
+|------------------------+---------+------------------+------------------------------------|
+| `IFA_F_SECONDARY`      | `0x01`  | `0000 0001`      | Secondary address                  |
+| `IFA_F_NODAD`          | `0x02`  | `0000 0010`      | Do not perform DAD[fn:1]                 |
+| `IFA_F_OPTIMISTIC`     | `0x04`  | `0000 0100`      | Optimistic address                 |
+| `IFA_F_DADFAILED`      | `0x08`  | `0000 1000`      | DAD failed                         |
+| `IFA_F_HOMEADDRESS`    | `0x10`  | `0001 0000`      | Home address                       |
+| `IFA_F_DEPRECATED`     | `0x20`  | `0010 0000`      | Deprecated address                 |
+| `IFA_F_TENTATIVE`      | `0x40`  | `0100 0000`      | Tentative address                  |
+| `IFA_F_PERMANENT`      | `0x80`  | `1000 0000`      | Permanent address                  |
+| `IFA_F_MANAGETEMPADDR` | `0x100` | `0001 0000 0000` | RFC 4941 managed temp addr         |
+| `IFA_F_NOPREFIXROUTE`  | `0x200` | `0010 0000 0000` | No prefix route                    |
+| `IFA_F_MCAUTOJOIN`     | `0x400` | `0100 0000 0000` | Auto-join multicast group          |
+| `IFA_F_STABLE_PRIVACY` | `0x800` | `1000 0000 0000` | Stable privacy address             |
+
+*Decoding 65609 (`0x100F9` in hex)*
+Binary: `1111 1110 0101 1001`
+
+Flags present:
+- `IFA_F_SECONDARY` (`0x01`)
+- `IFA_F_DADFAILED` (`0x08`)
+- `IFA_F_DEPRECATED` (`0x20`)
+- `IFA_F_TENTATIVE` (`0x40`)
+- `IFA_F_PERMANENT` (`0x80`)
+- `IFA_F_MANAGETEMPADDR` (`0x10000`)
+
+✅ *Secondary address, DAD failed, Deprecated, Tentative, Permanent,
+and Managed Temporary Address.*
+
+**Decoding 69699 (`0x110F3` in hex)**
+Binary: `1000 1111 1110 0011`
+
+Flags present:
+- `IFA_F_SECONDARY` (`0x01`)
+- `IFA_F_NODAD` (`0x02`)
+- `IFA_F_OPTIMISTIC` (`0x04`)
+- `IFA_F_DADFAILED` (`0x08`)
+- `IFA_F_DEPRECATED` (`0x20`)
+- `IFA_F_TENTATIVE` (`0x40`)
+- `IFA_F_PERMANENT` (`0x80`)
+- `IFA_F_MANAGETEMPADDR` (`0x10000`)
+
+✅ *Secondary address, No DAD, Optimistic, DAD Failed, Deprecated,
+Tentative, Permanent, and Managed Temporary Address.*
+
+These values typically indicate addresses in transition, possibly in a
+*privacy-enhanced IPv6 configuration*.
+
+* Footnotes
+
+[fn:1]Duplicate Address Detection

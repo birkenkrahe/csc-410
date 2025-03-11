@@ -1129,14 +1129,14 @@ Shell block for testing:
 - To debug, add the ~-g~ flag to the compilation, this produces a file
   ready for debugging with ~gdb~, the GNU Debugger.
 
-* Week 8: More socket programming
+* DONE Week 8: More socket programming
 
 - [X] Test 4 deadline extended to March 10 (midterm: 12-Mar)
 - [X] Two small assignments until our next session (Wednesday)
 - [ ] Review: Network interface listing with C
 - [ ] Exercises: Network interface listing with C
 
-** DONE Mandatory Programming assignments
+** Mandatory Programming assignments
 
 These programs are meant to lay the foundation for an appreciation of
 system programming with C.
@@ -1145,27 +1145,13 @@ system programming with C.
 - Reading from a file using a file descriptor.
 - Hard deadline March 10 (because of midterms: 12-Mar)
 
-** DONE Optional programming assignments
+** Optional programming assignments
 
 - Download and complete: [[https://tinyurl.com/fizzbuzz-practice][tinyurl.com/fizzbuzz-practice]].
 - Fizzbuzz reloaded: functions returning strings & arrays.
 - Conversion of hexadecimal MAC address to binary (~switch~)
 
-** IN_PROGRESS Socket programming
-
-- Posted very dense 10 minute tutorial "Minimal Web-server in C".
-- We're heading towards: Socket API / HTML client / HTML server.
-- Next week we'll continue with more Cisco Packet Tracer stuff.
-
-- Two tasks until Wednesday:
-  1) Comment the IP address listing program.
-  2) Find out what the difference is between ~socket(2)~ and ~socket(7)~.
-
-- I will then decide if/how much longer to torture you with C.
-- Note: You really *do need to install Linux on your Windoze PC*.
-
-** TODO Review: Home assignments
-
+** Review: Home assignments
 *** Sample Solution: Adding Inline Comments to `unix_list.c`
 
 - *Assignment*: "Add inline comments // to the file `unix_list.c` to say
@@ -1197,7 +1183,7 @@ system programming with C.
       }
 
       struct ifaddrs *address = addresses;  // Working pointer to traverse the list
-      while (address) {                     // Loop through all interfaces until NULL
+      while (address != NULL) {             // Loop through all interfaces until NULL
         if (address->ifa_addr == NULL) {    // Skip if no address assigned (inactive)
           address = address->ifa_next;      // Move to next interface in list
           continue;                         // Restart loop
@@ -1221,16 +1207,23 @@ system programming with C.
       }
 
       freeifaddrs(addresses);  // Free memory allocated by getifaddrs()
-      return 0;                // Exit successfully (zero)
+      return EXIT_SUCCESS;     // Exit successfully (zero)
     }
   #+end_src
+
+  #+RESULTS:
+  | lo        | IPv4 |   |                           127.0.0.1 |
+  | wlp0s20f3 | IPv4 |   |                           10.1.6.35 |
+  | lo        | IPv6 |   |                                 ::1 |
+  | wlp0s20f3 | IPv6 |   | fe80::28f6:cc78:32ae:3b68%wlp0s20f3 |
 
 - *Notes*:
   - Comments explain *what* (e.g., “Print interface name”) and *why* (e.g., “avoids DNS”).
   - Specifics like struct sizes (16, 28 bytes) and `NI_NUMERICHOST` clarify intent.
   - Keeps it readable—future you or a peer can follow the flow.
-- *Test*: Tangle (C-c C-v t), compile (`gcc -o unix_list_commented unix_list_commented.c`), run (`./unix_list_commented`).
 
+- *Test*:
+  Tangle (C-c C-v t), compile (`gcc -o unix_list_commented unix_list_commented.c`), run (`./unix_list_commented`).
 
 
 *** Sample Solution: Differences Between Linux Manual Pages for Socket
@@ -1255,15 +1248,24 @@ system programming with C.
 
 - *Check*: Run =man 2 socket= and =man 7 socket= in Emacs (=M-!=).
 
+<<<<<<< HEAD
 ** TODO Review: Network interface listing with C
 
 1. What's a NAT?
+=======
+** Review: Network interface listing with C
+
+1. What's a NAT? And why do we need it?
+>>>>>>> 07a1b20f350867b5f24103b07e1858366e14c771
    #+begin_quote
    Network Address Translation server: a program that translates
    LAN IP addresses to WAN IP addresses and vice versa.
+
+   Reason: LANs have a reserved range of IPv4 addresses. For IPv6,
+   there is no problem because the IPv6 address range is huge.
    #+end_quote
 
-2. How can you get your public IP address if you're behind a NAT?
+2. How can you get your public host IP address if you're behind a NAT?
    #+begin_quote
    You need to contact a public internet server (e.g. via browser)
    like ~ifconfig.me/ip~ or ~api.ipify.org~.
@@ -1298,12 +1300,13 @@ system programming with C.
 
 6. How can you compare strings in C?
    #+begin_example C
-   #include <string.h>
-   strcmp(string1,string2);
+   #include <string.h>  // contains string manipulating functions
+   strcmp(string1,string2);  // compares `string1` and `string2`
    #+end_example
 
 7. What does this code fragment achieve?
    #+begin_example C
+   // declare IPv4 and IPv6 address counters and increment them
    int ipv4 = 0, ipv6 = 0;
    if (family == AF_INET) ipv4++; else ipv6++;
    #+end_example
@@ -1316,7 +1319,7 @@ system programming with C.
 
 9. How would you print ~address->ifa_flags~?
    #+begin_src C
-     // print unsigned integer
+     // print unsigned integer with `%u`
      printf("\tFlags: %u\n", address->ifa_flags);
    #+end_src
 
@@ -1329,3 +1332,141 @@ system programming with C.
     ~ip addr show~ includes all interfaces, even those without IPs
     (e.g., DOWN or non-IP protocols like ~AF_PACKET~).
     #+end_quote
+
+** Socket programming
+
+- Posted very dense 10 minute tutorial "Minimal Web-server in C".
+- We're heading towards: Socket API / HTML client / HTML server.
+- Next week we'll continue with more Cisco Packet Tracer stuff.
+
+- Two tasks until Wednesday:
+  1) Comment the IP address listing program.
+  2) Find out what the difference is between ~socket(2)~ and ~socket(7)~.
+
+- I will then decide if/how much longer to torture you with C.
+- Note: You really *do need to install Linux on your Windoze PC*.
+
+* Week 9: Socket exercises & TCP/IP in-depth
+#+attr_html: :width 400px :float nil:
+[[../img/socketmaster.png]]
+
+- [ ] *New test* available. 35 questions, covers socket programming and
+  material from various programming assignments and class exercises.
+
+- [ ] *Popquiz*: Subnet masks! Answer as many questions as you
+  can. Solutions will be available as PDF in GitHub.
+
+- [ ] *Finish* socket programming exercises.
+
+- [ ] *TCP/IP*: Back to Cisco Packet Tracer with a larger network to
+  investigate the interface between layer 3 and layer 4.
+  1) Bits, frames, packets, segments
+  2) HTTP capture
+  3) Network ports
+  4) FTP and Email capture
+
+** Review Subnetmask/CIDR
+
+- An IPv4 IP address has 32-bit length (4x8-bit words/bytes/octets).
+- The subnet mask says how many bit of the address are occupied.
+- 255.255.255.0 (decimal) is 11111111.11111111.11111111.00000000
+- The CIDR notation gives only the bit-length of the mask.
+- You can use ~bc~ with ~ibase~ and ~obase~ for I/O to convert addresses.
+
+An example: ~ip addr show~ shows =192.168.1.100/16= for your PC. How many
+hosts are at most in the same broadcast domain (aka subnet)?
+#+begin_quote
+Answer: 32 = 16 + 16 -> there are at most 2^16 other hosts.
+#+end_quote
+The subnetmask for this network in full form is 255.255.0.0. or in
+binary form: 11111111.11111111.11111111.000000000.00000000.
+
+*Review questions:*
+1. How many hosts can '10.12.1.0/24' have?
+   #+begin_quote
+   '/24' in CIDR notation: 24 x 1-bit + 8 x 1-bit. The first three
+   byte of the address are masked (= not available) but the last byte
+   is for any 8-bit or 2^8 host addresses (though 2 are reserved).
+   #+end_quote
+2. What host addresses are reserved?
+   #+begin_quote
+   The network address - e.g. 192.168.0.0 (used to identify the
+   network from the outside)- and the broadcast address -
+   e.g. 192.168.255.255 (used to send packets to network hosts)..
+   #+end_quote
+3. What kind of domain is '10.12.1.0/24'?
+   #+begin_quote
+   An IP address reserved for private or Local Area Networks: private
+   households or small businesses.
+   #+end_quote
+4. What's the public IP address for '10.12.1.0/24'?
+   #+begin_quote
+   The network does not have a public IP address, only the gateway
+   computer has one (on IPv4). You can find it by opening one of the
+   public IP address API servers in a browser (e.g. api.ipfy.org).
+   #+end_quote
+5. When you have the public address of a network, can you send data to
+   private host computers on that network?
+   #+begin_quote
+   Not without being allowed in, and rerouted by the router to that
+   network. The router also serves as the local default gateway.
+   #+end_quote
+6. How are public IPc4 addresses converted into local ones and vice
+   versa?
+   #+begin_quote
+   A NAT (Network Address Translation) server must be running. You can
+   check with ~iptables~ (=sudo iptables -t nat -L -v -n=) if a local NAT
+   server is there but most likely it is running on the router
+   (default gateway).
+   #+end_quote
+7. What is the subnet mask in dotted-decimal notation for a '/20' CIDR
+   prefix? How many hosts are available?
+   #+begin_quote
+   - Break the IP address into 4 octets (32 bits)
+   - 20 * 1-bit = 8 + 8 + 4 are masked:
+     11111111.11111111.1111000.00000000 =  255.255.240.0 because
+   - 11110000 = 2^4+2^5+2^6+2^7 = 16 + 32+ 64 + 128 = 240
+   - Available hosts on this network: 2^4+2^8-2 = 16+256-2 = 270
+   #+end_quote
+8. Confirm the result of the previous question with a ~bc~ calculation,
+   converting the binary subnet mask into a decimal.
+   #+begin_src bash :results output :exports both
+     echo "ibase=10;obase=2;240" | bc
+     echo "ibase=2;11110000" | bc
+   #+end_src
+
+   #+RESULTS:
+   : 11110000
+   : 240
+
+9. What happens if two devices on different networks are manually
+   assigned the same private IP address (e.g. 192.168.1.1).
+   #+begin_quote
+   This results in a routing issue because IP addresses on the same
+   subnet must have different IP addresses.
+   #+end_quote
+10. How many subnets can be created by borrowing 2 bits from the host
+    portion of a /24 network and add them to the network portion?
+    #+begin_quote
+    - A /24 network has 2^8-2=254 available IP addresses, ranging
+      e.g. from 192.168.1.1 to 192.168.1.254.
+    - Borrowing two bits means we take 2 bits from the last 8 bits and
+      add them to the network portion: The new subnetmask is /24 + 2 =
+      /26, the new host portion is 32-26=6 or 2^6-2 = 62 hosts.
+    - /26 corresponds to 11111111.11111111.11111111.11000000
+      (255.255.255.192) because 2^7+2^6=128+64=192.
+    #+end_quote
+
+** Socket programming exercises
+
+- Get the file ~unix-list.c~ from the web:
+  #+begin_example
+  wget -O unix_list.c tinyurl.com/unix-list-c
+    #+end_example
+
+- Create an Org-mode file ~unix-list.org~.
+
+- Insert the C file into a C block in the Org-mode file.
+
+- Run the file to make sure it works, then follow instructions.
+
