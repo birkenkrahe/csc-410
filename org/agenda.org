@@ -1255,7 +1255,6 @@ system programming with C.
 
 - *Check*: Run =man 2 socket= and =man 7 socket= in Emacs (=M-!=).
 
-
 ** TODO Review: Network interface listing with C
 
 1. What's a NAT?
