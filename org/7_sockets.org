@@ -379,7 +379,6 @@ The following topics are covered:
     }
   #+end_src
 
-<<<<<<< HEAD
 * Files
 
 - A similar abstraction is a *file*, which enables applications to read
@@ -585,6 +584,8 @@ The following topics are covered:
     wget -O unix_list.c tinyurl.com/unix-list-c
   #+end_src
 
+  #+RESULTS:
+
 - ~unix_list.c~ -
   #+begin_src C :noweb yes
     <<license>>
@@ -631,6 +632,12 @@ The following topics are covered:
       return 0;
     }
   #+end_src
+
+  #+RESULTS:
+  : lo	IPv4		127.0.0.1
+  : wlp0s20f3	IPv4		10.1.6.35
+  : lo	IPv6		::1
+  : wlp0s20f3	IPv6		fe80::28f6:cc78:32ae:3b68%wlp0s20f3
 
 - Output on my machine at home:
   #+begin_example
@@ -854,6 +861,13 @@ The following topics are covered:
      - Otherwise (since we filtered for =AF_INET6=), prints "IPv6".
   3) =\t= adds a tab for clean, column-aligned output.
 
+- The ternary operator in full form looks like this:
+  #+begin_src C
+    if (family == AF_INET)
+      printf("%s\t","IPv4");
+    else
+      printf("%s\t","IPv6");
+  #+end_src
 * Convert binary address to string
 
 - Summary:

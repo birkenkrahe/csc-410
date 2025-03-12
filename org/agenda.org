@@ -1248,15 +1248,9 @@ system programming with C.
 
 - *Check*: Run =man 2 socket= and =man 7 socket= in Emacs (=M-!=).
 
-<<<<<<< HEAD
-** TODO Review: Network interface listing with C
-
-1. What's a NAT?
-=======
 ** Review: Network interface listing with C
 
 1. What's a NAT? And why do we need it?
->>>>>>> 07a1b20f350867b5f24103b07e1858366e14c771
    #+begin_quote
    Network Address Translation server: a program that translates
    LAN IP addresses to WAN IP addresses and vice versa.
@@ -1350,13 +1344,13 @@ system programming with C.
 #+attr_html: :width 400px :float nil:
 [[../img/socketmaster.png]]
 
-- [ ] *New test* available. 35 questions, covers socket programming and
+- [X] *New test* available. 35 questions, covers socket programming and
   material from various programming assignments and class exercises.
+
+- [X] *Finish* socket programming exercises.
 
 - [ ] *Popquiz*: Subnet masks! Answer as many questions as you
   can. Solutions will be available as PDF in GitHub.
-
-- [ ] *Finish* socket programming exercises.
 
 - [ ] *TCP/IP*: Back to Cisco Packet Tracer with a larger network to
   investigate the interface between layer 3 and layer 4.
@@ -1365,7 +1359,20 @@ system programming with C.
   3) Network ports
   4) FTP and Email capture
 
-** Review Subnetmask/CIDR
+** DONE Socket programming exercises
+
+- Get the file ~unix-list.c~ from the web:
+  #+begin_example
+  wget -O unix_list.c tinyurl.com/unix-list-c
+  #+end_example
+
+- Create an Org-mode file ~unix-list.org~.
+
+- Insert the C file into a C block in the Org-mode file.
+
+- Run the file to make sure it works, then follow instructions.
+
+** DONE Popquiz (handout) Subnetmask/CIDR
 
 - An IPv4 IP address has 32-bit length (4x8-bit words/bytes/octets).
 - The subnet mask says how many bit of the address are occupied.
@@ -1457,16 +1464,5 @@ binary form: 11111111.11111111.11111111.000000000.00000000.
       (255.255.255.192) because 2^7+2^6=128+64=192.
     #+end_quote
 
-** Socket programming exercises
-
-- Get the file ~unix-list.c~ from the web:
-  #+begin_example
-  wget -O unix_list.c tinyurl.com/unix-list-c
-    #+end_example
-
-- Create an Org-mode file ~unix-list.org~.
-
-- Insert the C file into a C block in the Org-mode file.
-
-- Run the file to make sure it works, then follow instructions.
+** NEXT TCP/IP "deep dive"
 
