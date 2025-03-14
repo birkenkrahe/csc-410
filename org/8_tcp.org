@@ -1,0 +1,312 @@
+#+startup: overview hideblocks indent entitiespretty: 
+* Practical TCP/IP Model Part 1: Bits, Frames, Packets, Segments
+
+- TCP/IP model:
+  1) Change PT mode to ~Simulation~ so that we can see packet traffic.
+  2) When data is sent at the physical layer 1 - *bits* are sent.
+  3) When data is sent at the data link layer 2 - *frames* are sent.
+     #+attr_html: :width 400px :float nil:
+     [[../img/frames.png]]
+  4) When data is sent over the network layer 3 - *packets* are sent.
+  5) When data are transported via layer 4 - *segments* are sent.
+
+- People tend to blame "the network" even if it's an application error
+  (which is much more likely given that the network is the most
+  established, best designed, and best tested system available).
+
+* Practical TCP/IP Model Part 2: HTTP captures
+
+- Switch to ~Simulation~ mode.
+- Open the web browser on ~PC 0~.
+- Connect to the server on ~10.1.1.100~.
+- Packets should appear ~Inside PC 0~.
+- Hover over them: they are labeled ~TCP/IP~ and ~ARP~.
+  1. The ~ARP~ *packet* is a broadcast request: "Who has the MAC address
+     associated with this IP address?" Click on next step.
+  2. The PC sends a *frame* to ~Switch1~.
+     #+attr_html: :width 400px :float nil:
+     [[../img/frame2server.png]]
+  3. Open the ~ARP~ Type in the simulation window to follow the path of
+     the frame on layer 2.
+     #+attr_html: :width 400px :float nil:
+     [[../img/frame2server2.png]]
+  4. Look at the PDU (Protocol Data Unit): The target MAC address is
+     blank (packet has not reached the server yet).
+     #+attr_html: :width 400px :float nil:
+     [[../img/frame2server3.png]]
+  5. The next step flushes the broadcast ARP request to all connected
+     hosts, identifying the correct host as ~Server1~. Both ~Server2~ and
+     ~Router1~ drop the packet.
+     #+attr_html: :width 400px :float nil:
+     [[../img/frame2server4.png]]
+  6. The PDU shows that the server connection received the frame, and
+     the Outbound PDU Details show that ~Server1~ responds with its own
+     MAC address (ending in =0086=).
+     #+attr_html: :width 400px :float nil:
+     [[../img/frame2server5.png]]
+  7. Now the PC knows the MAC address of the server and can
+     communicate with it directly sending/receiving TCP *packets*.
+     #+attr_html: :width 400px :float nil:
+     [[../img/frame2server7.png]]
+  8. Only now can the PC send an HTTP request. It is forwarded to
+     ~Switch1~, received on interface ~G1/0/4~ and forwarded to ~G1/0/2~.
+     #+attr_html: :width 400px :float nil:
+     [[../img/frame2server8.png]]
+  9. *How does the network know what to do at layer 3* (Network/Ethernet
+     in the PDU) In the PDU, you now see an 'EtherType', =TYPE: 0x800=
+     which means IPv4. This is how the payload is identified as an
+     *IPv4 packet* and processed accordingly: When an application
+     interacts with this data via sockets, it uses ~AF_INET~ to indicate
+     IPv4 addressing.
+     #+attr_html: :width 400px :float nil:
+     [[../img/type.png]]
+  10. *How does the network know what to do at layer 4*
+      (Transport/TCP/IP in the PDU)? In the IANA (Internet Assigned
+      Numbers Authority) registry for IP protocol numbers, ~0x06~
+      corresponds to TCP so the IP's packet payload is a *TCP
+      segment*. Find IPv4 protocol nos. on the [[Concrete example:][IANA registry site]].
+
+- How does the layer 3 ~TYPE~ information relate to sockets?
+  1) An Ethernet frame with ~TYPE 0x0800~ arrives
+  2) The kernel's network stack strips the Ethernet header and hands
+     the IPv4 packet to the IP layer.
+  3) A server program (e.g. a web server) listening on a socket
+     created with ~socket(AF_INET,SOCK_STREAM,0)~ receives the data if
+     it's destined for that port.
+
+- How does the layer 4 ~PRO~ information relate to sockets?
+  1) Recall the ~socket~ prototype definition:
+     #+begin_example C
+     int socket(int domain, int type, int protocol);
+     #+end_example
+  2) The TCP value from the IP header is implicitly linked through the
+     stack: When you create a socket with
+     #+begin_example C
+     socket(AF_INET, SOCK_STREAM, 0)
+     #+end_example
+     - ~AF_INET~ says you're using IPv4
+     - ~SOCK_STREAM~ says you want a reliable stream (TCP)
+     - ~0~ means "use default for this domain and type", which is TCP.
+
+- Example: When a packet arrives with ~PRO:0x06~
+  1) The IP layer (3) hands it to the TCP layer (4).
+  2) The TCP layer matches it to an existing socket based on the
+     4-tuple: (source IP, source port, dest IP, dest port) from the
+     TCP header
+  3) Data now become available to an application via the socket
+     operation ~read~.
+  4) When an application sends data through a ~SOCK_STREAM~ socket, the
+     stack builds a TCP segment, wrapts it in an IP packet with the
+     protocol field set to ~0x06~ and sends it out.
+
+* Practical TCP/IP Model Part 2: Port Numbers
+
+- Check out PDU details (TCP): The *Destination Port* is *:80*, while the
+  *Source Port* is *:1025*.
+
+- Google "port numbers" and go to the =iana.org= site. Then search for
+  the port number 80. You find *Tim Berners-Lee* next to it as the
+  maintainer of this register entry.
+
+- The port number is responsible for sending the data to the right
+  application (e.g. an HTTP web service). The HTTP server only listens
+  on port 80 (unless you instructed it otherwise).
+
+- Different ports are used for HTTP on the server side: 80 for plain
+  HTTP, and 443 for (encrypted) HTTPS.
+
+- The source port (1025) is an ephemeral (or dynamic) port chosen
+  temporarily for convenience on the client side (the PC). Different
+  sessions can operate in parallel on different ports.
+
+- From the IANA page: There are
+  1) System ports (0-1023)
+  2) User ports (1024-49151)
+  3) Dynamic/Private/Ephemeral ports (49152-65535)
+
+- Different operating systems, however, use different ranges. Windows
+  specifically allows you to customize ports from 1025 upwards.
+
+- The port number is represented by a 16-bit field in the packet
+  header, hence 2^16 = 65,536 possible numbers in [0,65535].
+
+- Know the well-known protocols: FTP (21), HTTP (80), HTTPS (443) etc.
+
+* Why does TCP keep sending segments after HTTP requests
+
+In Cisco Packet Tracer, after an HTTP request (e.g., fetching a web
+page) is exchanged between a PC (client) and server, you observe TCP
+segments continuing to flow back and forth. This reflects TCP’s role
+as a reliable, connection-oriented protocol beneath HTTP. Let’s break
+it down.
+
+- Context: HTTP Over TCP HTTP (e.g., requesting a web page) runs on
+  TCP. While HTTP handles the application-level request/response
+  (e.g., "GET /index.html" and the HTML content), TCP ensures reliable
+  delivery. This reliability generates additional TCP segments beyond
+  the HTTP payload.
+
+  In Packet Tracer, you see the full TCP lifecycle—connection setup,
+  data transfer, and teardown—plus HTTP nuances.
+
+** 1. TCP Connection Establishment (3-Way Handshake)
+
+Before HTTP data moves, TCP establishes a connection:
+
+- *SYN*: Client sends a TCP segment with the SYN flag to the server
+  (e.g., port 80).
+- *SYN-ACK*: Server responds with SYN and ACK flags, agreeing and
+  acknowledging.
+- *ACK*: Client sends an ACK to confirm, completing the handshake.
+
+  These appear as TCP segments *before* the HTTP request in Packet
+  Tracer. Post-HTTP traffic builds on this.
+
+** 2. HTTP Request and Response
+
+Once connected:
+
+- Client sends an HTTP GET request (e.g., "GET /index.html
+  HTTP/1.1") in one or more TCP segments.
+- Server replies with the HTTP response (e.g., "HTTP/1.1 200 OK"
+  plus content), split across segments if needed.
+
+  In Packet Tracer, these are TCP segments carrying HTTP
+  payloads. Small pages fit in one; larger ones fragment. TCP’s work
+  continues after this.
+
+** 3. TCP Acknowledgments (Reliability)
+
+TCP ensures every segment is received:
+
+- Server sends a data segment; client sends a TCP segment with ACK
+  (e.g., "I got bytes 1–1460").
+- For multi-segment responses, this repeats: data, ACK, data, ACK.
+
+  In Packet Tracer, ACKs appear as standalone TCP segments (no HTTP
+  data, just headers). This back-and-forth is TCP confirming
+  delivery.
+
+** 4. TCP Connection Teardown (4-Way Handshake)
+
+After the page is delivered, TCP closes the connection:
+
+- *FIN*: Server (or client) sends a TCP segment with FIN, signaling it’s
+  done.
+- *ACK*: Other side ACKs the FIN.
+- *FIN*: Second side sends its FIN.
+- *ACK*: First side ACKs, closing the connection.
+
+  In Packet Tracer, this is four TCP segments post-HTTP. Server often
+  initiates closure (e.g., HTTP/1.0), but timing varies.
+
+** 5. HTTP/1.1 Keep-Alive (Optional)
+
+With HTTP/1.1 keep-alive, the TCP connection stays open for potential
+follow-ups (e.g., images):
+
+- Idle TCP segments (e.g., keep-alive probes, window updates).
+
+- Extra HTTP requests/responses for embedded resources.
+
+Packet Tracer might simplify this, but multi-resource pages increase
+TCP traffic.
+
+** Why This Happens in Packet Tracer
+
+Packet Tracer simulates the full TCP/IP stack:
+
+- *Realism*: Shows TCP’s reliability (ACKs) and session management (FINs).
+
+- *Learning Focus*: Exposes low-level TCP for education.
+
+- *Simplification*: May streamline (e.g., no pipelining).
+
+Example:
+- Client requests `index.html`.
+- Server sends it in 2 segments (1460 bytes each).
+- Client ACKs each.
+- Server sends FIN, client ACKs, client sends FIN, server ACKs.
+
+  That’s at least 6 post-request TCP segments.
+
+** Conclusion
+
+Post-HTTP TCP segments are likely:
+1. *ACKs* for response data.
+2. *FIN/ACK sequence* for closure.
+3. Possibly *window updates* or retransmissions (check sequence
+   numbers).
+
+To confirm in Packet Tracer:
+- Use *Simulation Mode*.
+- Filter TCP packets between PC and server.
+- Check *Flags* (SYN, ACK, FIN) and *Sequence/Acknowledgment Numbers*.
+
+Example PDU view:
+#+begin_example
+TCP:
+  Source Port: 1025
+  Destination Port: 80
+  Sequence Number: 0
+  Acknowledgment Number: 0
+  Flags: 0x02 (SYN)
+#+end_example
+
+** Summary
+
+TCP segments persist after HTTP because TCP confirms delivery (ACKs)
+and negotiates closure (FINs). Packet Tracer exposes this to teach
+networking. It’s TCP, not HTTP, driving the extra traffic.
+
+* Checking Flags and Sequence/Acknowledgment Numbers in Packet Tracer
+
+In Packet Tracer, the Flags field in the TCP header is shown as a
+hexadecimal value with a breakdown:
+
+- Common flag values:
+  + ~0x02~ = SYN (start connection).
+  + ~0x10~ = ACK (acknowledge data or prior segment).
+  + ~0x01~ = FIN (end connection).
+  + ~0x12~ = SYN+ACK (handshake response).
+  + ~0x11~ = FIN+ACK (combined finish and acknowledgment).
+
+These numbers help TCP manage data flow:
+
+- *Sequence Number*: Tracks the sender’s data stream. Starts at a random
+  value (e.g., 0 or 12345) and increments by the bytes sent.
+
+- *Acknowledgment Number*: Confirms receipt. If the client gets a
+  segment with Sequence 0 and 1460 bytes, it sends Ack 1460 (expecting
+  the next byte).
+
+- Example:
+  + Server sends data: ~Seq: 0, Len: 1460, Flags: 0x18 (PSH+ACK)~.
+  + Client replies: ~Seq: 1, Ack: 1460, Flags: 0x10 (ACK)~.
+
+* Practical TCP/IP Model Part 3: E-mail and FTP captures
+
+- Close the web server and open the E-mail application on the PC.
+
+- Compose an E-mail to =peter@cisco.com=
+
+- Check on the server for the E-mail service
+
+- Go back to the E-mail and write "test email" in the =Subject= and in
+  the editor field, write "test e-mail showing port numbers".
+
+- Switch on simulation mode.
+
+- Click send and watch what happens.
+
+- Check =Inbound Details= in the PDU:
+  1) ~TYPE~ shows =0x0800= for IPv4 on Ethernet layer 2
+  2) ~PRO~ shows =0x00= for TCP on IP layer 3
+  3) ~DESTINATION PORT~ shows =PORT 25= on TCP layer 4
+  4) ~SMTP Data~ (Simple Mail Transfer) on application layer 7
+
+- Once the email has been received from the server, you can see it in
+  the =Receive= field of your email client. If you open the inbound
+  details, you'll find 
+
+- Home assignment: FTP transfer (details forthcoming).     
