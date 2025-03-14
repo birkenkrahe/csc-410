@@ -96,7 +96,7 @@
   3) Data now become available to an application via the socket
      operation ~read~.
   4) When an application sends data through a ~SOCK_STREAM~ socket, the
-     stack builds a TCP segment, wrapts it in an IP packet with the
+     stack builds a TCP segment, wraps it in an IP packet with the
      protocol field set to ~0x06~ and sends it out.
 
 * Practical TCP/IP Model Part 2: Port Numbers
@@ -132,7 +132,7 @@
 
 - Know the well-known protocols: FTP (21), HTTP (80), HTTPS (443) etc.
 
-* Why does TCP keep sending segments after HTTP requests
+* NEXT Why does TCP keep sending segments after HTTP requests
 
 In Cisco Packet Tracer, after an HTTP request (e.g., fetching a web
 page) is exchanged between a PC (client) and server, you observe TCP

@@ -1359,7 +1359,7 @@ system programming with C.
   3) Network ports
   4) FTP and Email capture
 
-** DONE Socket programming exercises
+** Socket programming exercises
 
 - Get the file ~unix-list.c~ from the web:
   #+begin_example
@@ -1372,7 +1372,7 @@ system programming with C.
 
 - Run the file to make sure it works, then follow instructions.
 
-** DONE Popquiz (handout) Subnetmask/CIDR
+** Popquiz (handout) Subnetmask/CIDR
 
 - An IPv4 IP address has 32-bit length (4x8-bit words/bytes/octets).
 - The subnet mask says how many bit of the address are occupied.
@@ -1464,5 +1464,10 @@ binary form: 11111111.11111111.11111111.000000000.00000000.
       (255.255.255.192) because 2^7+2^6=128+64=192.
     #+end_quote
 
-** NEXT TCP/IP "deep dive"
+** TCP/IP "deep dive"
 
+Practical TCP/IP Model:
+1) ARP request
+2) Bits, Frames, Packets, Segments
+3) HTTP capture
+4) Port numbers/IANA
