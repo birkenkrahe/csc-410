@@ -1,4 +1,4 @@
-#+startup: overview hideblocks indent entitiespretty: 
+#+startup: overview hideblocks indent entitiespretty:
 * Practical TCP/IP Model Part 1: Bits, Frames, Packets, Segments
 
 - TCP/IP model:
@@ -132,7 +132,7 @@
 
 - Know the well-known protocols: FTP (21), HTTP (80), HTTPS (443) etc.
 
-* NEXT Why does TCP keep sending segments after HTTP requests
+* TODO Why does TCP keep sending segments after HTTP requests
 
 In Cisco Packet Tracer, after an HTTP request (e.g., fetching a web
 page) is exchanged between a PC (client) and server, you observe TCP
@@ -256,10 +256,10 @@ TCP:
 ** Summary
 
 TCP segments persist after HTTP because TCP confirms delivery (ACKs)
-and negotiates closure (FINs). Packet Tracer exposes this to teach
-networking. It’s TCP, not HTTP, driving the extra traffic.
+and negotiates closure (FINs). It’s TCP, not HTTP, driving the extra
+traffic.
 
-* Checking Flags and Sequence/Acknowledgment Numbers in Packet Tracer
+* TODO Checking Flags and Sequence/Acknowledgment Numbers in Packet Tracer
 
 In Packet Tracer, the Flags field in the TCP header is shown as a
 hexadecimal value with a breakdown:
@@ -284,7 +284,102 @@ These numbers help TCP manage data flow:
   + Server sends data: ~Seq: 0, Len: 1460, Flags: 0x18 (PSH+ACK)~.
   + Client replies: ~Seq: 1, Ack: 1460, Flags: 0x10 (ACK)~.
 
-* Practical TCP/IP Model Part 3: E-mail and FTP captures
+* TODO Packet Loss Recovery in TCP/IP
+
+When a packet is dropped (lost) under TCP/IP, TCP ensures recovery
+because it’s a reliable protocol, unlike UDP. This process uses
+sequence numbers, acknowledgments (ACKs), and retransmission. Here’s
+how it works.
+
+** How Packet Loss Happens
+
+Packets can be lost due to:
+- Network congestion (e.g., router buffers overflow).
+- Physical errors (e.g., cable noise).
+- Routing issues (e.g., temporary blackout).
+- Firewall or QoS policies discarding packets.  When lost, the sender
+  doesn’t get confirmation, triggering TCP’s recovery.
+
+** TCP’s Recovery Process
+
+*** 1. Detection of Loss
+TCP detects loss in two ways:
+- *Timeout (Retransmission Timeout - RTO)*:
+  - Sender sets a timer per segment based on *Round-Trip Time (RTT)*.
+  - If no ACK arrives before timeout, the packet (or its ACK) is
+    assumed lost.
+  - RTT is calculated dynamically (e.g., Jacobson’s algorithm).
+- *Duplicate ACKs (Fast Retransmit)*:
+  - Each segment has a *Sequence Number* for its byte offset.
+  - Receiver ACKs the next expected sequence. If a packet’s lost, it
+    sends duplicate ACKs for the last good segment.
+  - Three duplicate ACKs signal loss to the sender.
+    Example:
+    - Sender: Seq 1000 (1460 bytes), Seq 2460, Seq 3920.
+    - Seq 1000 arrives, ACK 2460 sent.
+    - Seq 2460 lost, Seq 3920 arrives, ACK 2460 repeated.
+    - Three ACKs 2460 → loss detected.
+
+*** 2. Retransmission
+
+Once detected:
+
+- *Timeout Case*:
+  - Sender retransmits the unacknowledged segment (e.g., Seq 2460).
+  - Timer resets, sending often slows.
+- *Fast Retransmit Case*:
+  - After three duplicate ACKs, sender retransmits immediately (e.g.,
+    Seq 2460).
+  - Faster than waiting for timeout.
+    Retransmitted segment is identical—same sequence, same data.
+
+*** 3. Receiver Handling
+
+- Receiver reorders packets using sequence numbers (e.g., Seq 3920
+  before 2460).
+- On retransmitted Seq 2460 arrival, sends cumulative ACK (e.g., ACK
+  5380).
+- Discards duplicates silently if retransmitted unnecessarily.
+
+*** 4. Congestion Control (Avoiding More Loss)
+
+Loss often means congestion, so TCP adjusts:
+- *Slow Start*: Post-timeout, halves *congestion window (cwnd)*, restarts
+  small.
+- *Congestion Avoidance*: Post-fast retransmit, reduces cwnd (e.g.,
+  half), moderates pace.
+- *Timer Backoff*: Doubles timer per retry (exponential backoff).
+  Balances recovery with network stability.
+
+** Example in Action
+
+- Sender: Seq 1000, Seq 2460, Seq 3920 (cwnd = 3 segments).
+- Seq 2460 drops.
+- Receiver: ACK 2460 (after Seq 1000), ACK 2460 (after Seq 3920).
+- Sender: Three ACKs 2460 → retransmits Seq 2460.
+- Receiver: Gets Seq 2460, sends ACK 5380.
+- Sender adjusts cwnd, continues if more data.
+
+** Key Mechanisms at Play
+
+- *Sequence Numbers*: Track bytes, detect gaps.
+- *ACKs*: Feedback, trigger retransmission.
+- *Timers*: Catch loss without feedback.
+- *Congestion Window*: Balances recovery and network load.
+
+** Why It Works in TCP/IP
+
+- *IP Layer*: Unreliable—drops packets, no recovery.
+- *TCP Layer*: Reliable—detects and fixes loss. TCP/IP splits duties: IP
+  delivers, TCP ensures reliability.
+
+** Recovery Success
+
+TCP recovers unless the connection fails entirely (e.g., network
+partition). Sender retries (up to 5–15 attempts) before quitting, then
+the application (e.g., browser) sees an error.
+
+* TODO Practical TCP/IP Model Part 3: E-mail and FTP captures
 
 - Close the web server and open the E-mail application on the PC.
 
@@ -307,6 +402,6 @@ These numbers help TCP manage data flow:
 
 - Once the email has been received from the server, you can see it in
   the =Receive= field of your email client. If you open the inbound
-  details, you'll find 
+  details, you'll find
 
-- Home assignment: FTP transfer (details forthcoming).     
+- Home assignment: FTP.
