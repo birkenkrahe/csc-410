@@ -1129,12 +1129,12 @@ Shell block for testing:
 - To debug, add the ~-g~ flag to the compilation, this produces a file
   ready for debugging with ~gdb~, the GNU Debugger.
 
-* DONE Week 8: More socket programming
+* DONE Week 8: Network interfacing with sockets
 
 - [X] Test 4 deadline extended to March 10 (midterm: 12-Mar)
 - [X] Two small assignments until our next session (Wednesday)
-- [ ] Review: Network interface listing with C
-- [ ] Exercises: Network interface listing with C
+- [X] Review: Network interface listing with C
+- [X] Exercises: Network interface listing with C
 
 ** Mandatory Programming assignments
 
@@ -1340,7 +1340,7 @@ system programming with C.
 - I will then decide if/how much longer to torture you with C.
 - Note: You really *do need to install Linux on your Windoze PC*.
 
-* Week 9: Socket exercises & TCP/IP in-depth
+* DONE Week 9: Socket exercises & TCP/IP in-depth I
 #+attr_html: :width 400px :float nil:
 [[../img/socketmaster.png]]
 
@@ -1349,15 +1349,15 @@ system programming with C.
 
 - [X] *Finish* socket programming exercises.
 
-- [ ] *Popquiz*: Subnet masks! Answer as many questions as you
+- [X] *Popquiz*: Subnet masks! Answer as many questions as you
   can. Solutions will be available as PDF in GitHub.
 
-- [ ] *TCP/IP*: Back to Cisco Packet Tracer with a larger network to
+- [-] *TCP/IP*: Back to Cisco Packet Tracer with a larger network to
   investigate the interface between layer 3 and layer 4.
-  1) Bits, frames, packets, segments
-  2) HTTP capture
-  3) Network ports
-  4) FTP and Email capture
+  1) [X] Bits, frames, packets, segments
+  2) [X] HTTP capture
+  3) [X] Network ports
+  4) [ ] FTP and Email capture
 
 ** Socket programming exercises
 
@@ -1471,3 +1471,35 @@ Practical TCP/IP Model:
 2) Bits, Frames, Packets, Segments
 3) HTTP capture
 4) Port numbers/IANA
+
+* Week 10: TCP/IP in-depth II - SMTP, FTP, Packet Loss Recovery
+#+attr_html: :width 400px :float nil: 
+[[../img/protocols.png]]
+
+- [ ] Why does TCP keep sending segments?
+- [ ] How does TCP recover lost packets?
+- [ ] How are E-mail and FTP captured?
+
+* Week 11: Socket API & TCP vs UDP
+
+- Source: Hands-on Network Programming with C (2020) pp. 40-70
+
+* Week 12: Programming a TCP client
+
+- Source: Hands-on Network Programming with C (2020) pp. 70-87
+
+* Week 13: Programming a TCP server
+
+- Source: Hands-on Network Programming with C (2020) pp. 88-100
+
+* Week 14: Programming a Web client
+
+- Source: Hands-on Network Programming with C (2020) pp. 166-194
+
+* Week 15: Programming a Web server
+
+- Source: Hands-on Network Programming with C (2020) pp. 195-225
+
+* Week 16: Project presentations
+
+
