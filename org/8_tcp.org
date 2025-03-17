@@ -132,42 +132,51 @@
 
 - Know the well-known protocols: FTP (21), HTTP (80), HTTPS (443) etc.
 
+* IN PROGRESS Restart simulation
+
+1) Make an HTTP request from PC0 to =10.1.1.100= (Server1)
+2) Move the simulation forward until the the HTTP message has reached
+   the server. Check =Sequence number= and =Acknowledgement= PDU entries.
+3) Move past the HTTP request until you get a sequence of several TCP
+   requests (this may take a while).
+
+This is the situation we're trying to clear up: Why do the hosts keep
+exchanging TCP segments after the HTTP request is finished?
+
 * TODO Why does TCP keep sending segments after HTTP requests
 
-In Cisco Packet Tracer, after an HTTP request (e.g., fetching a web
-page) is exchanged between a PC (client) and server, you observe TCP
-segments continuing to flow back and forth. This reflects TCP’s role
-as a reliable, connection-oriented protocol beneath HTTP. Let’s break
-it down.
-
-- Context: HTTP Over TCP HTTP (e.g., requesting a web page) runs on
-  TCP. While HTTP handles the application-level request/response
-  (e.g., "GET /index.html" and the HTML content), TCP ensures reliable
+- Context: HTTP handles the application-level request/response (e.g.,
+  ="GET /index.html"= and the HTML content), TCP ensures reliable
   delivery. This reliability generates additional TCP segments beyond
   the HTTP payload.
 
-  In Packet Tracer, you see the full TCP lifecycle—connection setup,
-  data transfer, and teardown—plus HTTP nuances.
+- To see the following, you can open the PDU / OSI Model view.
 
-** 1. TCP Connection Establishment (3-Way Handshake)
+- We'll first go through the simulation, then we'll look at the
+  analysis.
+
+** TCP Connection Establishment (3-Way Handshake)
 
 Before HTTP data moves, TCP establishes a connection:
 
 - *SYN*: Client sends a TCP segment with the SYN flag to the server
   (e.g., port 80).
+
 - *SYN-ACK*: Server responds with SYN and ACK flags, agreeing and
   acknowledging.
+
 - *ACK*: Client sends an ACK to confirm, completing the handshake.
 
   These appear as TCP segments *before* the HTTP request in Packet
   Tracer. Post-HTTP traffic builds on this.
 
-** 2. HTTP Request and Response
+** HTTP Request and Response
 
 Once connected:
 
 - Client sends an HTTP GET request (e.g., "GET /index.html
   HTTP/1.1") in one or more TCP segments.
+
 - Server replies with the HTTP response (e.g., "HTTP/1.1 200 OK"
   plus content), split across segments if needed.
 
@@ -175,7 +184,7 @@ Once connected:
   payloads. Small pages fit in one; larger ones fragment. TCP’s work
   continues after this.
 
-** 3. TCP Acknowledgments (Reliability)
+** TCP Acknowledgments (Reliability)
 
 TCP ensures every segment is received:
 
@@ -187,7 +196,7 @@ TCP ensures every segment is received:
   data, just headers). This back-and-forth is TCP confirming
   delivery.
 
-** 4. TCP Connection Teardown (4-Way Handshake)
+** TCP Connection Teardown (4-Way Handshake)
 
 After the page is delivered, TCP closes the connection:
 
@@ -197,10 +206,10 @@ After the page is delivered, TCP closes the connection:
 - *FIN*: Second side sends its FIN.
 - *ACK*: First side ACKs, closing the connection.
 
-  In Packet Tracer, this is four TCP segments post-HTTP. Server often
-  initiates closure (e.g., HTTP/1.0), but timing varies.
+In Packet Tracer, this is four TCP segments post-HTTP. Server often
+initiates closure (e.g., HTTP/1.0), but timing varies.
 
-** 5. HTTP/1.1 Keep-Alive (Optional)
+** HTTP/1.1 Keep-Alive (Optional)
 
 With HTTP/1.1 keep-alive, the TCP connection stays open for potential
 follow-ups (e.g., images):
@@ -214,15 +223,8 @@ TCP traffic.
 
 ** Why This Happens in Packet Tracer
 
-Packet Tracer simulates the full TCP/IP stack:
+Packet Tracer simulates the full TCP/IP stack. For example:
 
-- *Realism*: Shows TCP’s reliability (ACKs) and session management (FINs).
-
-- *Learning Focus*: Exposes low-level TCP for education.
-
-- *Simplification*: May streamline (e.g., no pipelining).
-
-Example:
 - Client requests `index.html`.
 - Server sends it in 2 segments (1460 bytes each).
 - Client ACKs each.
@@ -230,7 +232,7 @@ Example:
 
   That’s at least 6 post-request TCP segments.
 
-** Conclusion
+** Summary
 
 Post-HTTP TCP segments are likely:
 1. *ACKs* for response data.
@@ -238,37 +240,20 @@ Post-HTTP TCP segments are likely:
 3. Possibly *window updates* or retransmissions (check sequence
    numbers).
 
-To confirm in Packet Tracer:
-- Use *Simulation Mode*.
-- Filter TCP packets between PC and server.
-- Check *Flags* (SYN, ACK, FIN) and *Sequence/Acknowledgment Numbers*.
-
-Example PDU view:
-#+begin_example
-TCP:
-  Source Port: 1025
-  Destination Port: 80
-  Sequence Number: 0
-  Acknowledgment Number: 0
-  Flags: 0x02 (SYN)
-#+end_example
-
-** Summary
-
 TCP segments persist after HTTP because TCP confirms delivery (ACKs)
 and negotiates closure (FINs). It’s TCP, not HTTP, driving the extra
 traffic.
 
 * TODO Checking Flags and Sequence/Acknowledgment Numbers in Packet Tracer
 
-In Packet Tracer, the Flags field in the TCP header is shown as a
-hexadecimal value with a breakdown:
+In Packet Tracer, the Flags field in the TCP header (PDU) is shown as
+a hexadecimal value with a breakdown:
 
 - Common flag values:
-  + ~0x02~ = SYN (start connection).
-  + ~0x10~ = ACK (acknowledge data or prior segment).
+  + ~0x02~ = SYN (start connection) - Seq = 0, Ack = 0.
+  + ~0x10~ = ACK (acknowledge data or prior segment) - Seq = 1, Ack = 1.
   + ~0x01~ = FIN (end connection).
-  + ~0x12~ = SYN+ACK (handshake response).
+  + ~0x12~ = SYN+ACK (handshake response) - Seq = 0, Ack = 1.
   + ~0x11~ = FIN+ACK (combined finish and acknowledgment).
 
 These numbers help TCP manage data flow:
@@ -283,6 +268,84 @@ These numbers help TCP manage data flow:
 - Example:
   + Server sends data: ~Seq: 0, Len: 1460, Flags: 0x18 (PSH+ACK)~.
   + Client replies: ~Seq: 1, Ack: 1460, Flags: 0x10 (ACK)~.
+
+* TODO Closing a TCP connection: 4-way handshake
+
+- To close the TCP connection and stop seeing more HTTP traffic, you
+  need to change the server settings from "Keep-Alive"
+  (persistent).
+
+- This is not available in our version of PT - you can only switch
+  HTTP off or change the =Global Algorithm Settings= in =Config=.
+
+- When the connection is closed:
+
+  1. The server sends a TCP segment with the FIN flag set (=0x01=)
+  2. The host responds with an ACK (=0x10=), then sends its own FIN
+     followed by a final ACK.
+
+- This is a 4-way handshake:
+  1) Server → PC: FIN
+  2) PC → Server: ACK
+  3) PC → Server: FIN
+  4) Server → PC: ACK
+
+* TODO A failed HTTP request
+
+1) Open Cisco Packet Tracer.
+2) Open =TCP_IP_OSI_Model.pkt.=
+3) Switch to ~Simulation~ mode.
+8) Open =10.1.1.99= in a browser on PC0.
+9) Check the =TCP= PDU.
+   #+begin_quote
+   1. The device receives a TCP RST+ACK segment on the connection to
+      10.1.1.99 on port 80.
+   2. Received segment information: the sequence number 0, the ACK
+      number 1, and the data length 20.
+   3. The TCP segment has the expected peer sequence number.
+   4. The TCP connection was refused.
+   5. The device sets the connection state to CLOSED.
+   #+end_quote
+10) What just happened?
+
+What just happened:
+#+begin_quote
+- The PC receives a TCP segment with both RST (reset) and ACK
+  (acknowledgement) flag set from the IP 10.1.1.99:80 (HTTP).
+- RST means: connection is forcibly terminated.
+- ACK acknowledges the prior segment (SYN from 3-way handshake).
+- PDU:
+  - Sequence number 0, ACK number 1
+  - Data length 20: TCP header with no payload (minimum size)
+- In a real network, you might get an ICMP "Destination unreachable"
+  message instead (Packet Tracer simplifies it).
+#+end_quote
+
+- The TCP-level connection includes a control phase (handshake) and a
+  data transfer (payload) if the handshake is successful.
+
+* TODO Network application requirements
+#+attr_html: :width 700px :float nil: 
+#+caption: Kurose/Ross, Computer Networking (2017) p. 121.
+[[../img/loss.png]]
+
+- *Data loss*: Can the app tolerate data loss (can packets be dropped
+  during transmission)? /Loss-tolerance/ = that some packets can be
+  interpolated or ignored as long as the data stream continues.
+
+- *Throughput*: How much data need to be transferred over the network?
+  /Elastic/ = app can adapt to flexible bandwidth. Transfer can pause or
+  resume. /Specific:/ Consistent data rate per sec required.
+
+- *Time-Sensitive*: Is the application sensitive to delays (latency) in
+  data delivery? If *No*, then delays are fine. If *Yes*, then delays can
+  be tolerated within limits (e.g. 100-500 ms). *Yes and no*:
+  Time-sensitive for real-time chats, delays for non-urgent messages.
+
+All of these affect the choice of protocol. E.g. TCP ensures no loss
+by retransmitting dropped packets but adds delay, and enables veriable
+flow control (does not guarantee bandwidth - UDP does).
+
 
 * TODO Packet Loss Recovery in TCP/IP
 
@@ -303,35 +366,39 @@ Packets can be lost due to:
 ** TCP’s Recovery Process
 
 *** 1. Detection of Loss
+
 TCP detects loss in two ways:
-- *Timeout (Retransmission Timeout - RTO)*:
-  - Sender sets a timer per segment based on *Round-Trip Time (RTT)*.
-  - If no ACK arrives before timeout, the packet (or its ACK) is
-    assumed lost.
-  - RTT is calculated dynamically (e.g., Jacobson’s algorithm).
-- *Duplicate ACKs (Fast Retransmit)*:
-  - Each segment has a *Sequence Number* for its byte offset.
-  - Receiver ACKs the next expected sequence. If a packet’s lost, it
-    sends duplicate ACKs for the last good segment.
-  - Three duplicate ACKs signal loss to the sender.
-    Example:
-    - Sender: Seq 1000 (1460 bytes), Seq 2460, Seq 3920.
-    - Seq 1000 arrives, ACK 2460 sent.
-    - Seq 2460 lost, Seq 3920 arrives, ACK 2460 repeated.
-    - Three ACKs 2460 → loss detected.
+
+1. *Timeout (Retransmission Timeout - RTO)*:
+   - Sender sets a timer per segment based on *Round-Trip Time (RTT)*.
+   - If no ACK arrives before timeout, the packet (or its ACK) is
+     assumed lost.
+   - RTT is calculated dynamically (e.g., [[https://tcpcc.systemsapproach.org/algorithm.html][Jacobson’s algorithm]]).
+
+2. *Duplicate ACKs (Fast Retransmit)*:
+   - Each segment has a *Sequence Number* for its byte offset.
+   - Receiver ACKs the next expected sequence. If a packet’s lost, it
+     sends duplicate ACKs for the last good segment.
+   - Three duplicate ACKs signal loss to the sender.
+     Example:
+     - Sender: Seq 1000 (1460 bytes), Seq 2460, Seq 3920.
+     - Seq 1000 arrives, ACK 2460 sent.
+     - Seq 2460 lost, Seq 3920 arrives, ACK 2460 repeated.
+     - Three ACKs 2460 → loss detected.
 
 *** 2. Retransmission
 
 Once detected:
 
-- *Timeout Case*:
-  - Sender retransmits the unacknowledged segment (e.g., Seq 2460).
-  - Timer resets, sending often slows.
-- *Fast Retransmit Case*:
-  - After three duplicate ACKs, sender retransmits immediately (e.g.,
-    Seq 2460).
-  - Faster than waiting for timeout.
-    Retransmitted segment is identical—same sequence, same data.
+1. *Timeout Case*:
+   - Sender retransmits the unacknowledged segment (e.g., Seq 2460).
+   - Timer resets, sending often slows.
+
+2. *Fast Retransmit Case*:
+   - After three duplicate ACKs, sender retransmits immediately (e.g.,
+     Seq 2460).
+   - Faster than waiting for timeout: Retransmitted segment is
+     identical—same sequence, same data.
 
 *** 3. Receiver Handling
 
@@ -367,17 +434,34 @@ Loss often means congestion, so TCP adjusts:
 - *Timers*: Catch loss without feedback.
 - *Congestion Window*: Balances recovery and network load.
 
-** Why It Works in TCP/IP
-
-- *IP Layer*: Unreliable—drops packets, no recovery.
-- *TCP Layer*: Reliable—detects and fixes loss. TCP/IP splits duties: IP
-  delivers, TCP ensures reliability.
-
 ** Recovery Success
 
 TCP recovers unless the connection fails entirely (e.g., network
 partition). Sender retries (up to 5–15 attempts) before quitting, then
 the application (e.g., browser) sees an error.
+
+** TODO Home assignment: TCP Packet Loss Recovery ([[https://lyon.instructure.com/courses/3114/assignments/43202][Canvas]])
+
+This exercise helps you explore how TCP recovers from packet loss in a
+simulated network using Cisco Packet Tracer. You’ll set up a basic
+network, send data, drop a packet, and observe TCP’s recovery process.
+
+The exercise was designed with the help of Grok 3 after a lot of back
+and forth with me alongside the development of the "TCP/IP deep dive"
+lecture and practice exercises.
+
+Grok's confidence that it will work as described is 85%-90% (based on
+a careful breakdown). I would like you to try it and report back if
+you encounter any issues. I will do it myself of course and then we
+can compare notes.
+
+*You get the points for this exercise for trying even if you do not
+succeed (but you must document your failure).*
+
+* TODO Application layer protocols
+#+attr_html: :width 700px :float nil: 
+#+caption: Source: Kurose/Ross 2019 (p. 124)
+[[../img/inetapps.png]]
 
 * TODO Practical TCP/IP Model Part 3: E-mail and FTP captures
 
@@ -392,16 +476,17 @@ the application (e.g., browser) sees an error.
 
 - Switch on simulation mode.
 
-- Click send and watch what happens.
+- Click send.
 
-- Check =Inbound Details= in the PDU:
-  1) ~TYPE~ shows =0x0800= for IPv4 on Ethernet layer 2
-  2) ~PRO~ shows =0x00= for TCP on IP layer 3
-  3) ~DESTINATION PORT~ shows =PORT 25= on TCP layer 4
-  4) ~SMTP Data~ (Simple Mail Transfer) on application layer 7
+- Check =Inbound Details= in the PDU for the first =TCP= segment:
+  1) ~TYPE~ shows =0x0800= for IPv4 on Ethernet layer 2 (data-link)
+  2) ~PRO~ shows =0x00= for TCP on IP layer 3 (network)
+  3) ~DESTINATION PORT~ shows =PORT 25= on TCP layer 4 (transport)
+  4) ~SMTP Data~ (Simple Mail Transfer) on layer 7 (application)
 
 - Once the email has been received from the server, you can see it in
   the =Receive= field of your email client. If you open the inbound
   details, you'll find
 
-- Home assignment: FTP.
+** Home assignment: FTP capture.
+

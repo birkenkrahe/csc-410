@@ -1477,8 +1477,18 @@ Practical TCP/IP Model:
 [[../img/protocols.png]]
 
 - [ ] Why does TCP keep sending segments?
-- [ ] How does TCP recover lost packets?
-- [ ] How are E-mail and FTP captured?
+- [ ] What do different network applications require?
+- [ ] How does TCP recover lost packets? (Home assignment)
+- [ ] How are E-mail and FTP captured? (Home assignment)
+
+** TCP/IP Deep Dive Continued
+
+1) Open Cisco Packet Tracer (re-enter credentials).
+2) Load network packet file (=TCP_IP_OSI_Model.pkt=).
+3) Open Web Browser on PC0.
+4) Switch dashboard to =Simulation=.
+5) Enter Server1 web address =10.1.1.100= and click =Go=
+6) Watch simulation until only TCP traffic comes.
 
 * Week 11: Socket API & TCP vs UDP
 
