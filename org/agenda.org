@@ -1477,10 +1477,10 @@ Practical TCP/IP Model:
 [[../img/protocols.png]]
 
 - [X] Review: Models, layers, and units
+- [X] How does TCP recover lost packets? (Home assignment - deferred)
+- [X] How are E-mail and FTP captured? (Home assignment)
 - [ ] Why does TCP keep sending segments?
 - [ ] What do different network applications require?
-- [X] How does TCP recover lost packets? (Home assignment)
-- [X] How are E-mail and FTP captured? (Home assignment)
 
 ** DONE Review
 
@@ -1630,10 +1630,10 @@ Practical TCP/IP Model:
    ACK flag (0x10) and no HTTP payload, just headers.
    #+END_QUOTE
 
-9. How does HTTP/1.1 keep-alive affect TCP traffic, and what might you
+9. How does =HTTP/1.1 keep-alive= affect TCP traffic, and what might you
    observe in Packet Tracer?
    #+BEGIN_QUOTE
-   HTTP/1.1 keep-alive keeps the TCP connection open for additional
+   =HTTP/1.1 keep-alive= keeps the TCP connection open for additional
    requests (e.g., for images), leading to idle TCP segments like
    keep-alive probes or window updates in Packet Tracer.
    #+END_QUOTE
@@ -1646,10 +1646,12 @@ Practical TCP/IP Model:
     possibly due to the server refusing the connection.
     #+END_QUOTE
 
-** TODO HTTP and Email capture
+
+** TODO HTTP Reset
 
 1) Load the network, start the simulation, advance it.
 2) Look at the last TCP entries in the OSI Model view.
+3) Close the browser and reset the simulation.
 
 * Week 11: Socket API & TCP vs UDP
 
