@@ -1476,12 +1476,87 @@ Practical TCP/IP Model:
 #+attr_html: :width 400px :float nil: 
 [[../img/protocols.png]]
 
+- [X] Review: Models, layers, and units
 - [ ] Why does TCP keep sending segments?
 - [ ] What do different network applications require?
-- [ ] How does TCP recover lost packets? (Home assignment)
-- [ ] How are E-mail and FTP captured? (Home assignment)
+- [X] How does TCP recover lost packets? (Home assignment)
+- [X] How are E-mail and FTP captured? (Home assignment)
 
-** TCP/IP Deep Dive Continued
+** DONE Review
+
+1. What is the name of layer 2 of the TCP/IP model? (Assume 5 layer
+   model)
+   #+BEGIN_QUOTE
+   The name of layer 2 of the TCP/IP model (5-layer model) is the Data
+   Link layer.
+   #+END_QUOTE
+
+2. What is the name of layer 3 of the TCP/IP model? (Assume 5 layer model)
+   #+BEGIN_QUOTE
+   The name of layer 3 of the TCP/IP model (5-layer model) is the
+   Network layer.
+   #+END_QUOTE
+
+3. At which layer of the TCP/IP model is the Transport layer?
+   #+BEGIN_QUOTE
+   The Transport layer of the TCP/IP model is at layer 4 (5-layer
+   model).
+   #+END_QUOTE
+
+4. Which layers of the TCP/IP model does Cisco Packet Tracer use?
+   #+BEGIN_QUOTE
+   - Cisco Packet Tracer uses the OSI layers (adds "Session" and
+     "Presentation")
+     
+   - The CCNA Exam TCP/IP model uses all five layers: Physical, Data
+     Link, Network, Transport, and Application.
+   #+END_QUOTE
+
+5. At which layer are bits used?
+   #+BEGIN_QUOTE
+   Bits are used at layer 1, the Physical layer.
+   #+END_QUOTE
+
+6. At which layer are packets used?
+   #+BEGIN_QUOTE
+   Packets are used at layer 3, the Network layer.
+   #+END_QUOTE
+
+7. At which layer are segments used?
+   #+BEGIN_QUOTE
+   Segments are used at layer 4, the Transport layer.
+   #+END_QUOTE
+
+8. Which of the following are Layer 3 addresses?
+   #+BEGIN_QUOTE
+   Layer 3 addresses are IP addresses (e.g., IPv4 or IPv6 addresses).
+   #+END_QUOTE
+
+9. Which of the following are Layer 7 (OSI) or 5 (TCP/IP) protocols?
+   #+BEGIN_QUOTE
+   Layer 7 protocols include HTTP, HTTPS, FTP, and SMTP (Application
+   layer protocols).
+   #+END_QUOTE
+
+10. Which Protocol Data Unit (PDU) is used at the data link layer?
+    #+BEGIN_QUOTE
+    The Protocol Data Unit (PDU) used at the Data Link layer is a
+    [ethernet] frame.
+    #+END_QUOTE
+
+11. Which Protocol Data Unit (PDU) is used at the transport layer?
+    #+BEGIN_QUOTE
+    The Protocol Data Unit (PDU) used at the Transport layer is a
+    segment (for TCP) or datagram (for UDP).
+    #+END_QUOTE
+
+12. Which Protocol Data Unit (PDU) is used at the network layer?
+    #+BEGIN_QUOTE
+    The Protocol Data Unit (PDU) used at the Network layer is a
+    packet.
+    #+END_QUOTE
+
+** DONE TCP/IP Deep Dive Continued
 
 1) Open Cisco Packet Tracer (re-enter credentials).
 2) Load network packet file (=TCP_IP_OSI_Model.pkt=).
@@ -1489,6 +1564,92 @@ Practical TCP/IP Model:
 4) Switch dashboard to =Simulation=.
 5) Enter Server1 web address =10.1.1.100= and click =Go=
 6) Watch simulation until only TCP traffic comes.
+
+
+** TODO Review: TCP handshakes, Transport Flags, and HTTP capture or non-capture
+
+1. What happens when the network is first powered up?
+   #+begin_quote
+   The Ethernet connections (physical layer) are activated. 
+   #+end_quote
+
+2. What happens when you request a web page via HTTP for the first
+   time after the network is powered up?
+   #+begin_quote
+   An ARP request is broadcast to all hosts on the network to identify
+   if there is a host with the requested IP address.
+   #+end_quote
+
+3. What is the purpose of the TCP 3-way handshake, and what flags are
+   set in each step?
+   #+BEGIN_QUOTE
+   The TCP 3-way handshake establishes a reliable connection; the
+   steps are SYN (0x02) from the client, SYN+ACK (0x12) from the
+   server, and ACK (0x10) from the client.
+   #+END_QUOTE
+
+4. Why does TCP continue sending segments after an HTTP request is
+   completed?
+   #+BEGIN_QUOTE
+   TCP sends additional segments after an HTTP request for reliability
+   (ACKs to confirm data receipt) and connection closure (FIN/ACK
+   sequence in the 4-way handshake).)
+   #+END_QUOTE
+
+5. What does the RST+ACK segment indicate in a failed HTTP request
+   scenario in Packet Tracer?
+   #+BEGIN_QUOTE
+   The RST+ACK segment indicates that the TCP connection to the server
+   (e.g., 10.1.1.99:80) was forcibly terminated, refusing the
+   connection, and the state is set to CLOSED.
+   #+END_QUOTE
+
+6. How does the TCP 4-way handshake work to close a connection, and
+   what flags are involved?
+   #+BEGIN_QUOTE
+   The TCP 4-way handshake closes the connection with the server
+   sending FIN (0x01), the client responding with ACK (0x10), the
+   client sending its own FIN (0x01), and the server sending a final
+   ACK (0x10).
+   #+END_QUOTE
+
+7. What role do sequence and acknowledgment numbers play in TCP
+   communication, and how are they used in Packet Tracer?
+   #+BEGIN_QUOTE
+   Sequence numbers track the sender’s data stream, while
+   acknowledgment numbers confirm receipt; in Packet Tracer, for
+   example, a server sending data with Seq: 0 and Len: 1460 gets an
+   ACK from the client with Ack: 1460.
+   #+END_QUOTE
+
+8. What is the role of TCP acknowledgments (ACKs) after an HTTP
+   response, and how do they appear in Packet Tracer?
+   #+BEGIN_QUOTE
+   TCP ACKs confirm receipt of data segments after an HTTP response;
+   in Packet Tracer, they appear as standalone TCP segments with the
+   ACK flag (0x10) and no HTTP payload, just headers.
+   #+END_QUOTE
+
+9. How does HTTP/1.1 keep-alive affect TCP traffic, and what might you
+   observe in Packet Tracer?
+   #+BEGIN_QUOTE
+   HTTP/1.1 keep-alive keeps the TCP connection open for additional
+   requests (e.g., for images), leading to idle TCP segments like
+   keep-alive probes or window updates in Packet Tracer.
+   #+END_QUOTE
+
+10. What happens to the TCP connection state when a device receives a
+    RST+ACK segment, and why might this occur?
+    #+BEGIN_QUOTE
+    The TCP connection state is set to CLOSED when a RST+ACK segment is
+    received, indicating the connection was forcibly terminated,
+    possibly due to the server refusing the connection.
+    #+END_QUOTE
+
+** TODO HTTP and Email capture
+
+1) Load the network, start the simulation, advance it.
+2) Look at the last TCP entries in the OSI Model view.
 
 * Week 11: Socket API & TCP vs UDP
 

@@ -132,7 +132,7 @@
 
 - Know the well-known protocols: FTP (21), HTTP (80), HTTPS (443) etc.
 
-* IN PROGRESS Restart simulation
+* Restart simulation
 
 1) Make an HTTP request from PC0 to =10.1.1.100= (Server1)
 2) Move the simulation forward until the the HTTP message has reached
@@ -143,7 +143,7 @@
 This is the situation we're trying to clear up: Why do the hosts keep
 exchanging TCP segments after the HTTP request is finished?
 
-* TODO Why does TCP keep sending segments after HTTP requests
+* Why does TCP keep sending segments after HTTP requests
 
 - Context: HTTP handles the application-level request/response (e.g.,
   ="GET /index.html"= and the HTML content), TCP ensures reliable
@@ -244,7 +244,7 @@ TCP segments persist after HTTP because TCP confirms delivery (ACKs)
 and negotiates closure (FINs). It’s TCP, not HTTP, driving the extra
 traffic.
 
-* TODO Checking Flags and Sequence/Acknowledgment Numbers in Packet Tracer
+* Checking Flags and Sequence/Acknowledgment Numbers in Packet Tracer
 
 In Packet Tracer, the Flags field in the TCP header (PDU) is shown as
 a hexadecimal value with a breakdown:
@@ -269,7 +269,7 @@ These numbers help TCP manage data flow:
   + Server sends data: ~Seq: 0, Len: 1460, Flags: 0x18 (PSH+ACK)~.
   + Client replies: ~Seq: 1, Ack: 1460, Flags: 0x10 (ACK)~.
 
-* TODO Closing a TCP connection: 4-way handshake
+* Closing a TCP connection: 4-way handshake
 
 - To close the TCP connection and stop seeing more HTTP traffic, you
   need to change the server settings from "Keep-Alive"
@@ -290,7 +290,7 @@ These numbers help TCP manage data flow:
   3) PC → Server: FIN
   4) Server → PC: ACK
 
-* TODO A failed HTTP request
+* A failed HTTP request
 
 1) Open Cisco Packet Tracer.
 2) Open =TCP_IP_OSI_Model.pkt.=
@@ -345,7 +345,6 @@ What just happened:
 All of these affect the choice of protocol. E.g. TCP ensures no loss
 by retransmitting dropped packets but adds delay, and enables veriable
 flow control (does not guarantee bandwidth - UDP does).
-
 
 * TODO Packet Loss Recovery in TCP/IP
 
@@ -458,12 +457,42 @@ can compare notes.
 *You get the points for this exercise for trying even if you do not
 succeed (but you must document your failure).*
 
+
 * TODO Application layer protocols
 #+attr_html: :width 700px :float nil: 
 #+caption: Source: Kurose/Ross 2019 (p. 124)
 [[../img/inetapps.png]]
 
-* TODO Practical TCP/IP Model Part 3: E-mail and FTP captures
+* TODO Email protocols: SMTP, POP3, IMAP
+
+** POP3
+
+  - Post Office Protocol version 3
+  - Retrieves emails from a server to a local client
+  - Downloads emails and usually deletes them from the server (unless
+    configured otherwise)
+  - Best for offline access, not great for syncing across devices
+
+** IMAP
+
+  - Internet Message Access Protocol
+  - Keeps emails on the server, syncs them with your device
+  - Syncs changes (read, delete, etc.) across multiple devices
+  - Ideal for multi-device use, requires internet connection
+
+** SMTP
+
+  - Simple Mail Transfer Protocol
+  - Handles sending emails from your client to the recipient’s server
+  - Complements POP3 and IMAP: SMTP sends, POP3/IMAP receive
+
+** Key Differences
+
+  - POP3: Downloads emails (one-way), no sync
+  - IMAP: Syncs emails (two-way), server-based
+  - SMTP: Sends emails, doesn’t receive
+
+* TODO Practical TCP/IP Model Part 3: E-mail capture
 
 - Close the web server and open the E-mail application on the PC.
 
@@ -476,7 +505,9 @@ succeed (but you must document your failure).*
 
 - Switch on simulation mode.
 
-- Click send.
+- Click send in the PC0 editor.
+
+- Click "Play" in the simulation dashboard.
 
 - Check =Inbound Details= in the PDU for the first =TCP= segment:
   1) ~TYPE~ shows =0x0800= for IPv4 on Ethernet layer 2 (data-link)
@@ -486,7 +517,10 @@ succeed (but you must document your failure).*
 
 - Once the email has been received from the server, you can see it in
   the =Receive= field of your email client. If you open the inbound
-  details, you'll find
+  details, you'll find the message data and 
 
-** Home assignment: FTP capture.
+* NEXT FTP capture (home assignment)
+
+- Log into your PC0 console (command-line tool).
+
 
