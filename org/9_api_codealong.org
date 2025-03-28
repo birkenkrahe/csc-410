@@ -190,8 +190,4 @@ those sockets it has connected to:
   loop, and add a loggint ~printf~ message to monitor activity.
   #+end_quote
   
-* Sources
-
-- van Winkle, Hands-on Network Programming with C (Packt);
-- Eduonix, Learn Socket Programming from Scratch (Udemy).
 
