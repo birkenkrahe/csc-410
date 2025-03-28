@@ -1,0 +1,288 @@
+#+title: Client Server Socket Example
+#+author: Marcus Birkenkrahe (pledged)
+#+SEQ_TODO: TODO NEXT IN_PROGRESS | DONE
+#+startup: overview hideblocks indent entitiespretty:
+#+property: header-args:C :main yes :includes <stdio.h> :results output :exports both:
+#+property: header-args:python :session *Python* :python python3 :results output :exports both:
+#+property: header-args: R :session *R* :results output :exports both:
+#+property: header-args:C++ :main yes :includes <iostream> :results output :exports both:
+* Objectives
+
+The following topics are covered:
+
+- [ ] Understanding the importance of sockets in network programming
+- [ ] Understanding the client socket workflow
+- [ ] Coding a TCP client socket
+- [ ] Understanding the server socket workflow
+- [ ] Coding a TCP server socket
+- [ ] Connecting client and server over TCP
+- [ ] Use of ~make~ to build applications
+
+* Why sockets are important in network programming
+
+- Sockets are the low level endpoint used for processing information
+  across a network.
+
+- Protocols like HTTP and FTP rely on sockets.
+
+- Sockets are bidirectional so there isn't anything different about a
+  "client" socket (on the client side) vs. a "server" socket on the
+  server side.
+
+* Client Socket Workflow
+
+On the client side, three function calls are involved: we need to open
+or create a ~socket~, ~connect~ to a remote IP address and a port, and
+when the connection is accepted, we can receive data with ~recv~:
+
+#+attr_html: :width 400px :float nil:
+#+BEGIN_EXAMPLE org
++---------+
+| socket()|
++---------+
+     |
+     v
++----------+
+| connect()|
++----------+
+     |
+     v
++---------+
+| recv()  |
++---------+
+#+END_EXAMPLE
+
+- The result of this call is stored in an integer =network_socket=, and
+  this is the descriptor that we use to refer to the socket later on.
+- We're going to use IP addresses (~AF_INET~) and TCP (~SOCK_STREAM~) as
+  our protocol.
+- Once the socket is created, we connected it to a remote address.
+- If the connection is successful, we get a success signal back.
+- Once we've received data, we can write it into a string and use it.
+
+- The following function prototypes are involved:
+  #+begin_src C :results none :noweb yes
+    <<network header files>>
+
+      // IPv4 or IPv6, TCP or UDP, protocol type)
+    int socket(int domain, int type, int protocol);
+
+    // descriptor, ptr to destination address, length of address
+    int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+
+    // descriptor, ptr to buffer, max no. of bytes, msg flags)
+    ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+  #+end_src
+
+* Create TCP client socket
+
+- At the prompt, create the file with =touch tcp_client.c=
+  #+begin_src bash :results output :exports both
+    touch ./src/tcp_client.c
+    file ./src/tcp_client.c
+  #+end_src
+
+  #+RESULTS:
+  : ./src/tcp_client.c: empty
+
+- Include standard header files:
+  #+name: standard header files
+  #+begin_src C :results none
+    #include <stdio.h>
+    #include <stdlib.h>
+  #+end_src
+
+- Include several special header files
+  #+name: network header files
+  #+begin_src C :results none
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <unistd.h>
+  #+end_src
+
+- Main program:
+  #+begin_src C :noweb yes :tangle ./src/tcp_client.c :includes :main no
+    <<standard header files>>
+    <<network header files>>
+
+    #define PORT 9002
+    int main(void)
+    {
+      // create a socket
+      int network_socket;
+      // Use IPv4, TCP, default protocol
+      network_socket = socket(AF_INET,SOCK_STREAM,0);
+
+      // specify an address for the socket
+      struct sockaddr_in server_address;
+      server_address.sin_family = AF_INET; // IPv4
+      server_address.sin_port = htons(PORT); // Convert port number
+      server_address.sin_addr.s_addr = INADDR_ANY; // Use 0.0.0.0
+
+      // connect to socket
+      int connection_status =  // return 0 if ok, or -1
+        connect(network_socket,
+                (struct sockaddr *) &server_address,
+                sizeof(server_address));
+      // check for error with connection
+      if (connection_status == -1) {
+        printf("Connection error.\n\n");
+      }
+
+      // receive some data from the server
+      char server_response[250]; // empty string to hold data
+      recv(network_socket,&server_response,sizeof(server_response),0);
+
+      // print the data that we get back
+      if (connection_status == 0) {
+        printf("The server sent the data: %s",server_response);
+      }
+
+      // close the socket - unistd.h
+      close(network_socket);
+      return 0;
+    }
+  #+end_src
+
+  #+RESULTS:
+  : Connection error.
+  :
+
+- To test, run this and you should get the output =Connection error.=
+
+* Server Socket Workflow
+
+On the server side, we also need to create a ~socket~ but then we need
+to ~bind~ that socket to an IP address and port where it can ~listen~ for
+connections, ~accept~ a connection, and either ~send~ or ~recv~ data to
+those sockets it has connected to:
+
+#+attr_html: :width 400px :float nil:
+#+BEGIN_EXAMPLE org
++---------+
+| socket()|
++---------+
+     |
+     v
++----------+
+| bind()   |
++----------+
+     |
+     v
++---------+
+| listen()|
++---------+
+     |
+     v
++---------+
+| accept()|
++---------+
+     |
+     v
++---------+
+| send()  |
++---------+
+#+END_EXAMPLE
+
+- The following additional function prototypes are involved:
+  #+begin_src C :results none :noweb yesn
+    <<network header files>>
+
+      // descriptor, ptr to address, size of address
+    int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+
+    // descriptor, max no of pending connections that can be queried
+    int listen(int sockfd, int backlog);
+
+    // descriptor, ptr to storage for address, length of address
+    int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+    // descriptor, ptr to the data to send, no of bytes to send, msg flags
+    ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+  #+end_src
+
+* Create TCP server socket
+
+- We can reuse the header files from the client side program:
+  #+begin_src C :noweb yes :tangle ./src/tcp_server.c :includes :main no
+    <<standard header files>>
+    <<network header files>>
+
+    #define PORT 9002
+    #define CONN 5
+    int main(void)
+    {
+      // text sent to clients
+      char server_message[250] = "You have reached the server!\n\n";
+
+      // create socket
+      int server_socket;
+      server_socket = socket(AF_INET,SOCK_STREAM,0);
+
+      // define server address
+      struct sockaddr_in server_address;
+      server_address.sin_family = AF_INET;
+      server_address.sin_port = htons(PORT);
+      server_address.sin_addr.s_addr = INADDR_ANY;
+
+      // bind the socket to our specified IP and port
+      bind(server_socket,
+           (struct sockaddr*) &server_address,
+           sizeof(server_address));
+
+      // listen to the connection (max CONN)
+      listen(server_socket, CONN);
+
+      // accept connection with client
+      int client_socket;
+      client_socket = accept(server_socket,NULL,NULL); // local connection
+
+      // send data (server message) to client
+      send(client_socket, server_message, sizeof(server_message), 0);
+
+      // close the socket
+      close(server_socket);
+
+      return 0;
+    }
+  #+end_src
+
+* Connecting client and server over TCP
+
+- *Setup:*
+  1. Tangle the client source code (=tcp_client.c=)
+  2. Tangle the server source code (=tcp_server.c=)
+  3. Make a directory =./TCPclient= with ~mkdir -v~
+  4. Make a directory =./TCPserver= with ~mkdir -v~
+  5. Move client source code into =./TCPclient= with ~mv -v~
+  6. Move server source code into =./TCPserver= with ~mv -v~
+  7. Open *two* command-line windows and put them on top of one another
+
+- *Demo:*
+  1. In both windows, run ~ll~ to see the files.
+  2. In both windows, run ~make~ to build the machine code.
+  3. In both windows, run ~ll~ again to see the machine code.
+  4. In =./TCPclient= run =tcp_client= to get the error message.
+  5. In =./TCPserver= run =tcp_server &= to start the server.
+  6. In =./TCPclient= run =tcp_client= again to get the server message.
+
+- Why does =tcp_server= end after the client runs?
+  #+begin_quote
+  This TCP server is a one-shot server: after calling ~accept~ and
+  sending the message, the server closes the socket and returns - the
+  server process exits.
+  #+end_quote
+
+- Home assignment:
+  #+begin_quote
+  To keep the server open and handle multiple client requests
+  (sequentially), you can wrap the ~accept~ and ~send~ part in an infinite
+  loop, and add a loggint ~printf~ message to monitor activity.
+  #+end_quote
+  
+* Sources
+
+- van Winkle, Hands-on Network Programming with C (Packt);
+- Eduonix, Learn Socket Programming from Scratch (Udemy).
+

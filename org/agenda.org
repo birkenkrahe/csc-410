@@ -1472,17 +1472,17 @@ Practical TCP/IP Model:
 3) HTTP capture
 4) Port numbers/IANA
 
-* Week 10: TCP/IP in-depth II - SMTP, FTP, Packet Loss Recovery
+* DONE Week 10: TCP/IP in-depth II - SMTP, FTP, Packet Loss Recovery
 #+attr_html: :width 400px :float nil: 
 [[../img/protocols.png]]
 
 - [X] Review: Models, layers, and units
-- [X] How does TCP recover lost packets? (Home assignment - deferred)
-- [X] How are E-mail and FTP captured? (Home assignment)
-- [ ] Why does TCP keep sending segments?
+- [X] Why does TCP keep sending segments?
+- [ ] How does TCP recover lost packets? (Home assignment - Apr 3)
 - [ ] What do different network applications require?
+- [ ] How are E-mail and FTP captured? (Home assignment)
 
-** DONE Review
+** Review
 
 1. What is the name of layer 2 of the TCP/IP model? (Assume 5 layer
    model)
@@ -1556,7 +1556,7 @@ Practical TCP/IP Model:
     packet.
     #+END_QUOTE
 
-** DONE TCP/IP Deep Dive Continued
+** TCP/IP Deep Dive Continued
 
 1) Open Cisco Packet Tracer (re-enter credentials).
 2) Load network packet file (=TCP_IP_OSI_Model.pkt=).
@@ -1565,8 +1565,7 @@ Practical TCP/IP Model:
 5) Enter Server1 web address =10.1.1.100= and click =Go=
 6) Watch simulation until only TCP traffic comes.
 
-
-** TODO Review: TCP handshakes, Transport Flags, and HTTP capture or non-capture
+** Review: TCP handshakes, Transport Flags, and HTTP capture or non-capture
 
 1. What happens when the network is first powered up?
    #+begin_quote
@@ -1600,8 +1599,8 @@ Practical TCP/IP Model:
    scenario in Packet Tracer?
    #+BEGIN_QUOTE
    The RST+ACK segment indicates that the TCP connection to the server
-   (e.g., 10.1.1.99:80) was forcibly terminated, refusing the
-   connection, and the state is set to CLOSED.
+   (e.g., 10.1.1.99:80, or 10.1.1.100:8080) was forcibly terminated,
+   refusing the connection, and the state is set to CLOSED.
    #+END_QUOTE
 
 6. How does the TCP 4-way handshake work to close a connection, and
@@ -1619,7 +1618,7 @@ Practical TCP/IP Model:
    Sequence numbers track the sender’s data stream, while
    acknowledgment numbers confirm receipt; in Packet Tracer, for
    example, a server sending data with Seq: 0 and Len: 1460 gets an
-   ACK from the client with Ack: 1460.
+   ACK from the client with =Acknowledgement: 1460=.
    #+END_QUOTE
 
 8. What is the role of TCP acknowledgments (ACKs) after an HTTP
@@ -1627,7 +1626,7 @@ Practical TCP/IP Model:
    #+BEGIN_QUOTE
    TCP ACKs confirm receipt of data segments after an HTTP response;
    in Packet Tracer, they appear as standalone TCP segments with the
-   ACK flag (0x10) and no HTTP payload, just headers.
+   ACK =Flag= (0x10) and no HTTP payload, just headers.
    #+END_QUOTE
 
 9. How does =HTTP/1.1 keep-alive= affect TCP traffic, and what might you
@@ -1641,21 +1640,24 @@ Practical TCP/IP Model:
 10. What happens to the TCP connection state when a device receives a
     RST+ACK segment, and why might this occur?
     #+BEGIN_QUOTE
-    The TCP connection state is set to CLOSED when a RST+ACK segment is
-    received, indicating the connection was forcibly terminated,
-    possibly due to the server refusing the connection.
+    The TCP connection state is set to CLOSED when a RST+ACK segment
+    is received, indicating the connection was forcibly terminated,
+    possibly due to the server refusing the connection, or because it is
+    not listening on the specified port.
     #+END_QUOTE
 
+** HTTP Reset
 
-** TODO HTTP Reset
-
-1) Load the network, start the simulation, advance it.
-2) Look at the last TCP entries in the OSI Model view.
-3) Close the browser and reset the simulation.
+1) [X] Load the network, start the simulation, advance it.
+2) [X] Look at the last TCP entries in the OSI Model view.
+3) [X] Close the browser and reset the simulation.
 
 * Week 11: Socket API & TCP vs UDP
 
-- Source: Hands-on Network Programming with C (2020) pp. 40-70
+- [ ] *Home assignment:* FTP capture assignment is due Friday, April 4.
+- [ ] *Coding practice:* Client-server connection over TCP.
+- [ ] *Lecture*: Socket functions, TCP and UDP program flow.
+- [ ] *Practice:* Networking a simple time-telling program.
 
 * Week 12: Programming a TCP client
 
