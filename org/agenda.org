@@ -1658,16 +1658,18 @@ Practical TCP/IP Model:
 - [ ] *Coding practice:* Client-server connection over TCP.
 - [ ] *Lecture*: Socket functions, TCP and UDP program flow.
 - [ ] *Practice:* Networking a simple time-telling program.
+- [ ] *Lecture/Practice:* Building code with GNU ~make~ .
 
-* FTP capture assignment
+** FTP capture assignment
 #+attr_html: :width 400px :float nil:
 [[../img/ftp_capture_solution.png]]
 
-* Client-server connection over TCP
+** Client-server connection over TCP
 #+attr_html: :width 400px :float nil:
 [[../img/client_server.png]]
 
 Download the codealong file: [[https://tinyurl.com/api-code-along][tinyurl.com/api-code-along]]
+
 
 * Week 12: Programming a TCP client
 
