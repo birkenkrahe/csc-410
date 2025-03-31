@@ -64,7 +64,7 @@ when the connection is accepted, we can receive data with ~recv~:
   #+begin_src C :results none :noweb yes
     <<network header files>>
 
-      // IPv4 or IPv6, TCP or UDP, protocol type)
+    // IPv4 or IPv6, TCP or UDP, protocol type)
     int socket(int domain, int type, int protocol);
 
     // descriptor, ptr to destination address, length of address
@@ -75,15 +75,6 @@ when the connection is accepted, we can receive data with ~recv~:
   #+end_src
 
 * Create TCP client socket
-
-- At the prompt, create the file with =touch tcp_client.c=
-  #+begin_src bash :results output :exports both
-    touch ./src/tcp_client.c
-    file ./src/tcp_client.c
-  #+end_src
-
-  #+RESULTS:
-  : ./src/tcp_client.c: empty
 
 - Include standard header files:
   #+name: standard header files
