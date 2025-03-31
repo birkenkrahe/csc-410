@@ -1654,11 +1654,113 @@ Practical TCP/IP Model:
 
 * Week 11: Socket API & TCP vs UDP
 
+- [ ] *Test 5* ("socket programming") is due Friday April 4 (35 Qs).
 - [ ] *Home assignment:* FTP capture assignment is due Friday, April 4.
+- [ ] *Review*: 2nd Sprint Review (Literature Review with NotebookLM)
 - [ ] *Coding practice:* Client-server connection over TCP.
 - [ ] *Lecture*: Socket functions, TCP and UDP program flow.
 - [ ] *Practice:* Networking a simple time-telling program.
 - [ ] *Lecture/Practice:* Building code with GNU ~make~ .
+
+** 2nd Sprint Review
+#+attr_html: :width 400px :float nil:
+[[../img/doge.png]]
+
+*** Grading (boring but required)
+
+- *Grading criteria*: Full points only for fulfilling all requests
+  1) Find at least one scholarly article (doi)
+  2) Build and share a litmap
+  3) Add new references (ideally from the litmap)
+  4) Upload (improved) proposal to NotebookLM
+  5) Create podcast with NotebookLM
+  6) Share NotebookLM with me (email)
+  7) Submit NotebookLM link to Canvas
+  8) Upload podcast to GDrive
+  9) Share podcast on GChat
+  10) Work with NotebookLM using your sources
+
+- *Observations (CSC 410):*
+  1. Uploaded the litmap but not any of the sources: the AI cannot
+     guess your content. You have to upload the source itself (10%).
+  2. No signs of having worked with the source material, for example
+     by asking questions suggested by the AI (10%).
+  3. No signs of having worked with the podcast.
+  4. Late submission (50%)
+
+*** Lessons (important but difficult)
+     
+- *Lessons*: What did you learn?
+
+- *My advice for you*:
+  #+begin_quote
+  1. Unless you don't want to work in IT, you must develop minimal
+     research skills: You don't have to be able to produce original
+     papers yourself but you have to be able to find, read, understand
+     recent publications.
+  2. You should develop this skill while you have time, leisure and
+     export guidance from me at your hands.
+  3. AI will not take the burden of research from you - because of
+     hallucations and because of the complexity of innovation, only
+     expert use of the AI can result in anything useful.
+  4. If you're a senior, you need to develop and show enthusiasm for a
+     400-level course (capstone) project - this is what will be
+     expected from you in the real world - by putting in more than the
+     absolute minimum.
+  5. When working with clients (me), you need to make it as
+     comfortable and as easy for the client to see your results. You
+     need to communicate more than usual, ask for input proactively,
+     etc. Otherwise the client will feel like your dentist does
+     (except without getting paid as handsomely).)[fn:2].
+  6. I will be looking for that in your next spring review (April
+     14). In the real world, if no enthusiasm is visible, your project
+     would be cancelled (and if you don't have another good project,
+     you'd be cancelled, too).
+  7. To work smart, you first have to work hard. There is no shortcut
+     to developing process intelligence ("smart" work) other than by
+     working your butt off and failing many times in the process.
+  8. NotebookLM in particular is a closed environment: It only
+     responds to the sources that you've fed to it.
+  9. AI might be helpful to build motivation, automate service jobs,
+     analyse your performance, and shorten the path to publication.
+  10. Competent use of AI for research depends on your knowledge of
+      the research process and the subject matter without AI.
+  #+end_quote
+
+*** Redemption (saving grace and grade)
+
+- *Opportunity for redemption:* Extra credit
+  #+attr_html: :width 400px :float nil:
+  [[../img/talk.png]]
+
+- *Submit a personal experience report:*
+  #+begin_quote
+  For my upcoming Faculty Colloquium ("AI - Research Muse or Research
+  Tool?"), I need student input based on your experiences with using
+  AI for research for *any* project (in school or outside of school).
+
+  *Send me your experience reports* via email, please. Let me know for
+  which course you want the extra bonus points. Get a DOGE plus
+  badge. What I am looking for (you can use this as a template):
+
+  1) Which AI tools have you used for research?
+  2) Which ones did you like and why?
+  3) Which ones did you not like and why not?
+  4) What are you looking for in an AI research tool?
+  5) What you do you think the future of research will look like (in
+     the light of AI assistance)?
+  6) Anything else you can think of - for example any changes if you
+     already used NotebookLM last term.
+
+  Length does not matter - I'm looking for your honest views. I may
+  quote you in the talk (and/or in the followup paper) anonymously
+  (unless you withold your permission).
+  #+end_quote  
+
+- This will wipe out any losses you may have incurred from the 2nd
+  sprint review (as long as the report is insightful - don't use AI to
+  write it).
+
 
 ** FTP capture assignment
 #+attr_html: :width 400px :float nil:
@@ -1689,4 +1791,14 @@ Download the codealong file: [[https://tinyurl.com/api-code-along][tinyurl.com/a
 
 * Week 16: Project presentations
 
+* Footnotes
 
+[fn:2]  Informally speaking what is particularly annoying is to feel as
+if students are trying to get away with something - this can happen of
+course if you misunderstand the assignment. The only way to deal with
+that is to communicate with the client: ask if you did everything
+right - of course, to do that you need to submit well in advance of
+the deadline. Anyone's good opinion, once lost, is harder to regain
+than it is to keep it (and my opinion of you is good to begin with but
+it can get lost when I feel mistreated as a client). 
+ 
