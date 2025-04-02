@@ -1654,15 +1654,15 @@ Practical TCP/IP Model:
 
 * Week 11: Socket API & TCP vs UDP
 
-- [ ] *Test 5* ("socket programming") is due Friday April 4 (35 Qs).
-- [ ] *Home assignment:* FTP capture assignment is due Friday, April 4.
-- [ ] *Review*: 2nd Sprint Review (Literature Review with NotebookLM)
+- [X] *Test 5* ("socket programming") is due Friday April 4 (35 Qs).
+- [X] *Home assignment:* FTP capture assignment is due Friday, April 4.
+- [X] *Review*: 2nd Sprint Review (Literature Review with NotebookLM)
 - [ ] *Coding practice:* Client-server connection over TCP.
 - [ ] *Lecture*: Socket functions, TCP and UDP program flow.
 - [ ] *Practice:* Networking a simple time-telling program.
 - [ ] *Lecture/Practice:* Building code with GNU ~make~ .
 
-** 2nd Sprint Review
+** 2nd Sprint Review (I feel a sermon coming on...)
 #+attr_html: :width 400px :float nil:
 [[../img/doge.png]]
 
@@ -1691,6 +1691,13 @@ Practical TCP/IP Model:
 *** Lessons (important but difficult)
      
 - *Lessons*: What did you learn?
+  1. Understood the limit of my technical knowledge on the topic.
+  2. Don't like listening to the podcast (people talking).
+  3. I found out that the data I needed are unavailable.
+  4. Learnt something about playing a networked game via TCP.
+  5. It's difficult to find scholarly source for small practical projects.
+  6. I found out how difficult networking an application is.
+  7. Different VPN protocols can affect speed and security.
 
 - *My advice for you*:
   #+begin_quote
@@ -1720,7 +1727,8 @@ Practical TCP/IP Model:
      to developing process intelligence ("smart" work) other than by
      working your butt off and failing many times in the process.
   8. NotebookLM in particular is a closed environment: It only
-     responds to the sources that you've fed to it.
+     responds to the sources that you've fed to it. And it gets better
+     it you put more time into the research.
   9. AI might be helpful to build motivation, automate service jobs,
      analyse your performance, and shorten the path to publication.
   10. Competent use of AI for research depends on your knowledge of
@@ -1773,6 +1781,47 @@ Practical TCP/IP Model:
 Download the codealong file: [[https://tinyurl.com/api-code-along][tinyurl.com/api-code-along]]
 
 
+** TODO Review: Socket Programming
+
+For this section of the course, we'll keep a running tab of review
+questions, adding to the bottom of the list whenever there's something
+new worth knowing and/or reviewing.
+
+1. What's the difference between a "client" and a "server" socket?
+   #+begin_quote
+   A client socket initiates a connection to a server, while a server
+   socket listens for and accepts incoming connections.
+   #+end_quote
+2. What's the difference between a "client" and a "server" socket
+   after socket creation?
+   #+begin_quote
+   After creation, the client socket connects, and the server socket
+   binds, listens, and accepts. Both send and receive data packets.
+   #+end_quote
+3. What's the difference between a client and a server host?
+   #+begin_quote
+   The client makes service requests (e.g. "Open this web page"), and
+   the server answers the request.
+   #+end_quote
+4. What are the conditions for a successful server response?
+   #+begin_quote
+   1) Physical network connection (layer 1)
+   2) ARP request successful (layer 2)
+   3) IP routing successful (layer 3)
+   4) Socket established (layer 4)
+   5) Application protocol successful (layer 7)
+   #+end_quote
+5. How does the network identify a socket?
+   #+begin_quote
+   The network refers to a socket using a tuple of information:
+   - The IP address of the host machine (e.g. 192.168.0.100)
+   - The port number of a specific application on the host (e.g. 80)
+   - The transport protocol in use (TCP or UDP)
+
+   For a connection-oriented protocol like TCP, a 5-tuple is required:
+   IP addresses and port number of source and destination, protocol.
+   #+end_quote
+
 * Week 12: Programming a TCP client
 
 - Source: Hands-on Network Programming with C (2020) pp. 70-87
@@ -1788,7 +1837,8 @@ Download the codealong file: [[https://tinyurl.com/api-code-along][tinyurl.com/a
 * Week 15: Programming a Web server
 
 - Source: Hands-on Network Programming with C (2020) pp. 195-225
-
+- 2023 [[https://youtu.be/2HrYIl6GpYg?si=kYGyKPe4sMseffet][YouTube tutorial (not used)]]
+  
 * Week 16: Project presentations
 
 * Footnotes
