@@ -1473,7 +1473,7 @@ Practical TCP/IP Model:
 4) Port numbers/IANA
 
 * DONE Week 10: TCP/IP in-depth II - SMTP, FTP, Packet Loss Recovery
-#+attr_html: :width 400px :float nil: 
+#+attr_html: :width 400px :float nil:
 [[../img/protocols.png]]
 
 - [X] Review: Models, layers, and units
@@ -1507,7 +1507,7 @@ Practical TCP/IP Model:
    #+BEGIN_QUOTE
    - Cisco Packet Tracer uses the OSI layers (adds "Session" and
      "Presentation")
-     
+
    - The CCNA Exam TCP/IP model uses all five layers: Physical, Data
      Link, Network, Transport, and Application.
    #+END_QUOTE
@@ -1569,7 +1569,7 @@ Practical TCP/IP Model:
 
 1. What happens when the network is first powered up?
    #+begin_quote
-   The Ethernet connections (physical layer) are activated. 
+   The Ethernet connections (physical layer) are activated.
    #+end_quote
 
 2. What happens when you request a web page via HTTP for the first
@@ -1689,7 +1689,7 @@ Practical TCP/IP Model:
   4. Late submission (50%)
 
 *** Lessons (important but difficult)
-     
+
 - *Lessons*: What did you learn?
   1. Understood the limit of my technical knowledge on the topic.
   2. Don't like listening to the podcast (people talking).
@@ -1763,25 +1763,32 @@ Practical TCP/IP Model:
   Length does not matter - I'm looking for your honest views. I may
   quote you in the talk (and/or in the followup paper) anonymously
   (unless you withold your permission).
-  #+end_quote  
+  #+end_quote
 
 - This will wipe out any losses you may have incurred from the 2nd
   sprint review (as long as the report is insightful - don't use AI to
   write it).
 
-
 ** FTP capture assignment
 #+attr_html: :width 400px :float nil:
 [[../img/ftp_capture_solution.png]]
 
-** Client-server connection over TCP
+
+** IN_PROGRESS Client-server connection over TCP
 #+attr_html: :width 400px :float nil:
 [[../img/client_server.png]]
 
-Download the codealong file: [[https://tinyurl.com/api-code-along][tinyurl.com/api-code-along]]
+- Download the codealong file: [[https://tinyurl.com/api-code-along][tinyurl.com/api-code-along]]
 
+- Update: Change the ~printf~ in =tcp_client.c= to ~perror~ (check the man
+  page), and add the function call =dup2(1,2)= to redirect ~stderr~ to
+  ~stdout~ from within the program.
 
-** TODO Review: Socket Programming
+- This is the same thing as =2>&1= on the shell: 1 is the system's file
+  descriptor for the ~stdout~ data stream, and 2 is the file descriptor
+  for the ~stderr~ data stream.
+
+** IN_PROGRESS Review: Socket Programming
 
 For this section of the course, we'll keep a running tab of review
 questions, adding to the bottom of the list whenever there's something
@@ -1822,6 +1829,48 @@ new worth knowing and/or reviewing.
    IP addresses and port number of source and destination, protocol.
    #+end_quote
 
+6. What are the three main function calls involved in the client-side
+   socket workflow, and what is the purpose of each one in
+   establishing and using a connection?
+   #+BEGIN_QUOTE
+   ~socket()~ creates a new socket, ~connect()~ establishes a connection
+   to a remote server, and ~recv()~ receives data from the server once
+   connected.
+   #+END_QUOTE
+
+7. In the provided TCP client socket code, what does the ~htons(PORT)~
+   function do when setting up the ~server_address~ structure, and why
+   is it necessary?
+   #+BEGIN_QUOTE
+   ~htons(PORT)~ converts the port number from host byte order to
+   network byte order (big-endian), which is necessary for consistent
+   communication across different systems.
+   #+END_QUOTE
+
+8. How does the example code check for a connection error after
+   calling ~connect()~, and what happens if the connection fails?
+   #+BEGIN_QUOTE
+   The code checks if ~connection_status == -1~ after ~connect()~; if it
+   fails, it calls ~perror("Connection error")~ to print an error
+   message like "Connection refused."
+   #+END_QUOTE
+
+9. What is the role of the ~server_address~ structure in the TCP client
+   socket code, and what are the three fields it must specify?
+   #+BEGIN_QUOTE
+   The ~server_address~ structure specifies the destination for the
+   socket connection; it must include ~sin_family~ (protocol family,
+   e.g., IPv4), ~sin_port~ (port number), and ~sin_addr~ (IP address).
+   #+END_QUOTE
+
+10. Why does the example code use ~AF_INET~ and ~SOCK_STREAM~ as arguments
+    in the ~socket()~ function, and what do they represent?
+    #+BEGIN_QUOTE
+    ~AF_INET~ specifies the IPv4 protocol family, and ~SOCK_STREAM~
+    indicates a TCP connection-oriented stream; they define the socket
+    as using IPv4 and TCP for reliable data transfer.
+    #+END_QUOTE
+
 * Week 12: Programming a TCP client
 
 - Source: Hands-on Network Programming with C (2020) pp. 70-87
@@ -1838,7 +1887,7 @@ new worth knowing and/or reviewing.
 
 - Source: Hands-on Network Programming with C (2020) pp. 195-225
 - 2023 [[https://youtu.be/2HrYIl6GpYg?si=kYGyKPe4sMseffet][YouTube tutorial (not used)]]
-  
+
 * Week 16: Project presentations
 
 * Footnotes
@@ -1850,5 +1899,4 @@ that is to communicate with the client: ask if you did everything
 right - of course, to do that you need to submit well in advance of
 the deadline. Anyone's good opinion, once lost, is harder to regain
 than it is to keep it (and my opinion of you is good to begin with but
-it can get lost when I feel mistreated as a client). 
- 
+it can get lost when I feel mistreated as a client).
