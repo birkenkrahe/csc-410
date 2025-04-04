@@ -64,7 +64,7 @@ when the connection is accepted, we can receive data with ~recv~:
   #+begin_src C :results none :noweb yes
     <<network header files>>
 
-    // IPv4 or IPv6, TCP or UDP, protocol type)
+      // IPv4 or IPv6, TCP or UDP, protocol type)
     int socket(int domain, int type, int protocol);
 
     // descriptor, ptr to destination address, length of address
@@ -100,6 +100,9 @@ when the connection is accepted, we can receive data with ~recv~:
     #define PORT 9002
     int main(void)
     {
+      // Redirect stderr to stdout
+      dup2(1,2);
+      
       // create a socket
       int network_socket;
       // Use IPv4, TCP, default protocol
@@ -118,7 +121,7 @@ when the connection is accepted, we can receive data with ~recv~:
                 sizeof(server_address));
       // check for error with connection
       if (connection_status == -1) {
-        printf("Connection error.\n\n");
+        perror("Connection error");
       }
 
       // receive some data from the server
@@ -137,10 +140,12 @@ when the connection is accepted, we can receive data with ~recv~:
   #+end_src
 
   #+RESULTS:
-  : Connection error.
-  :
+  : Connection error: Connection refused
 
-- To test, run this and you should get the output =Connection error.=
+- To test, run this and you should get the output:
+  #+begin_example
+   Connection error: Connection refused.
+  #+end_example
 
 * Server Socket Workflow
 
@@ -180,7 +185,7 @@ those sockets it has connected to:
   #+begin_src C :results none :noweb yesn
     <<network header files>>
 
-      // descriptor, ptr to address, size of address
+    // descriptor, ptr to address, size of address
     int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
     // descriptor, max no of pending connections that can be queried
@@ -271,9 +276,104 @@ those sockets it has connected to:
   (sequentially), you can wrap the ~accept~ and ~send~ part in an infinite
   loop, and add a loggint ~printf~ message to monitor activity.
   #+end_quote
-  
+
+* Summary Q & A
+
+1. What is the role of a socket in network programming, and how do the
+   ~socket()~ function parameters (domain, type, protocol) determine its
+   behavior? Provide an example using the TCP client socket code from
+   the lecture.
+   #+begin_quote
+   A socket is a low-level endpoint for sending and receiving data
+   across a network, acting as the interface between an application
+   and the network protocol stack. It enables communication for
+   protocols like TCP or UDP.
+
+   The ~socket()~ function parameters define its behavior: ~domain~ (e.g.,
+   ~AF_INET~ for IPv4) specifies the address family, ~type~ (e.g.,
+   ~SOCK_STREAM~ for TCP) sets the communication style, and ~protocol~
+   (usually 0 for default) selects the specific protocol.
+
+   In the lecture’s TCP client code, ~network_socket = socket(AF_INET,
+   SOCK_STREAM, 0)~ creates a socket using IPv4, TCP, and the default
+   protocol, allowing the client to connect to a server and receive
+   data.
+   #+end_quote
+
+2. Compare the steps in the client socket workflow (~socket()~,
+   ~connect()~, ~recv()~) with the server socket workflow (~socket()~,
+   ~bind()~, ~listen()~, ~accept()~, ~send()~). Why does the server require
+   additional steps like ~bind()~ and ~listen()~?
+   #+begin_quote
+   The client workflow starts with ~socket()~ to create a socket, uses
+   ~connect()~ to initiate a connection to a server, and calls ~recv()~ to
+   receive data.
+
+   The server workflow also begins with ~socket()~ but then uses ~bind()~
+   to associate the socket with a specific IP and port, ~listen()~ to
+   prepare for incoming connections, ~accept()~ to establish a
+   connection with a client, and ~send()~ to transmit data.
+
+   The server needs ~bind()~ and ~listen()~ because it must be reachable
+   at a known address and port, and it passively waits for client
+   requests, unlike the client, which actively initiates
+   communication.
+   #+end_quote
+
+3. Explain how the client and server establish a connection over TCP using the code examples provided. What does the ~htons(PORT)~ function do, and why is it necessary when setting up the ~sockaddr_in~ structure?
+   #+begin_quote
+   The client creates a socket with ~socket()~, sets the server’s
+   address (IP and port) in a ~sockaddr_in~ structure, and uses
+   ~connect()~ to request a connection.
+
+   The server creates a socket, assigns it an IP and port with ~bind()~,
+   calls ~listen()~ to wait for clients, and uses ~accept()~ to connect,
+   creating a new socket for communication.
+
+   The ~htons(PORT)~ function adjusts the port number (e.g., 9002) so
+   it’s in the correct format for the network. It’s necessary because
+   different computers might store numbers differently, and ~htons()~
+   ensures the port is understood the same way by both client and
+   server when filling the ~sockaddr_in~ structure.
+   #+end_quote
+
+4. In the client socket example, the program checks if
+   ~connection_status == -1~ to detect a connection error. What might
+   cause this error in a real-world scenario, and how could you modify
+   the client code to provide more specific feedback about the
+   failure?
+   #+begin_quote
+   A ~connection_status == -1~ indicates ~connect()~ failed, possibly due
+   to the server not running, a wrong IP/port, network issues (e.g.,
+   firewall blocking), or the server’s backlog being full. To improve
+   feedback, include ~perror()~ or ~strerror(errno)~ after the
+   check. Modified code: ~if (connection_status == -1) {
+   perror("Connection error"); }~ This prints a detailed error message
+   (e.g., "Connection refused" if the server isn’t listening), helping
+   identify the specific issue rather than just "Connection error."
+   #+end_quote
+
+5. The lecture notes describe the TCP server as a "one-shot server"
+   that exits after handling one client. How would you modify the
+   server code to handle multiple client requests sequentially using
+   an infinite loop? Include a sample code snippet with your
+   explanation.
+   #+begin_quote
+   #+begin_quote
+   The server exits after one client because ~accept()~ and ~send()~ run
+   once, then ~close()~ is called. To handle multiple clients sequentially,
+   wrap ~accept()~ and ~send()~ in an infinite loop. Sample modification:
+   #+end_quote
+   #+begin_example C
+   while (1) {
+     int client_socket = accept(server_socket, NULL,NULL);
+     printf("Client connected\n");
+     send(client_socket,server_message, sizeof(server_message), 0);
+     close(client_socket); // Close client socket, not server_socket
+   }
+   #+end_example
+
 * Sources
 
 - van Winkle, Hands-on Network Programming with C (Packt);
 - Eduonix, Learn Socket Programming from Scratch (Udemy).
-
