@@ -1,0 +1,271 @@
+#+TITLE: GNU Make in 50 Minutes
+#+AUTHOR: Marcus Birkenkrahe & ChatGPT (pledged)
+#+OPTIONS: toc:nil num:nil
+#+STARTUP: overview hideblocks indent entitiespretty:
+
+* Source
+
+- Based on ~makefiletutorial.com~
+
+* Overview
+
+- What is GNU ~make~? A tool that automatically builds executables and
+  libraries from source code. Read the start of the ~make~ manual page.
+
+- Why use it?
+  + Automates compilation
+  + Avoids recompiling unchanged files
+  + Makes builds faster and cleaner
+
+- ~make~ works with configuration files called ~Makefile~. It consists of
+  rules that reflect the dependencies and say what needs to be done.
+
+- The ~Makefile~ consists of targets, prerequisites or dependencies, and
+  rules that are applied when the dependencies are triggered.
+
+* Simple example - "Hello, World"
+
+- Create a file called =Makefile= with this code in it:
+  #+begin_example makefile
+  hello:
+        echo "Hello, World"
+  #+end_example
+
+- If the file =hello= does not exist, the command (which must be
+  indented with a TAB) is executed.
+
+  #+begin_src bash :results output :exports both
+    make
+  #+end_src
+
+- What if it does exist?
+  #+begin_src bash :results output :exports both
+
+  #+end_src
+
+- ~make~ has checked if =hello= exists, found a copy of it (we created an
+  empty file with ~touch~), and checks if it is up to date. ~make hello~
+  has the same effect.
+
+- Being "up to date" means:
+  1) =hello= exists as a file
+  2) all of its prereqs/dependencies are older than the target (based
+     on last modified time).
+
+- Let's add a dependency after the target, and ~touch~ it so that it is
+  more recent than =hello=:
+  #+begin_example makefile
+  hello: hello2
+        echo "Hello, World"
+  #+end_example
+
+- Test it:
+  #+begin_src bash :results output :exports both
+
+  #+end_src
+
+* Making C files
+
+1) Tangle a file called ~blah.c~ that does nothing much:
+
+   #+begin_src C :main no :includes :tangle blah.c
+     // blah.c
+     int main() { return 0; }
+   #+end_src
+
+2) Create a makefile called ~makefile~:
+   #+begin_example makefile
+   blah:
+        cc blah.c -o blah
+   #+end_example
+
+3) Run ~make~ on the command-line:
+   #+begin_src bash :results output :exports both
+
+   #+end_src
+
+4) ~make~ found the first rule, =blah=. Since it's at the top, and there
+   is no file =blah= (only the C source file =blah.c=), it is created
+   using the compilation rule.
+
+5) When we change the timestamp of =blah.c=, ~make~ will not apply the
+   rule again, because =blah= exists and there is no dependency:
+   #+begin_src bash :results output :exports both
+
+   #+end_src
+
+6) Add =blah.c= as a prerequisite - now when ~make~ runs, it will be
+   checked, and =blah= will be run either if it does not exist or if
+   =blah= is older than =blah.c= (its dependency).
+   #+begin_example makefile
+   blah: blah.c
+        cc blah.c -o blah
+   #+end_example
+
+7) Test:
+   #+begin_src bash :results output :exports both
+
+   #+end_src
+
+8) The following ~makefile~ will run all three targets:
+
+   #+begin_example makefile
+   blah: blah.o
+        cc blah.o -o blah # runs third
+   blah.o: blah.c
+        cc -c blah.c -o blah.o # runs second
+   blah.c:
+        echo "int main() { return 0; }" > blah.c # runs first
+   #+end_example
+
+9) If you delete =blah.c=, all three targets will be rerun because the
+   target is not found.
+   #+begin_src bash :results output :exports both
+
+   #+end_src
+
+10) You can use the =clean= target to create and delete =some_file=:
+    #+begin_example makefile
+    some_file:
+        touch some_file
+
+    clean:
+        rm -f some_file
+    #+end_example
+
+    #+begin_src bash :results output :exports both
+
+    #+end_src
+
+* Variables
+
+- Variables can only be strings. To assign values to them, you can use
+  ~=~ or ~:=~ and whitespace is allowed (unlike in ~bash~).
+
+- Example: =files= is a variable with two string values.
+  #+begin_example makefile
+files := file1 file2 # set to string "file1 file2"
+
+some_file: $(files)
+        echo "Look at this variable: " $(files)
+        touch some_file # update timestamp
+
+file1:
+        touch file1
+
+file2:
+        touch file2
+
+clean:
+        rm -f file1 file2 some_file
+  #+end_example
+
+- Unlike ~bash~, ~make~ does not interpret quotes but views them as
+  characters. You need them for commands like ~printf~:
+
+  #+begin_example makefile
+a := one two \n # set to the string "one two \n"
+
+all:
+        printf $a
+        printf '$a'
+  #+end_example
+
+- Reference variables use ~${}~ or ~$()~:
+  #+begin_example makefile
+x := dude
+
+all:
+        echo $x
+        echo ${x}
+        echo $(x)
+  #+end_example
+
+* Practice exercise
+
+** Create the following project structure:
+
+#+BEGIN_SRC bash
+
+#+END_SRC
+
+** File: =main.c=
+
+#+BEGIN_SRC c :tangle ./project/main.c
+  #include <stdio.h>
+  #include "math.h"
+
+  int main() {
+    printf("2 + 3 = %d\n", add(2, 3));
+    return 0;
+  }
+#+END_SRC
+
+** File: =math.c=
+
+#+BEGIN_SRC c :tangle ./project/math.c
+  int add(int a, int b) {
+    return a + b;
+  }
+#+END_SRC
+
+** File: =math.h=
+
+#+BEGIN_SRC c :tangle ./project/math.h
+  int add(int a, int b);
+#+END_SRC
+
+** Write a Makefile with:
+
+- Object file compilation
+- Final linking
+- Variables for =CC= and =CFLAGS=
+
+** Sample Makefile
+
+- Create this ~Makefile~:
+  #+BEGIN_example makefile
+CC = gcc
+CFLAGS = -Wall
+
+main: main.o math.o
+	$(CC) $(CFLAGS) -o main main.o math.o
+
+main.o: main.c math.h
+	$(CC) $(CFLAGS) -c main.c
+
+math.o: math.c math.h
+	$(CC) $(CFLAGS) -c math.c
+
+.PHONY: clean
+clean:
+	rm -f *.o main
+  #+END_example
+
+- ~CC~ is the compiler to use, ~CFLAGS~ are its options (all warnings).
+
+- The first target =main= is the final executable. It links the object
+  files. When it is found, the dependencies =main.o= and =math.o= must
+  exist or they have to be made.
+
+- The second target =main.o= is built from =main.c= and depends on =math.h=
+  for the function declaration (prototype). The gcc flag ~-c~ compiles
+  but does not link.
+
+- The third target =math.o= is built from =math.c= and depends on =math.c=
+  and the header file =math.h= which declares the math function.
+
+- The ~.PHONY~ target is used to declare that a given tager is not a
+  file but rather a label for a command to run. This prevents ~make~
+  from getting confused if a file with the same name as the target
+  exists.
+
+- Summary:
+
+  | Target | Purpose                              | Trigger                              |
+  |--------+--------------------------------------+--------------------------------------|
+  | main   | Links main.o, math.o into executable | If either .o file is newer than main |
+  | main.o | Compiles main.c                      | If main.c or math.h changes          |
+  | math.o | Compiles math.c                      | If math.c or math.h changes          |
+  | clean  | Utility to clean up build files      | Manual (invoked with make clean)     |
+

@@ -1652,13 +1652,13 @@ Practical TCP/IP Model:
 2) [X] Look at the last TCP entries in the OSI Model view.
 3) [X] Close the browser and reset the simulation.
 
-* Week 11: Socket API & TCP vs UDP
+* DONE Week 11: Socket API: client/server application (localhost)
 
 - [X] *Test 5* ("socket programming") is due Friday April 4 (35 Qs).
 - [X] *Home assignment:* FTP capture assignment is due Friday, April 4.
 - [X] *Review*: 2nd Sprint Review (Literature Review with NotebookLM)
-- [ ] *Coding practice:* Client-server connection over TCP.
-- [ ] *Lecture*: Socket functions, TCP and UDP program flow.
+- [X] *Coding practice:* Client-server connection over TCP.
+- [X] *Lecture*: Socket functions, TCP and UDP program flow.
 - [ ] *Practice:* Networking a simple time-telling program.
 - [ ] *Lecture/Practice:* Building code with GNU ~make~ .
 
@@ -1773,8 +1773,7 @@ Practical TCP/IP Model:
 #+attr_html: :width 400px :float nil:
 [[../img/ftp_capture_solution.png]]
 
-
-** IN_PROGRESS Client-server connection over TCP
+** Client-server connection over TCP
 #+attr_html: :width 400px :float nil:
 [[../img/client_server.png]]
 
@@ -1788,7 +1787,7 @@ Practical TCP/IP Model:
   descriptor for the ~stdout~ data stream, and 2 is the file descriptor
   for the ~stderr~ data stream.
 
-** IN_PROGRESS Review: Socket Programming
+** Review: Socket Programming
 
 For this section of the course, we'll keep a running tab of review
 questions, adding to the bottom of the list whenever there's something
@@ -1871,24 +1870,44 @@ new worth knowing and/or reviewing.
     as using IPv4 and TCP for reliable data transfer.
     #+END_QUOTE
 
+
 * Week 12: Programming a TCP client
 
-- Source: Hands-on Network Programming with C (2020) pp. 70-87
+- [ ] *Assignment*: A simple one-shot echo
+- [ ] *Bonus Assignment:* An echo server and client
+- [ ] [[file:9_api.org::* Byte order][Byte order]] (~htons~)
+- [ ] Building programs with GNU ~make~
+- [ ] Creating smart header files for the preprocessor
+  
+** TODO Home assignment: One-shot echo server
 
-* Week 13: Programming a TCP server
+- Task: Create a one-shot echo client/server app that exchanges one
+  message each between client and server.
 
-- Source: Hands-on Network Programming with C (2020) pp. 88-100
-
-* Week 14: Programming a Web client
-
-- Source: Hands-on Network Programming with C (2020) pp. 166-194
-
-* Week 15: Programming a Web server
-
-- Source: Hands-on Network Programming with C (2020) pp. 195-225
-- 2023 [[https://youtu.be/2HrYIl6GpYg?si=kYGyKPe4sMseffet][YouTube tutorial (not used)]]
-
-* Week 16: Project presentations
+- Sequence diagram:
+  #+begin_example
+  Client (tcp_client.c)                 Server (tcp_server.c)
+  ----------------------               ------------------------
+  |                                  |
+  | network_socket = socket()        | server_socket = socket()
+  |                                  |
+  | connect(network_socket) -------->| bind(server_socket)
+  |                                  | listen(server_socket, CONN)
+  |                                  | 
+  |                                  | client_socket = accept(server_socket)
+  | send(network_socket, echo) ----->| recv(client_socket, buffer)
+  |                                  | printf("Client said: %s", buffer)
+  | recv(network_socket, server_response)
+  |<---------------------------------| send(client_socket, server_message)
+  |                                  |
+  | printf("Server said: ...")       |
+  |                                  |
+  | close(network_socket) ---------->| close(client_socket)
+  |                                  | close(server_socket)
+  #+end_example
+  
+- *Bonus assignment* (May 2): Persistent TCP echo server (more than one
+  message).
 
 * Footnotes
 
