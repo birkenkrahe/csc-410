@@ -1909,6 +1909,10 @@ new worth knowing and/or reviewing.
 - *Bonus assignment* (May 2): Persistent TCP echo server (more than one
   message).
 
+** TODO GNU make
+
+Download the code along file: https://tinyurl.com/gnu-make-org
+
 * Footnotes
 
 [fn:2]  Informally speaking what is particularly annoying is to feel as
