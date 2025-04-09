@@ -113,20 +113,26 @@
 
 * Making C files
 
-1) Tangle a file called ~blah.c~ that does nothing much (=C-u C-c C-v t=):
+1) To begin with, remove all =*blah*= files:
+   #+begin_src bash :results output
+     rm *blah*
+   #+end_src
+
+2) Tangle a file called ~blah.c~ that does nothing much (=C-u C-c C-v t=):
 
    #+begin_src C :main no :includes :tangle blah.c
      // blah.c
      int main() { return 0; }
    #+end_src
 
-2) Create a makefile called =makeblah= (don't forget =C-q TAB=):
+3) Create a makefile called =makeblah= (don't forget =C-q TAB=) that
+   compiles =blah.c= into =blah=:
    #+begin_src :main no :includes :tangle makeblah
    blah:
-   	cc blah.c -o blah
+        cc blah.c -o blah
    #+end_src
 
-3) Run ~make~ on =makeblah=:
+4) Run ~make~ on =makeblah= (=C-c C-c=):
    #+begin_src bash :results output :exports both
      if [ -f blah.c ]; then
         make -f makeblah
@@ -138,17 +144,17 @@
 
    #+RESULTS:
    : cc blah.c -o blah
-   : -rwxrwxr-x 1 aletheia aletheia 15776 Apr  9 08:23 blah
-   : -rw-rw-r-- 1 aletheia aletheia    35 Apr  9 08:23 blah.c
+   : -rwxrwxr-x 1 marcus marcus 15776 Apr  9 10:29 blah
+   : -rw-rw-r-- 1 marcus marcus    35 Apr  9 10:29 blah.c
 
-4) Explain this:
+5) Explain this:
    #+begin_quote
    ~make~ found the first rule, =blah=. Since it's at the top, and there
    is no file =blah= (only the C source file =blah.c=), it is created
    using the compilation rule.
    #+end_quote
 
-5) When we change the timestamp of =blah.c=, ~make~ will not apply the
+6) When we change the timestamp of =blah.c=, ~make~ will not apply the
    rule again, because =blah= exists and there is no dependency:
    #+begin_src bash :results output :exports both
      touch blah.c
@@ -157,59 +163,61 @@
    #+end_src
 
    #+RESULTS:
-   : -rwxrwxr-x 1 aletheia aletheia 15776 Apr  9 08:25 blah
-   : -rw-rw-r-- 1 aletheia aletheia    35 Apr  9 08:25 blah.c
+   : -rwxrwxr-x 1 marcus marcus 15776 Apr  9 10:29 blah
+   : -rw-rw-r-- 1 marcus marcus    35 Apr  9 10:29 blah.c
    : make: 'blah' is up to date.
 
-6) Add =blah.c= as a prerequisite - now when ~make~ runs, it will be
-   checked, and =blah= will be run either if it does not exist or if
-   =blah= is older than =blah.c= (its dependency).
-   #+begin_example makefile
-   blah: blah.c
-        cc blah.c -o blah
-   #+end_example
+7) The following ~makefile~ will run all three targets:
 
-7) Test:
-   #+begin_src bash :results output :exports both
-     make
-     make
-     touch blah.c 
-     make
+   #+begin_src C :main no :includes :tangle makeblah2
+   blah: blah.o
+   	cc blah.o -o blah # runs third
+   blah.o: blah.c
+   	cc -c blah.c -o blah.o # runs second
+   blah.c:
+   	echo "int main() { return 0; }" > blah.c # runs first
    #+end_src
 
-8) The following ~makefile~ will run all three targets:
-
-   #+begin_example makefile
-   blah: blah.o
-        cc blah.o -o blah # runs third
-   blah.o: blah.c
-        cc -c blah.c -o blah.o # runs second
-   blah.c:
-        echo "int main() { return 0; }" > blah.c # runs first
-   #+end_example
-
-9) If you delete =blah.c=, all three targets will be rerun because the
+8) If you delete =blah.c=, all three targets will be rerun because the
    target is not found.
    #+begin_src bash :results output :exports both
      rm blah.c
-     make
+     make -f makeblah2
      ls -l blah*
    #+end_src
 
-10) You can use the =clean= target to create and delete =some_file=:
-    #+begin_example makefile
-    some_file:
-        touch some_file
+   #+RESULTS:
+   : echo "int main() { return 0; }" > blah.c # runs first
+   : cc -c blah.c -o blah.o # runs second
+   : cc blah.o -o blah # runs third
+   : -rwxrwxr-x 1 marcus marcus 15776 Apr  9 10:31 blah
+   : -rw-rw-r-- 1 marcus marcus    25 Apr  9 10:31 blah.c
+   : -rw-rw-r-- 1 marcus marcus  1224 Apr  9 10:31 blah.o
 
-    clean:
-        rm -f some_file
-    #+end_example
+9) You can use the =clean= target to create and delete =some_file=:
+   #+begin_src C :main no :includes :tangle makeSome_file
+   some_file:
+   	touch some_file
 
-    #+begin_src bash :results output :exports both
-      make
-      ls -l some_file
-      make clean # some_file removed
-    #+end_src
+   clean:
+   	rm -f some_file
+   #+end_src
+
+   #+begin_src bash :results output :exports both
+     make -f makeSome_file
+     ls -l some_file
+     make -f makeSome_file clean # some_file removed
+
+     if [ ! -f "some_file" ]; then
+         echo 'File "some_file" does not exist'
+     fi
+   #+end_src
+
+   #+RESULTS:
+   : touch some_file
+   : -rw-rw-r-- 1 marcus marcus 0 Apr  9 10:36 some_file
+   : rm -f some_file
+   : File "some_file" does not exist
 
 * Variables
 
@@ -241,7 +249,7 @@ clean:
 a := one two \n # set to the string "one two \n"
 
 all:
-        printf $a
+        printf $a  
         printf '$a'
   #+end_example
 
@@ -254,18 +262,22 @@ all:
         echo ${x}
         echo $(x)
   #+end_example
+
 * Practice exercise
 
-** Create the following project structure:
+** Create a project structure
 
-#+BEGIN_SRC bash
-  mkdir project && cd project
+#+BEGIN_SRC bash :results output
+  if [ -e "project" ]; then
+      rm -rfv "project"
+  fi       
+  mkdir -v project && cd project
   pwd
   touch main.c math.c math.h Makefile
   ls
-#+END_SRC
+          #+END_SRC
 
-** File: =main.c=
+** Create file: =main.c=
 
 #+BEGIN_SRC c :tangle ./project/main.c
   #include <stdio.h>
@@ -277,7 +289,7 @@ all:
   }
 #+END_SRC
 
-** File: =math.c=
+** Create file: =math.c=
 
 #+BEGIN_SRC c :tangle ./project/math.c
   int add(int a, int b) {
@@ -285,7 +297,7 @@ all:
   }
 #+END_SRC
 
-** File: =math.h=
+** Create file: =math.h=
 
 #+BEGIN_SRC c :tangle ./project/math.h
   int add(int a, int b);
@@ -296,29 +308,28 @@ all:
 - Object file compilation
 - Final linking
 - Variables for =CC= and =CFLAGS=
-- Use of automatic variables
-- Use of
+- Use of ~.PHONY~ target
 
 ** Sample Makefile
 
 - Create this ~Makefile~:
-  #+BEGIN_example makefile
+  #+BEGIN_src C :tangle ./project/makefile :main no :includes
 CC = gcc
 CFLAGS = -Wall
 
 main: main.o math.o
-        $(CC) $(CFLAGS) -o main main.o math.o
+	$(CC) $(CFLAGS) -o main main.o math.o
 
 main.o: main.c math.h
-        $(CC) $(CFLAGS) -c main.c
+	$(CC) $(CFLAGS) -c main.c
 
 math.o: math.c math.h
-        $(CC) $(CFLAGS) -c math.c
+	$(CC) $(CFLAGS) -c math.c
 
 .PHONY: clean
 clean:
-        rm -f *.o main
-  #+END_example
+	rm -fv *.o main
+  #+END_src
 
 - ~CC~ is the compiler to use, ~CFLAGS~ are its options (all warnings).
 
@@ -333,16 +344,91 @@ clean:
 - The third target =math.o= is built from =math.c= and depends on =math.c=
   and the header file =math.h= which declares the math function.
 
-- The ~.PHONY~ target is used to declare that a given tager is not a
+- The ~.PHONY~ target is used to declare that a given target is not a
   file but rather a label for a command to run. This prevents ~make~
   from getting confused if a file with the same name as the target
   exists.
 
 - Summary:
 
-  | Target | Purpose                              | Trigger                              |
-  |--------+--------------------------------------+--------------------------------------|
-  | main   | Links main.o, math.o into executable | If either .o file is newer than main |
-  | main.o | Compiles main.c                      | If main.c or math.h changes          |
-  | math.o | Compiles math.c                      | If math.c or math.h changes          |
-  | clean  | Utility to clean up build files      | Manual (invoked with make clean)     |
+  | Target | Purpose                              | Trigger                          |
+  |--------+--------------------------------------+----------------------------------|
+  | main   | Links main.o, math.o into executable | .o file is newer than main       |
+  | main.o | Compiles main.c                      | main.c or math.h changes         |
+  | math.o | Compiles math.c                      | math.c or math.h changes         |
+  | clean  | Utility to clean up build files      | Manual (invoked with make clean) |
+
+- Test: Change to =project=, ~make~ everything.
+  #+begin_src bash :results output
+    cd project
+    pwd
+    ls -lt
+    make
+  #+end_src
+
+  #+RESULTS:
+  : /home/marcus/GitHub/admin/spring25/csc410/org/project
+  : total 16
+  : -rw-rw-r-- 1 marcus marcus 102 Apr  9 10:49 main.c
+  : -rw-rw-r-- 1 marcus marcus 222 Apr  9 10:43 makefile
+  : -rw-rw-r-- 1 marcus marcus  23 Apr  9 10:41 math.h
+  : -rw-rw-r-- 1 marcus marcus  42 Apr  9 10:41 math.c
+  : gcc -Wall -c main.c
+  : gcc -Wall -c math.c
+  : gcc -Wall -o main main.o math.o
+
+- ~touch~ =main.o= and remake:
+  #+begin_src bash :results output
+    cd project
+    touch main.o
+    ls -lt
+    make
+  #+end_src  
+
+  #+RESULTS:
+  : total 40
+  : -rw-rw-r-- 1 marcus marcus  1568 Apr  9 10:51 main.o
+  : -rwxrwxr-x 1 marcus marcus 16024 Apr  9 10:49 main
+  : -rw-rw-r-- 1 marcus marcus  1232 Apr  9 10:49 math.o
+  : -rw-rw-r-- 1 marcus marcus   102 Apr  9 10:49 main.c
+  : -rw-rw-r-- 1 marcus marcus   222 Apr  9 10:43 makefile
+  : -rw-rw-r-- 1 marcus marcus    23 Apr  9 10:41 math.h
+  : -rw-rw-r-- 1 marcus marcus    42 Apr  9 10:41 math.c
+  : gcc -Wall -o main main.o math.o
+
+- ~touch~ =main.c= and remake:
+  #+begin_src bash :results output
+    cd project
+    touch main.c
+    ls -lt
+    make
+  #+end_src  
+
+  #+RESULTS:
+  #+begin_example
+  total 40
+  -rw-rw-r-- 1 marcus marcus   102 Apr  9 10:51 main.c
+  -rwxrwxr-x 1 marcus marcus 16024 Apr  9 10:51 main
+  -rw-rw-r-- 1 marcus marcus  1568 Apr  9 10:51 main.o
+  -rw-rw-r-- 1 marcus marcus  1232 Apr  9 10:49 math.o
+  -rw-rw-r-- 1 marcus marcus   222 Apr  9 10:43 makefile
+  -rw-rw-r-- 1 marcus marcus    23 Apr  9 10:41 math.h
+  -rw-rw-r-- 1 marcus marcus    42 Apr  9 10:41 math.c
+  gcc -Wall -c main.c
+  gcc -Wall -o main main.o math.o
+  #+end_example
+
+- Clean up:
+  #+begin_src bash :results output
+    cd project
+    make clean
+    ls -lt
+  #+end_src
+
+  #+RESULTS:
+  : rm -fv *.o main
+  : total 16
+  : -rw-rw-r-- 1 marcus marcus 223 Apr  9 10:52 makefile
+  : -rw-rw-r-- 1 marcus marcus 102 Apr  9 10:51 main.c
+  : -rw-rw-r-- 1 marcus marcus  23 Apr  9 10:41 math.h
+  : -rw-rw-r-- 1 marcus marcus  42 Apr  9 10:41 math.c
