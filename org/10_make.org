@@ -1,0 +1,348 @@
+#+TITLE: GNU Make in 50 Minutes
+#+AUTHOR: Marcus Birkenkrahe & ChatGPT (pledged)
+#+OPTIONS: toc:nil num:nil
+#+STARTUP: overview hideblocks indent entitiespretty
+#+properties: header-args:C :main no :includes :results output :exports both
+* Source
+
+- Based on ~makefiletutorial.com~
+
+* Overview
+
+- What is GNU ~make~? A tool that automatically builds executables and
+  libraries from source code. Read the start of the ~make~ manual page.
+
+- Heres is an example dependency graph that you can build with ~make~:
+  If any of the file's dependencies change, the file will get
+  recompiled.
+  #+attr_html: :width 600px :float nil:
+  [[../img/dependency_graph.png]]
+
+- Why use it?
+  + Automates compilation
+  + Avoids recompiling unchanged files
+  + Makes builds faster and cleaner
+
+- ~make~ works with configuration files called ~Makefile~. It consists of
+  rules that reflect the dependencies and say what needs to be done.
+
+- The ~Makefile~ consists of targets, prerequisites or dependencies, and
+  rules that are applied when the dependencies are triggered.
+
+* Simple example - "Hello, World"
+
+- Create a file called =makehello= with this code in it. The rule in the
+  second line *must be indented by a TAB* - type =C-q TAB= to do
+  that. Then tangle the file with =C-u C-c C-v t=
+  #+begin_src C :tangle makeHello :main no :includes
+    hello:
+    echo "Hello, World"
+  #+end_src
+
+- If the file =hello= does not exist, the command (which must be
+  indented with a TAB) is executed.
+
+- Since you're going to create and change different makefiles, it's
+  #+begin_src bash :results output :exports both
+    make -f makeHello # use `makeHello` as your makefile
+    make -sf makeHello # execute in silent mode
+  #+end_src
+
+- What if the target (=hello=) does already exist?
+  #+begin_src bash :results output :exports both
+    touch hello # 1 create an empty file `hello`
+    make -f makeHello  # 2 make `hello` with `make`
+    if [ -f hello ]; then
+        rm hello  # 3 remove `hello` if it exists
+    fi
+    make -sf makeHello  # 4 remake `hello` (silently)
+  #+end_src
+
+  #+RESULTS:
+  : make: 'hello' is up to date.
+  : Hello, World
+
+- *Explanation:*
+  1. We create an empty file =hello= using the ~touch~ command.
+  2. Running ~make~ now means that nothing is to be done.
+  3. Then we remove the =hello= file.
+  4. Now ~make~ can build the target.
+
+- The other condition to build a target: The dependencies are more
+  recent than the target. To test this, we need a ~makefile~ with a
+  dependency.
+
+- Let's add a dependency after the target, and ~touch~ it so that it is
+  more recent than =hello=. First the configuration file =makehello2=:
+  tangle it (=C-u C-c C-v t=):
+  #+begin_src C :tangle makeHello2 :main no :includes
+    hello: hello2
+    echo "Hello, World"
+  #+end_src
+
+- Understand it: ~make~ finds the target =hello= but not the dependency
+  =hello2=, and it cannot build it without a target and a rule to do so:
+  #+begin_src bash :results silent :exports both
+    make -f makeHello2
+  #+end_src
+
+- You should get an error message:
+  #+begin_example
+  make: *** No rule to make target 'hello2', needed by 'hello'.  Stop.
+  #+end_example
+
+- Remake the makefile: tangle the update (=makeHello3=)
+  #+begin_src C :tangle makeHello3 :main no :includes
+    hello: hello2
+    echo "Hello, World"
+    hello2:
+    echo "hello2 is here now!"
+  #+end_src
+
+- Test it (remove =hello2= if it already exists):
+  #+begin_src bash :results output :exports both
+    if [ -f hello2 ]; then
+        rm hello2  # remove `hello2` if it exists
+    fi
+    make -sf makeHello3
+  #+end_src
+
+  #+RESULTS:
+  : hello2 is here now!
+  : Hello, World
+
+* Making C files
+
+1) Tangle a file called ~blah.c~ that does nothing much (=C-u C-c C-v t=):
+
+   #+begin_src C :main no :includes :tangle blah.c
+     // blah.c
+     int main() { return 0; }
+   #+end_src
+
+2) Create a makefile called =makeblah= (don't forget =C-q TAB=):
+   #+begin_src :main no :includes :tangle makeblah
+   blah:
+   	cc blah.c -o blah
+   #+end_src
+
+3) Run ~make~ on =makeblah=:
+   #+begin_src bash :results output :exports both
+     if [ -f blah.c ]; then
+        make -f makeblah
+        ls -l blah*
+     else
+        echo 'No file "blah.c" to make "blah"'
+     fi
+   #+end_src
+
+   #+RESULTS:
+   : cc blah.c -o blah
+   : -rwxrwxr-x 1 aletheia aletheia 15776 Apr  9 08:23 blah
+   : -rw-rw-r-- 1 aletheia aletheia    35 Apr  9 08:23 blah.c
+
+4) Explain this:
+   #+begin_quote
+   ~make~ found the first rule, =blah=. Since it's at the top, and there
+   is no file =blah= (only the C source file =blah.c=), it is created
+   using the compilation rule.
+   #+end_quote
+
+5) When we change the timestamp of =blah.c=, ~make~ will not apply the
+   rule again, because =blah= exists and there is no dependency:
+   #+begin_src bash :results output :exports both
+     touch blah.c
+     ls -l blah*   # target `blah` is now more recent than `blah.c`
+     make -f makeblah
+   #+end_src
+
+   #+RESULTS:
+   : -rwxrwxr-x 1 aletheia aletheia 15776 Apr  9 08:25 blah
+   : -rw-rw-r-- 1 aletheia aletheia    35 Apr  9 08:25 blah.c
+   : make: 'blah' is up to date.
+
+6) Add =blah.c= as a prerequisite - now when ~make~ runs, it will be
+   checked, and =blah= will be run either if it does not exist or if
+   =blah= is older than =blah.c= (its dependency).
+   #+begin_example makefile
+   blah: blah.c
+        cc blah.c -o blah
+   #+end_example
+
+7) Test:
+   #+begin_src bash :results output :exports both
+     make
+     make
+     touch blah.c 
+     make
+   #+end_src
+
+8) The following ~makefile~ will run all three targets:
+
+   #+begin_example makefile
+   blah: blah.o
+        cc blah.o -o blah # runs third
+   blah.o: blah.c
+        cc -c blah.c -o blah.o # runs second
+   blah.c:
+        echo "int main() { return 0; }" > blah.c # runs first
+   #+end_example
+
+9) If you delete =blah.c=, all three targets will be rerun because the
+   target is not found.
+   #+begin_src bash :results output :exports both
+     rm blah.c
+     make
+     ls -l blah*
+   #+end_src
+
+10) You can use the =clean= target to create and delete =some_file=:
+    #+begin_example makefile
+    some_file:
+        touch some_file
+
+    clean:
+        rm -f some_file
+    #+end_example
+
+    #+begin_src bash :results output :exports both
+      make
+      ls -l some_file
+      make clean # some_file removed
+    #+end_src
+
+* Variables
+
+- Variables can only be strings. To assign values to them, you can use
+  ~=~ or ~:=~ and whitespace is allowed (unlike in ~bash~).
+
+- Example: =files= is a variable with two string values.
+  #+begin_example makefile
+files := file1 file2 # set to string "file1 file2"
+
+some_file: $(files)
+        echo "Look at this variable: " $(files)
+        touch some_file # update timestamp
+
+file1:
+        touch file1
+
+file2:
+        touch file2
+
+clean:
+        rm -f file1 file2 some_file
+  #+end_example
+
+- Unlike ~bash~, ~make~ does not interpret quotes but views them as
+  characters. You need them for commands like ~printf~:
+
+  #+begin_example makefile
+a := one two \n # set to the string "one two \n"
+
+all:
+        printf $a
+        printf '$a'
+  #+end_example
+
+- Reference variables use ~${}~ or ~$()~:
+  #+begin_example makefile
+x := dude
+
+all:
+        echo $x
+        echo ${x}
+        echo $(x)
+  #+end_example
+* Practice exercise
+
+** Create the following project structure:
+
+#+BEGIN_SRC bash
+  mkdir project && cd project
+  pwd
+  touch main.c math.c math.h Makefile
+  ls
+#+END_SRC
+
+** File: =main.c=
+
+#+BEGIN_SRC c :tangle ./project/main.c
+  #include <stdio.h>
+  #include "math.h"
+
+  int main() {
+    printf("2 + 3 = %d\n", add(2, 3));
+    return 0;
+  }
+#+END_SRC
+
+** File: =math.c=
+
+#+BEGIN_SRC c :tangle ./project/math.c
+  int add(int a, int b) {
+    return a + b;
+  }
+#+END_SRC
+
+** File: =math.h=
+
+#+BEGIN_SRC c :tangle ./project/math.h
+  int add(int a, int b);
+#+END_SRC
+
+** Write a Makefile with:
+
+- Object file compilation
+- Final linking
+- Variables for =CC= and =CFLAGS=
+- Use of automatic variables
+- Use of
+
+** Sample Makefile
+
+- Create this ~Makefile~:
+  #+BEGIN_example makefile
+CC = gcc
+CFLAGS = -Wall
+
+main: main.o math.o
+        $(CC) $(CFLAGS) -o main main.o math.o
+
+main.o: main.c math.h
+        $(CC) $(CFLAGS) -c main.c
+
+math.o: math.c math.h
+        $(CC) $(CFLAGS) -c math.c
+
+.PHONY: clean
+clean:
+        rm -f *.o main
+  #+END_example
+
+- ~CC~ is the compiler to use, ~CFLAGS~ are its options (all warnings).
+
+- The first target =main= is the final executable. It links the object
+  files. When it is found, the dependencies =main.o= and =math.o= must
+  exist or they have to be made.
+
+- The second target =main.o= is built from =main.c= and depends on =math.h=
+  for the function declaration (prototype). The gcc flag ~-c~ compiles
+  but does not link.
+
+- The third target =math.o= is built from =math.c= and depends on =math.c=
+  and the header file =math.h= which declares the math function.
+
+- The ~.PHONY~ target is used to declare that a given tager is not a
+  file but rather a label for a command to run. This prevents ~make~
+  from getting confused if a file with the same name as the target
+  exists.
+
+- Summary:
+
+  | Target | Purpose                              | Trigger                              |
+  |--------+--------------------------------------+--------------------------------------|
+  | main   | Links main.o, math.o into executable | If either .o file is newer than main |
+  | main.o | Compiles main.c                      | If main.c or math.h changes          |
+  | math.o | Compiles math.c                      | If math.c or math.h changes          |
+  | clean  | Utility to clean up build files      | Manual (invoked with make clean)     |
