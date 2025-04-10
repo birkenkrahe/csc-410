@@ -3,10 +3,6 @@
 #+OPTIONS: toc:nil num:nil
 #+STARTUP: overview hideblocks indent entitiespretty
 #+properties: header-args:C :main no :includes :results output :exports both
-* Source
-
-- Based on ~makefiletutorial.com~
-
 * Overview
 
 - What is GNU ~make~? A tool that automatically builds executables and
@@ -432,3 +428,7 @@ clean:
   : -rw-rw-r-- 1 marcus marcus 102 Apr  9 10:51 main.c
   : -rw-rw-r-- 1 marcus marcus  23 Apr  9 10:41 math.h
   : -rw-rw-r-- 1 marcus marcus  42 Apr  9 10:41 math.c
+* Source
+
+- Based on the online ~makefiletutorial.com~ by Chase Lambert (2020).
+
