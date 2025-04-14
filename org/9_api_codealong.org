@@ -10,9 +10,9 @@
 
 The following topics are covered:
 
-- [ ] Understanding the importance of sockets in network programming
-- [ ] Understanding the client socket workflow
-- [ ] Coding a TCP client socket
+- [X] Understanding the importance of sockets in network programming
+- [X] Understanding the client socket workflow
+- [X] Coding a TCP client socket
 - [ ] Understanding the server socket workflow
 - [ ] Coding a TCP server socket
 - [ ] Connecting client and server over TCP
@@ -23,7 +23,7 @@ The following topics are covered:
 - Sockets are the low level endpoint used for processing information
   across a network.
 
-- Protocols like HTTP and FTP rely on sockets.
+- Protocols like HTTP and FTP rely on sockets (and on TCP).
 
 - Sockets are bidirectional so there isn't anything different about a
   "client" socket (on the client side) vs. a "server" socket on the
@@ -58,7 +58,8 @@ when the connection is accepted, we can receive data with ~recv~:
   our protocol.
 - Once the socket is created, we connected it to a remote address.
 - If the connection is successful, we get a success signal back.
-- Once we've received data, we can write it into a string and use it.
+- Once we've received data, we can write it into a buffer (for example
+  a string) and use it.
 
 - The following function prototypes are involved:
   #+begin_src C :results none :noweb yes
@@ -79,21 +80,77 @@ when the connection is accepted, we can receive data with ~recv~:
 - Include standard header files:
   #+name: standard header files
   #+begin_src C :results none
-
+    #include <stdio.h>
+    #include <stdlib.h>
   #+end_src
 
 - Include several special header files
   #+name: network header files
   #+begin_src C :results none
-
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <unistd.h>
   #+end_src
 
+- *Challenge:* Where exactly are these files on your Linux system? Find
+  out and let's share in the next session.
+
 - Main program:
-  #+begin_src C :noweb yes :tangle ./src/tcp_client.c :includes :main no
+  #+begin_src C :noweb yes :tangle tcp_client.c :includes :main no
     <<standard header files>>
     <<network header files>>
 
+    #define PORT 9002
+
+    int main(void)
+    {
+      // redirect stderr to stdout
+      dup2(1,2);  // same as 1&>2 on the shell
+      
+      // create socket
+      int network_socket;
+
+      // use IPv4, TCP, default for the socket
+      network_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+      // specify a destination address for the socket
+      struct sockaddr_in server_address;
+      server_address.sin_family = AF_INET; // use IPv4
+      server_address.sin_port = htons(PORT); // convert port number
+      server_address.sin_addr.s_addr = INADDR_ANY; // use 0.0.0.0
+
+      // connect to the socket
+      int connection_status = // return 0 if OK, or -1 if not OK
+        connect(network_socket,
+                (struct sockaddr *) &server_address,
+                sizeof(server_address));
+
+      // check for error (no connection)
+      if (connection_status == -1) {
+        perror("Connection error");  // perror prints to stderr
+      }
+
+      // receive data from the server
+      char server_response[250]; // empty string to hold the data
+      recv(network_socket, // this is the socket we created
+           &server_response,
+           sizeof(server_response),
+           0);
+
+      // print the data that we received
+      if (connection_status == 0) { // if we could get a connection
+        printf("The server sent the data: %s", server_response);
+      }
+      // close the socket
+      close(network_socket);
+
+      return 0;
+    }
   #+end_src
+
+  #+RESULTS:
+  : Connection error: Connection refused
 
 - To test, run this and you should get the output =Connection error.=
 
@@ -127,7 +184,7 @@ those sockets it has connected to:
      |
      v
 +---------+
-| send()  |
+| send() or recv() |
 +---------+
 #+END_EXAMPLE
 
@@ -135,7 +192,7 @@ those sockets it has connected to:
   #+begin_src C :results none :noweb yesn
     <<network header files>>
 
-    // descriptor, ptr to address, size of address
+      // descriptor, ptr to address, size of address
     int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
     // descriptor, max no of pending connections that can be queried
@@ -151,11 +208,51 @@ those sockets it has connected to:
 * Create TCP server socket
 
 - We can reuse the header files from the client side program:
-  #+begin_src C :noweb yes :tangle ./src/tcp_server.c :includes :main no
+  #+begin_src C :noweb yes :tangle tcp_server.c :includes :main no
     <<standard header files>>
     <<network header files>>
 
+    #define PORT 9002
+    #define CONN 5
+
+    int main(void)
+    {
+      // text sent to the client
+      char server_message[250] = "You have reached the server!\n\n";
+
+      // create socket
+      int server_socket;
+      server_socket = socket(AF_INET,SOCK_STREAM,0);
+
+      // define server address
+      struct sockaddr_in server_address;
+      server_address.sin_family = AF_INET;
+      server_address.sin_port = htons(PORT);
+      server_address.sin_addr.s_addr = INADDR_ANY;
+
+      // bind the socket to our specified IP and port (of the client)
+      bind(server_socket,
+           (struct sockaddr*) &server_address,
+           sizeof(server_address));
+
+      // listen to the connection (max CONN)
+      listen(server_socket, CONN);
+
+      // accept the connection with the client
+      int client_socket;
+      client_socket = accept(server_socket,NULL,NULL); // local connection
+
+      // send data (server message only) to the client
+      send(client_socket,server_message, sizeof(server_message),0);
+      
+      // close socket on the server side
+      close(server_socket);
+
+      return 0;
+    }
   #+end_src
+
+  #+RESULTS:
 
 * Connecting client and server over TCP
 
@@ -189,5 +286,398 @@ those sockets it has connected to:
   (sequentially), you can wrap the ~accept~ and ~send~ part in an infinite
   loop, and add a loggint ~printf~ message to monitor activity.
   #+end_quote
-  
 
+* TODO Network header files - library files and macros
+
+- This header file will only work on Unix-like systems.
+
+- We're putting all header files into ~time_server.h~:
+  #+begin_src C :tangle time_server.h :main no :includes :results none
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <netdb.h>
+    #include <unistd.h>
+    #include <errno.h>
+    #include <stdio.h>
+    #include <time.h>
+    #include <string.h>
+  #+end_src
+
+- Explanation:
+  | Header File  | Purpose and Use (Max 72 chars)                          |
+  |--------------+---------------------------------------------------------|
+  | =sys/types.h=  | Types (e.g., ~pid_t~) for socket vars in time server.     |
+  | =sys/socket.h= | Socket funcs (~socket~, ~bind~) to send time to clients.    |
+  | =netinet/in.h= | Structs (~sockaddr_in~) for IP/port in time server.       |
+  | =arpa/inet.h=  | Funcs (~inet_pton~, ~htons~) for IP/port in time server.    |
+  | =netdb.h=      | Hostname resolution for network time requests.          |
+  | =unistd.h=     | Close socket after sending time to clients.             |
+  | =errno.h=      | Error handling for network issues in time server.       |
+  | =time.h=       | Time funcs (~time~, ~ctime~) to get/format time for client. |
+  | =stdio.h=      | ~printf~ to format time string for network transmission.  |
+
+* TODO Building the networked time-telling program
+
+- This is the flow that we've got to implement:
+  #+attr_html: :width 400px :float nil:
+  #+caption: Source: van Winkle (2019)
+  [[../img/tcp_flow.png]]
+
+- Most of our functions are ~man~ level 2 (system calls) that interact
+  directly with the OS kernel for time retrieval and networking.
+
+- A couple of our functions are ~man~ level 3 (library functions).
+
+- We're going to assemble the file using ~noweb~ chunks.
+  #+begin_src C :main no :includes :tangle time_server.c
+    #include "time_server.h"
+    #define PORT "8080" // for the `service` parameter of `getaddrinfo`
+    #define CONN 10 // max number of connections to `listen` to
+
+    int main(void)
+    {
+      <<configure local address>>
+      <<create socket>>
+      <<check that socket is valid>>
+      <<bind address to socket>>
+      <<listen to connections>>
+      <<accept incoming connection>>
+      <<print client address to console>>
+      <<receive client request>>
+      <<send server response>>
+      <<send time>>
+      <<close client connection>>
+      <<close server connection>>
+                        
+      return 0;
+    }
+  #+end_src
+
+** Pick address for the server to ~bind(2)~ to with ~getaddrinfo(3)~
+
+- Figure out the local address that the web server should bind to:
+  #+name: configure local address
+  #+begin_src C :main no :includes  :results none
+    printf("Configuring local address...\n");
+
+  #+end_src
+
+- Explanation:
+
+  1. =struct addrinfo hints=: Declares =hints= ~struct~ for address
+     configuration options.
+
+  2. =memset(&hints, 0, sizeof(hints))=: Clears =hints= ~struct~ to avoid
+     garbage values (check the ~memset~ ~man~ page).
+
+  3. =hints.ai_family = AF_INET=: Sets address family to IPv4 for the
+     server.
+
+  4. =hints.ai_socktype = SOCK_STREAM=: Specifies TCP (stream) socket
+     type.
+
+  5. =hints.ai_flags = AI_PASSIVE=: Allows binding to any local IP
+     (e.g., 0.0.0.0).
+
+  6. =struct addrinfo *bind_address=: Declares pointer for storing
+     address info.
+
+  7. =getaddrinfo(0, "8080", &hints, &bind_address)=: Gets address for
+     port 8080, using =hints= and 0. The prototype:
+     #+begin_example C
+       int getaddrinfo(const char *node, const char *service,
+                       const struct addrinfo *hints,
+                       struct addrinfo **res);
+     #+end_example
+     ~service~ can be a =PORT= (like ="8080"=) or a service like (=="http"=),
+     which is why it's got to be a string.
+
+  8. The ~man~ page of ~getaddrinfo~ explains what that does:
+     #+begin_quote
+     If the ~AI_PASSIVE~ flag is specified in ~hints.ai_flags~, and node
+     is NULL, then the returned socket addresses will be suitable for
+     ~bind(2)~ -ing a socket that will ~accept(2)~ connections.  The
+     returned socket address will contain the "wildcard address"
+     (INADDR_ANY for IPv4 addresses [...]).  The wildcard address is
+     used by applications (typically servers) that intend to accept
+     connections on any of the host's network addresses.
+     #+end_quote
+
+     ~getaddrinfo~ is protocol-independent: we only need to change
+     ~AF_INET~ to ~AF_INET6~ to make it work on IPv6.
+
+** Create the socket descriptor by calling ~socket(2)~
+
+- Once we've got the local address info, we can create the socket.
+  #+name: create socket
+  #+begin_src C :main no :includes  :results none
+    printf("Creating socket...\n");
+
+  #+end_src
+
+- Explanation:
+
+  1. =int socket_listen=: Declares variable for the listening socket. On
+     Windows, this would be the ~SOCKET~ type defined just for sockets.
+
+  2. =socket_listen = socket(...)=: Creates socket using address family, type,
+     and protocol from bind_address.
+
+  3. The reason we used ~getaddrinfo~ is that we can now pass parts of
+     =bind_address= as the arguments to ~socket~.
+
+  4. It is common to see programs that call ~socket~ first. This
+     complicates things since socket family, type, and protocol must
+     be entered multiple times.
+
+** Check that the call to ~socket~ is successful
+
+- We check that the call to ~socket~ was successful:
+  #+name: check that socket is valid
+  #+begin_src C  :main no :includes  :results none
+
+  #+end_src
+
+- Explanation of Socket Validation Code for Time Program
+
+  1. =if (!(socket_listen >= 0))=: Checks if =socket_listen= is valid
+     (non-negative).
+  2. =fprintf(stderr, "socket() failed, (%d)\n", errno)=: Prints error
+     to ~stderr~ with ~errno~ if socket creation fails. Check ~man errno~.
+
+  3. =return 1=: Exits program with error code 1 on socket failure.
+
+** Call ~bind~ to associate the socket with =bind_address=
+
+- Once the socket has been created, we call ~bind~ to associate the
+  socket with the address generated by ~getaddrinfo~:
+  #+name: bind address to socket
+  #+begin_src C  :main no :includes  :results none
+    printf("Binding socket to local address...\n");
+
+  #+end_src
+
+- Explanation:
+
+  1. =if (bind(socket_listen, ...))=: Binds =socket_listen= to the address
+     and port in =bind_address=.
+
+  2. =fprintf(stderr, "bind() failed. (%d\n", errno)=: Prints error with
+     ~errno~ if binding fails. ~bind~ returns 0 on success. It fails if
+     the port we are binding to is already in use.
+
+  3. =return 1=: Exits program with error code 1 if binding fails.
+
+  4. =freeaddrinfo(bind_address)=: Frees memory allocated for
+     =bind_address=.
+
+** Start listening for connections with ~listen(2)~
+
+- Once socket has been created and bound to a local address, we can
+  start listening for connections:
+  #+name: listen to connections
+  #+begin_src C :main no :includes  :results none
+    printf("Listening...\n");
+
+  #+end_src
+
+- Explanation:
+
+  1. =if (listen(socket_listen, CONN) < 0)=: Sets =socket_listen= to
+     listen for up to =CONN= incoming connections.
+
+  2. =fprintf(stderr, "listen() failed. (%d)\n", errno)=: Prints error
+     with ~errno~ if ~listen~ fails.
+
+  3. =return 1=: Exits program with error code 1 if ~listen~ fails.
+
+** Start accepting incoming connection with ~accept(2)~
+
+- Once the socket has begun listening for connections, you can ~accept~
+  incoming connections:
+  #+name: accept incoming connection
+  #+begin_src C :main no :includes :results none
+    printf("Waiting for connection...\n");
+
+  #+end_src
+
+- Explanation:
+
+  1. =struct sockaddr_storage client_address:= Declares storage for
+     client address info.
+
+  2. =socklen_t client_len = sizeof(client_address)=: Sets size of
+     =client_address= ~struct~.
+
+  3. =int socket_client = accept(socket_listen, ...)=: Accepts client
+     connection, returns new socket.
+
+  4. =if (!(socket_client >= 0))=: Checks if accept failed
+     =(socket_client < 0)=.
+
+  5. =fprintf(stderr, "accept() failed, (%d)\n", errno)=: Prints error
+     with ~errno~ if accept fails.
+
+  6. =return 1=: Exits program with error code 1 if ~accept~ fails.
+
+- ~accept~ will block your program until a new connection is made: it
+  will ~sleep~ until a client connects to =socket_listen=. Then ~accept~
+  will create a new socket =socket_client= used to send and receive
+  data, and ~address~ also fills in address info of the client.
+
+** Print the client's address to the console with ~getnameinfo(3)~
+
+- A TCP connection to a remote client has now been established, and
+  we're waiting for the client to make a request.
+
+- This step is optional but it is good practice to log network
+  connections, and we're using ~getnameinfo~ for that.
+  #+name: print client address to console
+  #+begin_src C :main no :includes :results none
+    printf("Client is connected... ");
+
+  #+end_src
+
+- Explanation:
+
+  1. =char address_buffer[100]=: Declares array to store client’s IP
+     address as string.
+
+  2. =getnameinfo(...)=: Converts client address to numeric IP string.
+
+  3. =printf("%s\n", address_buffer)=: Prints the client’s IP address
+     from buffer.
+
+- The ~getnameinfo(3)~ prototype: 
+#+begin_example C
+  int getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
+                  char *host, socklen_t hostlen,
+                  char *serv, socklen_t servlen, int flags);
+#+end_example
+
+   The function takes the client's address =addr= and address length
+   =addlen= (it can work with both IPv4 and IPv6 addresses). The
+   hostname output is written to =host=. The service name and its length
+   is output to =serv= and =servlen= (we don't care about this here). The
+   ~NI_NUMERICHOST~ flag means that we want to see the hostname as an IP
+   address.
+
+** Read client request with ~recv~
+
+- We read a client request using the ~recv(2)~ function:
+  #+name: receive client request
+  #+begin_src C :main no :includes :results none
+    printf("Reading request...\n");
+
+  #+end_src
+
+- Explanation:
+
+  1. =char request[1024]=: Declares array to store client’s request up
+     to 1024 bytes.
+
+  2. =int bytes_received = recv(socket_client, request, 1024, 0)=:
+     Receives data from client into =request=, returns bytes read.
+
+  3. =printf("Received %d bytes.\n", bytes_received)=: Prints number of
+     bytes received.
+
+- If nothing has been received yet, ~recv~ blocks until it has
+  something. If the connection is terminated by the client, ~recv~
+  returns 0 or -1 (one should check =recv > 0=).
+
+- A real web server would need to parse the request and look at which
+  resource the web client is requestion (e.g. HTTP, FTP etc.). Here,
+  we can ignore the =request= altogether but you can print it to
+  console.
+
+** Send response from server back to the client with ~send(2)~
+
+- Once the web browser has sent the client request, the server can
+  send its response back:
+  #+name: send server response
+  #+begin_src C :main no :includes :results none
+    printf("Sending response...\n");
+
+  #+end_src
+
+- Explanation:
+
+  1. =const char *response = "HTTP/1.1 200 OK\r\n..." ...=: Defines HTTP
+     response header with time prefix.
+
+  2. =int bytes_sent = send(socket_client, response, strlen(response),
+     0)=: Sends response string to client, returns bytes sent.
+
+  3. =printf("Sent %d bytes.\n", bytes_sent)=: Prints number of bytes sent.
+
+- We set =response= to a standard HTTP response header followed by the
+  beginning of our message (="Local time is: "=). It tells the browser:
+  1) Your request is OK.
+  2) The server will close the connection when all data is sent.
+  3) The data you receive will be plain text.
+
+- HTTP requires line endings to take the form of a carriage return
+  followed by a new line: =\r\n= is a blank line in your response.
+
+- You should generally check that the number of bytes sent with
+  ~send(2)~ was as expected, and you try to send the rest if it's not.
+
+** Send the time with ~send(2)~
+
+- Once the HTTP header and the beginning of the message is sent, we
+  can send the actual time. We get it as before in =time_console.c=, and
+  we send it using ~send(2)~:
+  #+name: send time
+  #+begin_src C :main no :includes :results none
+
+  #+end_src
+
+- Explanation:
+  
+  1. =time_t timer=: Declares variable to hold current time.
+
+  2. =time(&timer)=: Fetches current system time into timer.
+
+  3. =char *time_msg = ctime(&timer)=: Converts timer to human-readable
+     string.
+
+  4. =bytes_sent = send(socket_client, time_msg, strlen(time_msg), 0)=:
+     Sends time string to client, returns bytes sent.
+
+  5. =printf("Sent %d of %d bytes.\n", ...)=: Prints bytes sent vs. time
+     string length.
+
+** Close client connection with ~close(2)~
+
+- We now must ~close~ the client connection to indicate to the browser
+  application that we've sent all of our request data:
+  #+name: close client connection
+  #+begin_src C :main no :includes :results none
+    printf("Closing requesting (client) connection...\n");
+
+  #+end_src
+
+- If we don't close the connection, the browser will wait for more
+  data until it times out (~300s for Chrome - browser dependent).
+
+** Close server connection with ~close(2)~
+
+- We could call ~accept~ on =socket_listen= to accept additional
+  connections: That's what a real server would do.
+  #+name: close server connection
+  #+begin_src C :main no :includes :results none
+    printf("Closing listening (server) connection...\n");
+
+  #+end_src
+  
+* TODO Compile and run the program
+
+#+begin_src bash :results output
+  make time_server
+#+end_src
+
+
+  
