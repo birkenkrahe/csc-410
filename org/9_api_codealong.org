@@ -107,7 +107,7 @@ when the connection is accepted, we can receive data with ~recv~:
     {
       // redirect stderr to stdout
       dup2(1,2);  // same as 1&>2 on the shell
-      
+
       // create socket
       int network_socket;
 
@@ -244,7 +244,7 @@ those sockets it has connected to:
 
       // send data (server message only) to the client
       send(client_socket,server_message, sizeof(server_message),0);
-      
+
       // close socket on the server side
       close(server_socket);
 
@@ -287,7 +287,7 @@ those sockets it has connected to:
   loop, and add a loggint ~printf~ message to monitor activity.
   #+end_quote
 
-* TODO Network header files - library files and macros
+* Network header files - library files and macros
 
 - This header file will only work on Unix-like systems.
 
@@ -318,12 +318,7 @@ those sockets it has connected to:
   | =time.h=       | Time funcs (~time~, ~ctime~) to get/format time for client. |
   | =stdio.h=      | ~printf~ to format time string for network transmission.  |
 
-* TODO Building the networked time-telling program
-
-- This is the flow that we've got to implement:
-  #+attr_html: :width 400px :float nil:
-  #+caption: Source: van Winkle (2019)
-  [[../img/tcp_flow.png]]
+* IN_PROGRESS Building the networked time-telling program
 
 - Most of our functions are ~man~ level 2 (system calls) that interact
   directly with the OS kernel for time retrieval and networking.
@@ -350,8 +345,8 @@ those sockets it has connected to:
       <<send time>>
       <<close client connection>>
       <<close server connection>>
-                        
-      return 0;
+
+        return 0;
     }
   #+end_src
 
@@ -361,7 +356,14 @@ those sockets it has connected to:
   #+name: configure local address
   #+begin_src C :main no :includes  :results none
     printf("Configuring local address...\n");
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
 
+    struct addrinfo *bind_address;
+    getaddrinfo(0, PORT, &hints, &bind_address);
   #+end_src
 
 - Explanation:
@@ -414,7 +416,10 @@ those sockets it has connected to:
   #+name: create socket
   #+begin_src C :main no :includes  :results none
     printf("Creating socket...\n");
-
+    int socket_listen;
+    socket_listen = socket(bind_address->ai_family,
+                           bind_address->ai_socktype,
+                           bind_address->ai_protocol);
   #+end_src
 
 - Explanation:
@@ -437,7 +442,10 @@ those sockets it has connected to:
 - We check that the call to ~socket~ was successful:
   #+name: check that socket is valid
   #+begin_src C  :main no :includes  :results none
-
+    if (!(socket_listen >=0)) {
+      fprintf(stderr, "socket() failed, (%d)\n", errno);
+      return 1;
+     }
   #+end_src
 
 - Explanation of Socket Validation Code for Time Program
@@ -445,7 +453,8 @@ those sockets it has connected to:
   1. =if (!(socket_listen >= 0))=: Checks if =socket_listen= is valid
      (non-negative).
   2. =fprintf(stderr, "socket() failed, (%d)\n", errno)=: Prints error
-     to ~stderr~ with ~errno~ if socket creation fails. Check ~man errno~.
+     to ~stderr~ with ~errno(3)~ if socket creation fails. Check ~man
+     errno~.
 
   3. =return 1=: Exits program with error code 1 on socket failure.
 
@@ -456,17 +465,24 @@ those sockets it has connected to:
   #+name: bind address to socket
   #+begin_src C  :main no :includes  :results none
     printf("Binding socket to local address...\n");
-
+    if (bind(socket_listen,
+             bind_address->ai_addr,
+             bind_address->ai_addrlen)) {
+      fprintf(stderr, "bind() failed. (%d)\n", errno);
+      return 1;
+     }
+    freeaddrinfo(bind_address);
   #+end_src
 
 - Explanation:
 
   1. =if (bind(socket_listen, ...))=: Binds =socket_listen= to the address
-     and port in =bind_address=.
+     and port in =bind_address=. When ~bind~ succeeds (0) the condition is
+     false.
 
   2. =fprintf(stderr, "bind() failed. (%d\n", errno)=: Prints error with
-     ~errno~ if binding fails. ~bind~ returns 0 on success. It fails if
-     the port we are binding to is already in use.
+     ~errno~ if binding fails. ~bind~ returns 0 on success. It fails (-1)
+     if the port we are binding to is already in use.
 
   3. =return 1=: Exits program with error code 1 if binding fails.
 
@@ -480,7 +496,10 @@ those sockets it has connected to:
   #+name: listen to connections
   #+begin_src C :main no :includes  :results none
     printf("Listening...\n");
-
+    if (listen(socket_listen, CONN) < 0) {
+      fprintf(stderr, "listen() failed. (%d)\n", errno);
+      return 1;
+     }
   #+end_src
 
 - Explanation:
@@ -500,7 +519,15 @@ those sockets it has connected to:
   #+name: accept incoming connection
   #+begin_src C :main no :includes :results none
     printf("Waiting for connection...\n");
-
+    struct sockaddr_storage client_address;
+    socklen_t client_len = sizeof(client_address);
+    int socket_client = accept(socket_listen,
+                           (struct sockaddr*) &client_address,
+                           &client_len);
+    if (!(socket_client >= 0)) {
+      fprintf(stderr, "accept() failed, (%d)\n", errno);
+      return 1;
+     }
   #+end_src
 
 - Explanation:
@@ -537,7 +564,13 @@ those sockets it has connected to:
   #+name: print client address to console
   #+begin_src C :main no :includes :results none
     printf("Client is connected... ");
-
+    char address_buffer[100];
+    getnameinfo((struct sockaddr*) &client_address,
+            client_len,
+            address_buffer,
+            sizeof(address_buffer),
+            0,0,NI_NUMERICHOST);
+    printf("%s\n", address_buffer);
   #+end_src
 
 - Explanation:
@@ -550,19 +583,19 @@ those sockets it has connected to:
   3. =printf("%s\n", address_buffer)=: Prints the client’s IP address
      from buffer.
 
-- The ~getnameinfo(3)~ prototype: 
+- The ~getnameinfo(3)~ prototype:
 #+begin_example C
   int getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
                   char *host, socklen_t hostlen,
                   char *serv, socklen_t servlen, int flags);
 #+end_example
 
-   The function takes the client's address =addr= and address length
-   =addlen= (it can work with both IPv4 and IPv6 addresses). The
-   hostname output is written to =host=. The service name and its length
-   is output to =serv= and =servlen= (we don't care about this here). The
-   ~NI_NUMERICHOST~ flag means that we want to see the hostname as an IP
-   address.
+The function takes the client's address =addr= and address length
+=addlen= (it can work with both IPv4 and IPv6 addresses). The
+hostname output is written to =host=. The service name and its length
+is output to =serv= and =servlen= (we don't care about this here). The
+~NI_NUMERICHOST~ flag means that we want to see the hostname as an IP
+address.
 
 ** Read client request with ~recv~
 
@@ -570,7 +603,11 @@ those sockets it has connected to:
   #+name: receive client request
   #+begin_src C :main no :includes :results none
     printf("Reading request...\n");
-
+    char request[1024];
+    int bytes_received = recv(socket_client,
+                              request,
+                              1024,0);
+    printf("Received %d bytes.\n", bytes_received);
   #+end_src
 
 - Explanation:
@@ -600,7 +637,16 @@ those sockets it has connected to:
   #+name: send server response
   #+begin_src C :main no :includes :results none
     printf("Sending response...\n");
-
+    const char *response =
+      "HTTP/1.1 200 OK\r\n"
+      "Connection: close\r\n"
+      "Content-Type: text/plain\r\n\r\n"
+      "Local time is: ";
+    int bytes_sent = send(socket_client,
+                      response,
+                      strlen(response),
+                      0);
+    printf("Sent %d of %d bytes.\n", bytes_sent, (int) strlen(response));
   #+end_src
 
 - Explanation:
@@ -625,7 +671,7 @@ those sockets it has connected to:
 - You should generally check that the number of bytes sent with
   ~send(2)~ was as expected, and you try to send the rest if it's not.
 
-** Send the time with ~send(2)~
+** TODO Send the time with ~send(2)~
 
 - Once the HTTP header and the beginning of the message is sent, we
   can send the actual time. We get it as before in =time_console.c=, and
@@ -636,7 +682,7 @@ those sockets it has connected to:
   #+end_src
 
 - Explanation:
-  
+
   1. =time_t timer=: Declares variable to hold current time.
 
   2. =time(&timer)=: Fetches current system time into timer.
@@ -650,7 +696,7 @@ those sockets it has connected to:
   5. =printf("Sent %d of %d bytes.\n", ...)=: Prints bytes sent vs. time
      string length.
 
-** Close client connection with ~close(2)~
+** TODO Close client connection with ~close(2)~
 
 - We now must ~close~ the client connection to indicate to the browser
   application that we've sent all of our request data:
@@ -663,7 +709,7 @@ those sockets it has connected to:
 - If we don't close the connection, the browser will wait for more
   data until it times out (~300s for Chrome - browser dependent).
 
-** Close server connection with ~close(2)~
+** TODO Close server connection with ~close(2)~
 
 - We could call ~accept~ on =socket_listen= to accept additional
   connections: That's what a real server would do.
@@ -671,13 +717,67 @@ those sockets it has connected to:
   #+begin_src C :main no :includes :results none
     printf("Closing listening (server) connection...\n");
 
+    printf("Finished.\n");
   #+end_src
-  
+
 * TODO Compile and run the program
 
-#+begin_src bash :results output
-  make time_server
-#+end_src
+- Compile the program:
+  #+begin_src bash :results output
 
+  #+end_src
 
-  
+- Start the server in the shell in Emacs (=M-x shell=).
+
+- Start the server with =./time_server=.
+
+- When you see the ="Waiting for connection..."= message, open a web
+  browser to the address =127.0.0.1:8080= or =localhost:8080=.
+
+- This is what you should see:
+  #+begin_example
+  $ ./time_server
+  Configuring local address...
+  Creating socket...
+  Binding socket to local address...
+  Listening...
+  Waiting for connection...
+  Client is connected... 127.0.0.1
+  Reading request...
+  Received 660 bytes.
+  Sending response...
+  Sent 79 of 79 bytes.
+  Sent 25 of 25 bytes.
+  Closing requesting (client) connection...
+  Closing listening (server) connection...
+  Finished.
+  $
+  #+end_example
+
+- If you restart the server immediately after this, you may get a
+  =bind() failed. (98)= error. This is the ~EADDRINUSE~ error code from
+  ~<errno.h>~.
+
+- For the location of ~<errno.h>~ in ~/usr/include~ (std header files):
+  #+begin_src bash :results output :exports both
+
+  #+end_src
+
+- The port =8080= was still in use because that port is still in
+  ~TIME_WAIT~ state for a short period to make sure any lingering
+  packets are handled, about 30-60 seconds.
+
+- Fix this by calling ~setsockopt(2)~ after ~socket~ but before ~bind~:
+  #+name: enable immediate socket reuse
+  #+begin_src C :main no :includes :results none
+    
+  #+end_src
+
+- Insert this chunk into the ~main~ program before the =<<bind...>>= code:
+  #+begin_example C
+      <<enable immediate socket reuse>>
+  #+end_example
+
+- Then tangle =time_server.c=, ~make time_server~ again, start the server,
+  get the time, restart the server and try to get the time immediately
+  and it should work now.
