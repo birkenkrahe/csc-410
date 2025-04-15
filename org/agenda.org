@@ -1870,16 +1870,17 @@ new worth knowing and/or reviewing.
     as using IPv4 and TCP for reliable data transfer.
     #+END_QUOTE
 
+* DONE Week 12: GNU Make / Byte Order / TCP vs UDP
 
-* Week 12: Programming a TCP client
-
-- [ ] *Assignment*: A simple one-shot echo
-- [ ] *Bonus Assignment:* An echo server and client
-- [ ] [[file:9_api.org::* Byte order][Byte order]] (~htons~)
-- [ ] Building programs with GNU ~make~
-- [ ] Creating smart header files for the preprocessor
+- [X] *Assignment*: A simple one-shot echo client/server
+- [X] *Bonus Assignment:* A persistent echo server and client
+- [X] *New test* on socket programming with client/server
+- [X] *Lecture/practice:* Building programs with GNU ~make~
+- [X] From host order to [[file:9_api.org::* Byte order][network byte order]] with ~htons~
+- [X] *Lecture/practice:* TCP vs UDP program workflow
+- [X] *Code along*: Networking a time-telling program
   
-** TODO Home assignment: One-shot echo server
+** Home assignment: One-shot echo server
 
 - Task: Create a one-shot echo client/server app that exchanges one
   message each between client and server.
@@ -1909,9 +1910,205 @@ new worth knowing and/or reviewing.
 - *Bonus assignment* (May 2): Persistent TCP echo server (more than one
   message).
 
-** TODO GNU make
+** Review GNU make
 
-Download the code along file: https://tinyurl.com/gnu-make-org
+- I redesigned the code along file
+- Download the code along file again: [[https://tinyurl.com/gnu-make-org][tinyurl.com/gnu-make-org]]
+
+*Review questions to warm up:*
+
+1) What is GNU ~make~?
+   #+begin_quote
+   A free tool automates compilation, and avoids recompiling unchanged files
+   #+end_quote
+
+2) Where is GNU ~make~ *executed*? Where is it *located* on the computer?
+   #+begin_quote
+   On the shell (aka commandline). Location: check ~which make~. 
+   #+end_quote
+
+   #+begin_src bash :results output
+     which make
+   #+end_src
+
+   #+RESULTS:
+   : /usr/bin/make
+
+3) What is a =makefile=?
+   #+begin_quote
+   A configuration file for ~make~ that contains targets (to build),
+   dependencies (as prerequisites to build), and rules (to act upon).
+   #+end_quote
+
+4) When is a ~make~ *target* built?
+   #+begin_quote
+   When the dependencies exist and are not more recent than the
+   target, or when the target does not exist.
+   #+end_quote
+
+5) When do you need GNU ~make~?
+   #+begin_quote
+   In projects with multiple source files or steps to build the
+   software. As an example, check out [[https://github.com/emacs-mirror/emacs][github.com/emacs-mirror/emacs]]
+   #+end_quote
+   
+
+* Week 14: Networking a web service
+
+- [X] *Code along:* Networking a time-telling program.
+- [X] *Test*: GNU Make / Byte Order / one-shot server / Web service.
+- [ ] *Home assignment*: Modify the networked time-telling program.
+- [ ] *Bonus assignment:* Network =timer_console.c= using ~inetd~.
+
+** DONE Review: Time-Telling Program
+
+Can you explain every line of this program?
+
+#+begin_src C
+  #include <stdio.h>
+  #include <time.h> 
+
+  int main()
+  {
+    time_t timer;
+
+    time(&timer);
+
+    printf("Local time is: %s", ctime(&timer));
+
+    return 0; 
+  }
+#+end_src
+
+#+RESULTS:
+: Local time is: Sun Apr 13 22:16:38 2025
+
+
+** Review: Networking the Time-Telling Program
+
+*Popquiz!*
+
+1. What is a socket?
+
+2. What is a connectionless protocol? What is a connection-oriented
+   protocol? Examples?
+
+3. What types of applications generally benefit from using TCP?
+
+4. What types of applications generally benefit from using UDP?
+
+5. Does TCP guarantee that data will be transmitted successfully?
+
+6. What does the ~bind~ function do?
+
+7. What is the meaning of the '2' in ~bind(2)~?
+
+8. What does the ~accept~ function do?
+
+9. In a TCP connection, does the client or the server send application
+   data first?
+
+10. Describe what you think the ~getaddrinfo(3)~ function does and why
+    it is used? Tip: this is where the function is used in
+    =time_server.c=:
+    #+begin_example C
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+
+    struct addrinfo *bind_address;
+    getaddrinfo(0, PORT, &hints, &bind_address);
+    #+end_example
+
+
+** Review: Networking the Time-Telling Program
+
+Popquiz!
+
+1. What is a socket?
+   #+BEGIN_QUOTE
+   A socket is an endpoint for network communication, allowing
+   programs to send/receive data over a network (e.g., TCP/IP). In
+   time_server, it’s used to listen on port 8080.
+   #+END_QUOTE
+
+2. What is a connectionless protocol? What is a connection-oriented
+   protocol? Examples?
+   #+BEGIN_QUOTE
+   - Connectionless: Sends data without establishing a link
+     (unreliable, fast). Example: UDP (e.g., DNS).
+   - Connection-oriented: Establishes a link before sending data
+     (reliable). Example: TCP (e.g., HTTP in time_server).
+   #+END_QUOTE
+
+3. What types of applications generally benefit from using TCP?
+   #+BEGIN_QUOTE
+   Apps needing reliable, ordered data delivery, like web servers
+   (HTTP in time_server), email (SMTP), or file transfers (FTP).
+   #+END_QUOTE
+
+4. What types of applications generally benefit from using UDP?
+   #+BEGIN_QUOTE
+   Apps prioritizing speed over reliability, like video streaming,
+   online gaming, or DNS queries, where minor data loss is tolerable.
+   #+END_QUOTE
+
+5. Does TCP guarantee that data will be transmitted successfully?
+   #+BEGIN_QUOTE
+   TCP guarantees reliable delivery by retransmitting lost packets,
+   ensuring data arrives in order, barring network failure (used in
+   time_server for HTTP response).
+   #+END_QUOTE
+
+6. What does the ~bind~ function do?
+   #+BEGIN_QUOTE
+   bind() assigns a socket to a specific address/port (e.g., port 8080
+   in time_server), so the server can receive connections there.
+   #+END_QUOTE
+
+7. What is the meaning of the '2' in ~bind(2)~?
+   #+BEGIN_QUOTE
+   The '2' means bind is a system call, documented in man page section
+   2 (system calls), covering kernel-level functions like bind in
+   time_server.
+   #+END_QUOTE
+
+8. What does the ~accept~ function do?
+   #+BEGIN_QUOTE
+   accept() retrieves a client connection from a listening socket,
+   creating a new socket for communication (e.g., handling a client in
+   time_server).
+   #+END_QUOTE
+
+9. In a TCP connection, does the client or the server send application data first?
+   #+BEGIN_QUOTE
+   The client typically sends application data first (e.g., HTTP GET
+   in time_server), after the TCP handshake. The server responds
+   (e.g., time data).
+   #+END_QUOTE
+
+10. Describe what you think the ~getaddrinfo(3)~ function does and why
+    it is used? Prototype and call in =timer_server.c=:
+    #+begin_example C
+       // function prototype
+       int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,
+                       struct addrinfo **res);
+       // example function call:
+       getaddrinfo(0, PORT, &hints, &bind_address);
+     #+end_example
+
+    #+BEGIN_QUOTE
+    getaddrinfo(3) resolves addresses/ports into socket-compatible
+    structs. In time_server, it sets up port 8080 for binding, using
+    hints for IPv4/TCP and AI_PASSIVE for server use.
+    #+END_QUOTE
+
+
+* Week 15: Building a TCP web server or Wireshark practice
+
+* Week 16: Project presentations
 
 * Footnotes
 
