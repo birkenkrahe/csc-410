@@ -1984,44 +1984,13 @@ Can you explain every line of this program?
 : Local time is: Sun Apr 13 22:16:38 2025
 
 
-** Review: Networking the Time-Telling Program
+** Networking a Time-Telling Program to Create a Web service
 
-*Popquiz!*
+To code along, open [[https://tinyurl.com/api-codealong][tinyurl.com/api-codealong]] in Emacs:
 
-1. What is a socket?
-
-2. What is a connectionless protocol? What is a connection-oriented
-   protocol? Examples?
-
-3. What types of applications generally benefit from using TCP?
-
-4. What types of applications generally benefit from using UDP?
-
-5. Does TCP guarantee that data will be transmitted successfully?
-
-6. What does the ~bind~ function do?
-
-7. What is the meaning of the '2' in ~bind(2)~?
-
-8. What does the ~accept~ function do?
-
-9. In a TCP connection, does the client or the server send application
-   data first?
-
-10. Describe what you think the ~getaddrinfo(3)~ function does and why
-    it is used? Tip: this is where the function is used in
-    =time_server.c=:
-    #+begin_example C
-    struct addrinfo hints;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-
-    struct addrinfo *bind_address;
-    getaddrinfo(0, PORT, &hints, &bind_address);
-    #+end_example
-
+#+begin_example
+  wget -O api.org tinyurl.com/api-codealong
+#+end_example
 
 ** Review: Networking the Time-Telling Program
 
@@ -2104,6 +2073,10 @@ Popquiz!
     structs. In time_server, it sets up port 8080 for binding, using
     hints for IPv4/TCP and AI_PASSIVE for server use.
     #+END_QUOTE
+
+
+** Quick review: Term Projects (3rd sprint review coming up)
+
 
 
 * Week 15: Building a TCP web server or Wireshark practice

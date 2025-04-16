@@ -2,7 +2,7 @@
 #+author: Marcus Birkenkrahe (pledged)
 #+SEQ_TODO: TODO NEXT IN_PROGRESS | DONE
 #+startup: overview hideblocks indent entitiespretty:
-#+property: header-args:C :main yes :includes <stdio.h> :results output :exports both:
+#+property: header-args:C :main yes :includes <stdio.h> :results output :exports both: :noweb yes
 #+property: header-args:python :session *Python* :python python3 :results output :exports both:
 #+property: header-args: R :session *R* :results output :exports both:
 #+property: header-args:C++ :main yes :includes <iostream> :results output :exports both:
@@ -10,13 +10,16 @@
 
 The following topics are covered:
 
-- [ ] Understanding the importance of sockets in network programming
-- [ ] Understanding the client socket workflow
-- [ ] Coding a TCP client socket
-- [ ] Understanding the server socket workflow
-- [ ] Coding a TCP server socket
-- [ ] Connecting client and server over TCP
+- [X] Understanding the importance of sockets in network programming
+- [X] Understanding the client socket workflow
+- [X] Coding a TCP client socket
+- [X] Understanding the server socket workflow
+- [X] Coding a TCP server socket
+- [X] Connecting client and server over TCP
 - [ ] Use of ~make~ to build applications
+- [ ] TCP vs. UDP program flow
+- [ ] Header files for Windows and Unix-based systems
+- [ ] Building real world program
 
 * Why sockets are important in network programming
 
@@ -102,7 +105,7 @@ when the connection is accepted, we can receive data with ~recv~:
     {
       // Redirect stderr to stdout
       dup2(1,2);
-      
+
       // create a socket
       int network_socket;
       // Use IPv4, TCP, default protocol
@@ -185,7 +188,7 @@ those sockets it has connected to:
   #+begin_src C :results none :noweb yesn
     <<network header files>>
 
-    // descriptor, ptr to address, size of address
+      // descriptor, ptr to address, size of address
     int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
     // descriptor, max no of pending connections that can be queried
@@ -277,101 +280,1314 @@ those sockets it has connected to:
   loop, and add a loggint ~printf~ message to monitor activity.
   #+end_quote
 
-* Summary Q & A
+* Byte order - Host or Network?
 
-1. What is the role of a socket in network programming, and how do the
-   ~socket()~ function parameters (domain, type, protocol) determine its
-   behavior? Provide an example using the TCP client socket code from
-   the lecture.
-   #+begin_quote
-   A socket is a low-level endpoint for sending and receiving data
-   across a network, acting as the interface between an application
-   and the network protocol stack. It enables communication for
-   protocols like TCP or UDP.
+- Hexadecimal is a human-friendly shorthand for binary. Memory
+  addresses, file contents, network packets, color codes etc.
 
-   The ~socket()~ function parameters define its behavior: ~domain~ (e.g.,
-   ~AF_INET~ for IPv4) specifies the address family, ~type~ (e.g.,
-   ~SOCK_STREAM~ for TCP) sets the communication style, and ~protocol~
-   (usually 0 for default) selects the specific protocol.
+- Example:
+  #+begin_src C
+    int i = 1;  // initialize integer variable i with the value 1
+    int *p = &i;  // pointer to the address of i
+    printf("The hex address of i = %d is %p.\n",i,&p);
+  #+end_src
 
-   In the lecture’s TCP client code, ~network_socket = socket(AF_INET,
-   SOCK_STREAM, 0)~ creates a socket using IPv4, TCP, and the default
-   protocol, allowing the client to connect to a server and receive
-   data.
-   #+end_quote
+  #+RESULTS:
+  : The hex address of i = 1 is 0x7ffd9e83b3c0.
 
-2. Compare the steps in the client socket workflow (~socket()~,
-   ~connect()~, ~recv()~) with the server socket workflow (~socket()~,
-   ~bind()~, ~listen()~, ~accept()~, ~send()~). Why does the server require
-   additional steps like ~bind()~ and ~listen()~?
-   #+begin_quote
-   The client workflow starts with ~socket()~ to create a socket, uses
-   ~connect()~ to initiate a connection to a server, and calls ~recv()~ to
-   receive data.
+- Hex to decimal can be computed easily on the shell with ~bc~:
+  #+begin_src bash :results output :exports both
+    echo "ibase=16; B34F" | bc
+    echo "obase=2;ibase=16; B34F" | bc
+  #+end_src
 
-   The server workflow also begins with ~socket()~ but then uses ~bind()~
-   to associate the socket with a specific IP and port, ~listen()~ to
-   prepare for incoming connections, ~accept()~ to establish a
-   connection with a client, and ~send()~ to transmit data.
+- How does the hexadecimal -> decimal result come about?
+  #+begin_quote
+  | Pos | Hex | Decimal | 16^Pos | Contribution      |
+  |-----+-----+---------+--------+-------------------|
+  |   3 | B   |      11 |   4096 | 11 × 4096 = 45056 |
+  |   2 | 3   |       3 |    256 | 3 × 256 = 768     |
+  |   1 | 4   |       4 |     16 | 4 × 16 = 64       |
+  |   0 | F   |      15 |      1 | 15 × 1 = 15       |
+  |-----+-----+---------+--------+-------------------|
+  |     |     |         |        | Total = *45903*     |
+  #+end_quote
+  #+begin_example
+  Decimal:  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15
+  Hex:      0  1  2  3  4  5  6  7  8  9   A  B  C  D  E  F
+  #+end_example
 
-   The server needs ~bind()~ and ~listen()~ because it must be reachable
-   at a known address and port, and it passively waits for client
-   requests, unlike the client, which actively initiates
-   communication.
-   #+end_quote
+- Two-byte hexadecimal numbers like =B34F= (two words), are stored in
+  sequential bytes - B3 followed by 4F. This number, stored with the
+  "Big End" (B3) first, is called "Big-Endian".
 
-3. Explain how the client and server establish a connection over TCP using the code examples provided. What does the ~htons(PORT)~ function do, and why is it necessary when setting up the ~sockaddr_in~ structure?
-   #+begin_quote
-   The client creates a socket with ~socket()~, sets the server’s
-   address (IP and port) in a ~sockaddr_in~ structure, and uses
-   ~connect()~ to request a connection.
+- Intel- or Intel-compatible computers store the bytes reversed: So in
+  memory, B34F is stored as the sequential bytes 4F followed by
+  B3. This is called "Little-Endian" (little end first).
 
-   The server creates a socket, assigns it an IP and port with ~bind()~,
-   calls ~listen()~ to wait for clients, and uses ~accept()~ to connect,
-   creating a new socket for communication.
+- "Big-Endian" is also called "Network Byte Order".
 
-   The ~htons(PORT)~ function adjusts the port number (e.g., 9002) so
-   it’s in the correct format for the network. It’s necessary because
-   different computers might store numbers differently, and ~htons()~
-   ensures the port is understood the same way by both client and
-   server when filling the ~sockaddr_in~ structure.
-   #+end_quote
+- Your computer stores numbers in "Host Byte Order". If the CPU's an
+  Intel 80x86, Host Byte Order is Little-Endian. If it's a
+  PowerPC..who knows.
 
-4. In the client socket example, the program checks if
-   ~connection_status == -1~ to detect a connection error. What might
-   cause this error in a real-world scenario, and how could you modify
-   the client code to provide more specific feedback about the
-   failure?
-   #+begin_quote
-   A ~connection_status == -1~ indicates ~connect()~ failed, possibly due
-   to the server not running, a wrong IP/port, network issues (e.g.,
-   firewall blocking), or the server’s backlog being full. To improve
-   feedback, include ~perror()~ or ~strerror(errno)~ after the
-   check. Modified code: ~if (connection_status == -1) {
-   perror("Connection error"); }~ This prints a detailed error message
-   (e.g., "Connection refused" if the server isn’t listening), helping
-   identify the specific issue rather than just "Connection error."
-   #+end_quote
+- So you need to make sure two- and four-byte numbers are in Network
+  Byte Order. This is what ~htons~ does for ~short~ (two bytes - used for
+  port numbers, TCP headers, checksums) and ~htonl~ for ~long~ (four
+  bytes - used for IPv4 addresses, TCP SEQ and ACK numbers, and
+  timestamps).
 
-5. The lecture notes describe the TCP server as a "one-shot server"
-   that exits after handling one client. How would you modify the
-   server code to handle multiple client requests sequentially using
-   an infinite loop? Include a sample code snippet with your
-   explanation.
-   #+begin_quote
-   #+begin_quote
-   The server exits after one client because ~accept()~ and ~send()~ run
-   once, then ~close()~ is called. To handle multiple clients sequentially,
-   wrap ~accept()~ and ~send()~ in an infinite loop. Sample modification:
-   #+end_quote
-   #+begin_example C
-   while (1) {
-     int client_socket = accept(server_socket, NULL,NULL);
-     printf("Client connected\n");
-     send(client_socket,server_message, sizeof(server_message), 0);
-     close(client_socket); // Close client socket, not server_socket
-   }
-   #+end_example
+- You can use different combinations:
+
+  | *Function* | *Description*           |
+  |----------+-----------------------|
+  | ~htons~    | host to network short |
+  | ~htonl~    | host to network long  |
+  | ~ntohs~    | network to host short |
+  | ~ntohl~    | network to host long  |
+
+- Example:
+  #+begin_src C :main no :includes :tangle htons.c
+    #include <stdio.h>  // IO functions
+    #include <arpa/inet.h> // contains `htons`
+
+    #define PORT 9002
+
+    int main(void)
+    {
+      printf("Port %hu = Host Byte Order | %X = Network Byte Order\n",
+         PORT, htons(PORT));
+      return 0;
+    }
+  #+end_src
+
+  #+RESULTS:
+  : Port 9002 = Host Byte Order | 2A23 = Network Byte Order
+
+- Confirm using ~bc~:
+  #+begin_src bash :results output :exports both
+    echo "obase=16; ibase=10; 9002" | bc
+  #+end_src
+
+  #+RESULTS:
+  : 232A
+
+* Socket functions
+
+In addition to the functions we already saw, there are a few more:
+
+| Function               | Purpose                                             |
+|------------------------+-----------------------------------------------------|
+| socket()               | Creates and initializes a new socket.               |
+| bind()                 | Associates socket with a local IP address and port  |
+| listen() - server      | Causes a TCP socket to listen for new connections.  |
+| connect() - client     | SSets remote address and port, establishes a        |
+| accept() - server      | CCreates new socket for an incoming TCP connection. |
+| send(), recv()         | Send and receive data with a socket.                |
+| sendto(), recvfrom()   | Send and receive data from sockets in UDP           |
+| close(), closesocket() | Close a socket; also terminates a TCP connection.   |
+| shutdown()             | Closes one side of a TCP connection                 |
+| select()               | Waits for an event on one or more sockets.          |
+| getnameinfo(),         | PProtocol-independent way to work with              |
+| getaddrinfo()          | hostnames and addresses                             |
+| setsockopt()           | Change socket options.                              |
+| fcntl(), ioctlsocket() | Get and set some socket options.                    |
+
+* Network programs as clients or servers
+
+- Modern networking models stretch traditional client-server
+  models. Network programs can be described as one of four types:
+  1. A TCP server
+  2. A TCP client
+  3. A UDP server
+  4. A UDP client
+
+- In the classic *client-server paradigm*, a server listens for new
+  connections at a published address. The client establishes the
+  connection knowing the server's address.
+
+- Once the connection is established, client and server can send and
+  receive data. Either of them can terminate the connection. Think of
+  a hotel (server) and the guests (clients).
+
+- An alternative paradigm is the *peer-to-peer* model (e.g. BitTorrent):
+  Each peer has the same responsibilities and acts both as a client
+  and as a server.
+
+- The sockets are not created equal here: For each peer-to-peer
+  connection, one peer is listening, and the other connecting. A
+  central "tracker" server stores a list of peer addresses.
+
+- In the FTP protocol, an FTP server listens for connections until the
+  FTP client connects. Then the FTP client issues commands to the
+  server. When it requests a file, the server makes a new connection
+  to the client to transfer the file - now the FTP client accepts
+  connections like a TCP server.
+
+* TCP program flow
+
+- Remember the basic client workflow:
+  1. The TCP client program must first know the TCP's server address.
+  2. The client creates a socket with ~socket~ and then establishes a
+     connection with ~connect~.
+  3. When the server accepts, the client can exchange data using ~send~
+     and ~recv~.
+
+- So far, we have manually constructed ~struct sockaddr_in~ where we
+  store the IP addresses:
+  #+begin_example C
+  struct sockaddr_in server_address;
+  server_address.sin_family = AF_INET;  // dest IP
+  server_address.sin_port = htons(PORT);  // port
+  server_address.sin_addr.s_addr = INADDR_ANY; // source IP
+  #+end_example
+
+- We've used it e.g. when connecting to the server from the client:
+  #+begin_example C
+  int network socket;  // created on the client
+  network_socket = socket(AF_INET,SOCK_STREAM,0);
+  connect(network_socket,
+          (struct sockaddr *) &server_address,
+          sizeof(server_address));
+  #+end_example
+
+- The function ~getaddrinfo~ replaces this construction: it resolves
+  hostnames (="localhost"=, ="example.com"=) and service names ("http",
+  ":80") into address structures (linked lists) that you can use with
+  sockets. You can then access the list elements with ~->~ :
+
+  #+begin_example C
+  struct addrinfo hints, *res; // res: points to head of address list
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+
+  int status = getaddrinfo("localhost", "9002", &hints, &res);
+
+  network_socket = socket(res->ai_family,
+                          res->ai_socktype,
+                          res->ai_protocol);
+  connect(network_socket, res->ai_addr,
+                          res->ai_addrlen);
+  #+end_example
+
+- With this function, the flow of TCP client & server looks like this:
+  #+attr_html: :width 400px :float nil:
+  #+caption: Source: van Winkle (2019)
+  [[../img/tcp_flow.png]]
+
+* UDP program flow
+
+- TCP (Transmission Control Protocol) is called a *connection-oriented*
+  protocol while UDP (User Datagram Protocol) is a *connectionless*
+  protocol.
+
+- In UDP, each data packet is addressed individually. It is completely
+  independent and unrelated to any packets coming before or after it -
+  like a *postcard*. There is no guarantee that it will arrive.
+
+- A UDP client must know the address of the remote UDP peer in order
+  to send the first packet.
+
+- The UDP client uses ~getaddrinfo~ to resolve the address into a
+  ~struct addrinfo~.
+
+- The difference to TCP: The UDP client cannot receive data first
+  since the remote peer would not know where to send it (there's no
+  handshake like in TCP). In TCP either client or server can send the
+  first data.
+
+- The program flow of a UDP client and server looks like this:
+  #+attr_html: :width 400px :float nil:
+  #+caption: Source: van Winkle (2019)
+  [[../img/udp_flow.png]]
+
+* Header files for Windows and Unix-based systems
+
+- "Winsock" short for Windows Sockets is Microsoft's implementation of
+  the Berkeley Sockets API originally developed for UNIX systems. It
+  lets you write TCP/UDP sockets.
+
+- The required header files differ between implementations. The
+  differences can be overcome with a *preprocessor* statement.
+
+- In UNIX, a socket *descriptor* is a standard file descriptor (a small,
+  non-negative number). ~socket~ returns an ~int~.
+
+- In Windows, a socket handle can be anything, and ~socket~ returns a
+  ~SOCKET~, a ~typedef~ for an ~unsigned int~ in the Winsock library
+  headers.
+
+- An example for how to deal with it:
+  #+begin_example C
+  #if !defined (_WIN32)
+     #define SOCKET int  // define Windows-type socket
+  #endif
+
+  #if defined(_WIN32)
+     #define CLOSESOCKET(s) closesocket(s) // Windows
+  #else
+     #define CLOSESOCKET(s) close(s)  // Unix
+  #endif
+  #+end_example
+
+- Comparison Unix/Winsock
+  #+name: unix vs winsock
+  | Concept            | Unix / POSIX              | Windows (Winsock)      |
+  |--------------------+---------------------------+------------------------|
+  | Socket library     | Built-in (~unistd.h~, etc.) | Must load ~ws2_32.dll~   |
+  | Startup required?  | ❌ No                     | ✅ call ~WSAStartup()~   |
+  | Shutdown required? | ❌ No                     | ✅ call ~WSACleanup()~   |
+  | Close socket       | ~close(socket_fd)~          | ~closesocket(socket_fd)~ |
+  | Error codes        | ~errno~ and ~perror()~        | ~WSAGetLastError()~      |
+  | Headers            | ~<sys/socket.h>~, etc.      | ~<winsock2.h>~           |
+
+* Networking a real world program
+
+- We're building a web service that tells you what time it is right
+  now. Users could navigate to our web page and get the time.
+
+- You should always work out the local version of a program before
+  networking it.
+
+- The local, console version of the time-telling program:
+
+  #+begin_src C :tangle time_console.c :main no :includes
+    #include <stdio.h>  // for printf
+    #include <time.h>   // for time-related functions
+
+    int main()
+    {
+      time_t timer; // declare a variable of type time_t for  calendar time
+
+      time(&timer); // get the current time and store it in 'timer'
+
+      // convert the calendar time to a human-readable string and print it
+      printf("Local time is: %s", ctime(&timer));
+
+      return 0;           // indicate that the program finished successfully
+    }
+  #+end_src
+
+  #+RESULTS:
+  : Local time is: Fri Apr 11 11:46:48 2025
+
+- When you pass =&timer=, you pass a memory location where the function
+  can write the current time. For more, check ~man time(2)~. Then ~ctime~
+  takes the ~time_t~-formatted time and converts it to a string to
+  print - see ~man ctime(3)~.
+
+* Analysis of the C Program for Displaying Local Time
+
+The program retrieves the current system time and prints it in a
+human-readable format (e.g., "Sun Apr 13 12:34:56 2025"). It uses the
+C standard library and the =time.h= library to handle time-related
+operations.
+
+** Detailed Analysis
+
+*** 1. Preprocessor Directives
+#+BEGIN_SRC c
+  #include <stdio.h>
+  #include <time.h>
+#+END_SRC
+- *#include*: A preprocessor directive that includes the contents of a
+  library or file.
+- *<stdio.h>*: The Standard Input/Output library, providing functions
+  like =printf= for output.
+- *<time.h>*: The Time library, providing functions and types like =time=
+  and =ctime= for handling dates and times.
+
+- Libraries are pre-written code collections. Including them lets you
+  use their functions without writing the code yourself.
+
+*** 2. The main Function
+#+BEGIN_SRC c
+  int main()
+#+END_SRC
+- *int*: The return type, indicating =main= returns an integer to signal
+  program status.
+- *main*: The program's entry point where execution begins.
+- *Parentheses ()*: Indicate =main= takes no arguments here.
+- *Curly braces {}*: Enclose the body of =main=, defining the program's
+  actions.
+
+- Every C program needs a =main= function as its starting point. The =int=
+  return type is standard, and we return =0= to indicate success.
+
+*** 3. Variable Declaration
+#+BEGIN_SRC c
+  time_t timer;
+#+END_SRC
+- *time_t*: A data type from =time.h=, typically an integer (e.g., =long=),
+  representing time as seconds since the Unix epoch (January 1, 1970,
+  00:00:00 UTC).
+- *timer*: The variable name, which will store the current time.
+
+- Think of =time_t= as a container for time values. =timer= is the label
+  for that container, to be filled with the current time.
+
+*** 4. Getting the Current Time
+#+BEGIN_SRC c
+  time(&timer);
+#+END_SRC
+- *time*: A function from =time.h= that fetches the current system time.
+- *&timer*: Passes the address of =timer= (a pointer) to =time=, which
+  stores the current time in =timer=.
+- *What it does*: Updates =timer= with the current time as seconds since
+  the epoch.
+
+- =time= asks the computer for the current time and stores it in
+  =timer=. The =&= is needed because =time= modifies =timer= directly by
+  accessing its memory location.
+
+*** 5. Printing the Time
+#+BEGIN_SRC c
+  printf("Local time is: %s", ctime(&timer));
+#+END_SRC
+
+- *printf*: A function from =stdio.h= for formatted console output.
+
+- *"Local time is: %s"*: The format string:
+  - "Local time is: ": Printed as-is.
+  - *%s*: Placeholder for a string.
+
+- *ctime(&timer)*:
+  - *ctime*: A =time.h= function that converts a =time_t= value into a
+    human-readable string.
+  - *&timer*: Passes the address of =timer=.
+  - *Output*: Returns a string in the format ="Www Mmm dd hh:mm:ss
+    yyyy\n"=, where:
+    - =Www=: Day of the week (e.g., "Sun").
+    - =Mmm=: Month (e.g., "Apr").
+    - =dd=: Day of the month (e.g., "13").
+    - =hh:mm:ss=: Time in 24-hour format (e.g., "12:34:56").
+    - =yyyy=: Year (e.g., "2025").
+    - =\n=: Newline character.
+  - Example: ="Sun Apr 13 12:34:56 2025\n"=.
+
+- *How it works*: =ctime(&timer)= generates the time string, which =printf=
+  inserts into =%s=, producing output like:
+  #+BEGIN_EXAMPLE
+  Local time is: Sun Apr 13 12:34:56 2025
+  #+END_EXAMPLE
+
+- =ctime= turns seconds into a readable format. =printf= combines the
+  phrase with the time and displays it.
+
+*** 6. Returning from main
+#+BEGIN_SRC c
+  return 0;
+#+END_SRC
+
+- *return*: Ends =main= and sends a value to the operating system.
+
+- *0*: Indicates successful execution (non-zero values signal errors).
+
+- After =return 0=, the program terminates.
+
+- =return 0= is like saying, "I'm done, and everything worked!" It
+  signals the computer that the program completed successfully.
+
+** How the Program Works as a Whole
+1. Execution starts at =main=.
+2. Declares a =time_t= variable =timer=.
+3. =time(&timer)= fetches the current time and stores it in =timer= as seconds since 1970.
+4. =ctime(&timer)= converts the time to a readable string.
+5. =printf= prints "Local time is:" followed by the time string.
+6. =return 0= ends the program successfully.
+
+** Key Concepts
+- *Libraries*:
+  - =stdio.h= and =time.h= provide functions to simplify coding.
+  - =stdio.h= handles input/output; =time.h= manages time.
+- *Data Types*:
+  - =time_t= stores time values.
+  - Types define what data a variable holds.
+- *Functions*:
+  - =time=, =ctime=, and =printf= perform specific tasks.
+  - Functions take arguments (e.g., =&timer=) and may return values.
+- *Pointers*:
+  - =&= gives a variable's memory address.
+  - Introduces pointers, a core C concept.
+- *Program Flow*:
+  - Executes line by line in =main=.
+- *Output Formatting*:
+  - =printf= uses =%s= to insert values.
+  - =ctime= formats time automatically.
+
+** Example Output
+Running the program on April 13, 2025, at 12:34:56 might produce:
+#+BEGIN_EXAMPLE
+Local time is: Sun Apr 13 12:34:56 2025
+#+END_EXAMPLE
+The output depends on the system's local time and time zone.
+
+** Potential Questions
+- *Why use =&timer= instead of =timer=?*
+  - =time= and =ctime= need a pointer to =timer='s memory address. =&=
+    provides that address.
+- *What if I remove =#include <time.h>=?*
+  - Errors occur because =time_t=, =time=, and =ctime= are undefined without
+    =time.h=.
+- *Can I change the time format?*
+  - Yes, using =strftime= and =localtime= (advanced topic).
+- *What's in =timer=?*
+  - Seconds since January 1, 1970 (e.g., 1,744,099,296 on April 13,
+    2025).
+- *Why does =ctime= add a newline?*
+  - It's part of =ctime='s standard output for tidy printing.
+
+** Suggestions for Experimentation
+
+Try these to learn more:
+
+1. *Print raw =timer= value*:
+   #+BEGIN_SRC C
+     #include <time.h>
+     printf("Seconds since epoch: %ld\n", time);
+   #+END_SRC
+
+   #+RESULTS:
+   : Seconds since epoch: 125674404552736
+
+   Shows seconds since 1970.
+
+2. *Add a loop to update time*:
+   #+BEGIN_SRC C :results output
+     #include <stdio.h>
+     #include <time.h>
+     #include <unistd.h>
+
+     int main() {
+       time_t timer;
+       for (int i = 0; i < 5; i++) {
+         time(&timer);
+         printf("Local time is: %s", ctime(&timer));
+         sleep(1);
+       }
+       return 0;
+     }
+   #+END_SRC
+
+   #+RESULTS:
+   : Local time is: Sun Apr 13 22:33:21 2025
+   : Local time is: Sun Apr 13 22:33:22 2025
+   : Local time is: Sun Apr 13 22:33:23 2025
+   : Local time is: Sun Apr 13 22:33:24 2025
+   : Local time is: Sun Apr 13 22:33:25 2025
+
+   Prints time every second for 5 seconds (=sleep= needs =unistd.h= on
+   Unix-like systems).
+
+3. *Use =gmtime= for UTC*:
+
+   #+BEGIN_SRC C
+     #include <time.h>
+
+     time_t timer;
+     struct tm *gmt = gmtime(&timer);
+
+     printf("UTC time: %d-%d-%d %d:%d:%d\n",
+            gmt->tm_year + 1900, gmt->tm_mon + 1, gmt->tm_mday,
+            gmt->tm_hour, gmt->tm_min, gmt->tm_sec);
+   #+END_SRC
+
+   #+RESULTS:
+   : UTC time: 1970-1-1 0:1:40
+
+   Shows UTC time and introduces =struct tm=.
+
+** Common Errors to Watch For
+
+- Forgetting =#include <time.h>=:
+  - *Error*: =time_t= or =ctime= undefined.
+  - *Fix*: Add =#include <time.h>=.
+
+- Using =timer= instead of =&timer=:
+  - *Error*: Type mismatch in =time= or =ctime=.
+  - *Fix*: Use =&timer= for the address.
+- Not returning 0:
+  - May work but returning =0= is best practice.
+
+** Why This Program is Useful
+
+- *Real-world application*: Time display is used in logs, interfaces,
+  and scripts.
+
+- *Learning opportunity*: Teaches libraries, functions, pointers, and
+  types.
+
+- *Foundation*: Basis for exploring time formatting, differences, or
+  dates.
+
+** Summary for Students
+
+This program teaches you to:
+- Use libraries (=stdio.h=, =time.h=).
+- Declare =time_t= variables.
+- Fetch time with =time=.
+- Format time with =ctime=.
+- Print with =printf=.
+- Structure a C program with =main= and =return=.
+
+* Using ~make~ to build files from multiple sources
+
+- Tangle the source code and build it with ~make~ using the built-in
+  ~makefile~:
+  #+begin_src bash :results output
+    ls -lt time_console.c
+    make time_console
+  #+end_src
+
+  #+RESULTS:
+  : -rw-rw-r-- 1 marcus marcus 185 Apr 11 10:08 time_console.c
+  : cc     time_console.c   -o time_console
+
+- Run it:
+  #+begin_src bash :results output
+    ./time_console
+  #+end_src
+
+  #+RESULTS:
+  : Local time is: Fri Apr 11 10:09:26 2025
+
+- Write a =makefile= `maketime` that builds the executable =time_console=.
+  #+begin_src C :main no :includes :tangle maketime
+    time_console: time_console.c
+    gcc time_console.c -o time_console
+  #+end_src
+
+- Run it:
+  #+begin_src bash :results output
+    touch time_console.c
+    make -f maketime
+    ./time_console
+  #+end_src
+
+  #+RESULTS:
+  : gcc time_console.c -o time_console
+  : Local time is: Fri Apr 11 10:42:15 2025
+
+- Now split the file =time_console.c= into two parts:
+  1. =time_console2.h= (with the header files only)
+  2. =time_console2.c= (with the ~main~ program only)
+  3. Add ~#include "time_console2.h"~ before the ~main~ program.
+
+- Header file:
+  #+begin_src C :main no :includes :tangle time_console2.h
+    #include <stdio.h>  // for printf
+    #include <time.h>   // for time-related functions
+  #+end_src
+
+- Main program:
+  #+begin_src C :main no :includes :tangle time_console2.c
+    #include "time_console2.h"
+
+    int main()
+    {
+      time_t timer; // declare a variable of type time_t for  calendar time
+
+      time(&timer); // get the current time and store it in 'timer'
+
+      // convert the calendar time to a human-readable string and print it
+      printf("Local time is: %s", ctime(&timer));
+
+      return 0;           // indicate that the program finished successfully
+    }
+  #+end_src
+
+- Create a suitable ~makefile~ called =maketime2=:
+  #+begin_src C :tangle maketime2 :main no :includes
+    time_console2.o: time_console2.c time_console2.h
+    gcc -c time_console2.c -o time_console2.o
+
+    time_console2: time_console2.o
+    gcc time_console2.o -o time_console2
+
+    clean:
+    rm -f *.o time_console2
+  #+end_src
+
+- Check all files were created:
+  #+begin_src bash :results output
+    ls -lt maketime2 time_console2*
+  #+end_src
+
+  #+RESULTS:
+  : -rw-rw-r-- 1 marcus marcus 1752 Apr 11 10:53 time_console2.o
+  : -rw-rw-r-- 1 marcus marcus  372 Apr 11 10:49 time_console2.c
+  : -rw-rw-r-- 1 marcus marcus  195 Apr 11 10:45 maketime2
+  : -rw-rw-r-- 1 marcus marcus   84 Apr 11 10:44 time_console2.h
+
+- Test the ~makefile~:
+  #+begin_src bash :results output
+    make -f maketime2 clean
+    make -f maketime2
+  #+end_src
+
+  #+RESULTS:
+  : rm -f *.o time_console2
+  : gcc -c time_console2.c -o time_console2.o
+
+- Run the executable:
+  #+begin_src bash :results output
+    pwd
+  #+end_src
+
+  #+RESULTS:
+  : /home/marcus/GitHub/admin/spring25/csc410/org
+
+* Network header files - library files and macros
+
+- This header file will only work on Unix-like systems.
+
+- We're putting all header files into ~time_server.h~:
+  #+begin_src C :tangle time_server.h :main no :includes :results none
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <netdb.h>
+    #include <unistd.h>
+    #include <errno.h>
+    #include <stdio.h>
+    #include <time.h>
+    #include <string.h>
+  #+end_src
+
+- Explanation:
+  | Header File  | Purpose and Use (Max 72 chars)                          |
+  |--------------+---------------------------------------------------------|
+  | =sys/types.h=  | Types (e.g., ~pid_t~) for socket vars in time server.     |
+  | =sys/socket.h= | Socket funcs (~socket~, ~bind~) to send time to clients.    |
+  | =netinet/in.h= | Structs (~sockaddr_in~) for IP/port in time server.       |
+  | =arpa/inet.h=  | Funcs (~inet_pton~, ~htons~) for IP/port in time server.    |
+  | =netdb.h=      | Hostname resolution for network time requests.          |
+  | =unistd.h=     | Close socket after sending time to clients.             |
+  | =errno.h=      | Error handling for network issues in time server.       |
+  | =time.h=       | Time funcs (~time~, ~ctime~) to get/format time for client. |
+  | =stdio.h=      | ~printf~ to format time string for network transmission.  |
+
+* Building the networked time-telling program
+
+- This is the flow that we've got to implement:
+  #+attr_html: :width 400px :float nil:
+  #+caption: Source: van Winkle (2019)
+  [[../img/tcp_flow.png]]
+
+- Most of our functions are ~man~ level 2 (system calls) that interact
+  directly with the OS kernel for time retrieval and networking.
+
+- A couple of our functions are ~man~ level 3 (library functions).
+
+- We're going to assemble the file using ~noweb~ chunks.
+  #+begin_src C :main no :includes :tangle time_server.c
+    #include "time_server.h"
+    #define PORT "8080" // for the `service` parameter of `getaddrinfo`
+    #define CONN 10 // max number of connections to `listen` to
+
+    int main(void)
+    {
+      <<configure local address>>
+      <<create socket>>
+      <<check that socket is valid>>
+      <<bind address to socket>>
+      <<listen to connections>>
+      <<accept incoming connection>>
+      <<print client address to console>>
+      <<receive client request>>
+      <<send server response>>
+      <<send time>>
+      <<close client connection>>
+      <<close server connection>>
+
+        return 0;
+    }
+  #+end_src
+
+** Pick address for the server to ~bind(2)~ to with ~getaddrinfo(3)~
+
+- Figure out the local address that the web server should bind to:
+  #+name: configure local address
+  #+begin_src C :main no :includes  :results none
+    printf("Configuring local address...\n");
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+
+    struct addrinfo *bind_address;
+    getaddrinfo(0, PORT, &hints, &bind_address);
+  #+end_src
+
+- Explanation:
+
+  1. =struct addrinfo hints=: Declares =hints= ~struct~ for address
+     configuration options.
+
+  2. =memset(&hints, 0, sizeof(hints))=: Clears =hints= ~struct~ to avoid
+     garbage values (check the ~memset~ ~man~ page).
+
+  3. =hints.ai_family = AF_INET=: Sets address family to IPv4 for the
+     server.
+
+  4. =hints.ai_socktype = SOCK_STREAM=: Specifies TCP (stream) socket
+     type.
+
+  5. =hints.ai_flags = AI_PASSIVE=: Allows binding to any local IP
+     (e.g., 0.0.0.0).
+
+  6. =struct addrinfo *bind_address=: Declares pointer for storing
+     address info.
+
+  7. =getaddrinfo(0, "8080", &hints, &bind_address)=: Gets address for
+     port 8080, using =hints= and 0. The prototype:
+     #+begin_example C
+       int getaddrinfo(const char *node, const char *service,
+                       const struct addrinfo *hints,
+                       struct addrinfo **res);
+     #+end_example
+     ~service~ can be a =PORT= (like ="8080"=) or a service like (=="http"=),
+     which is why it's got to be a string.
+
+  8. The ~man~ page of ~getaddrinfo~ explains what that does:
+     #+begin_quote
+     If the ~AI_PASSIVE~ flag is specified in ~hints.ai_flags~, and node
+     is NULL, then the returned socket addresses will be suitable for
+     ~bind(2)~ -ing a socket that will ~accept(2)~ connections.  The
+     returned socket address will contain the "wildcard address"
+     (INADDR_ANY for IPv4 addresses [...]).  The wildcard address is
+     used by applications (typically servers) that intend to accept
+     connections on any of the host's network addresses.
+     #+end_quote
+
+     ~getaddrinfo~ is protocol-independent: we only need to change
+     ~AF_INET~ to ~AF_INET6~ to make it work on IPv6.
+
+** Create the socket descriptor by calling ~socket(2)~
+
+- Once we've got the local address info, we can create the socket.
+  #+name: create socket
+  #+begin_src C :main no :includes  :results none
+    printf("Creating socket...\n");
+    int socket_listen;
+    socket_listen = socket(bind_address->ai_family,
+                           bind_address->ai_socktype,
+                           bind_address->ai_protocol);
+  #+end_src
+
+- Explanation:
+
+  1. =int socket_listen=: Declares variable for the listening socket. On
+     Windows, this would be the ~SOCKET~ type defined just for sockets.
+
+  2. =socket_listen = socket(...)=: Creates socket using address family, type,
+     and protocol from bind_address.
+
+  3. The reason we used ~getaddrinfo~ is that we can now pass parts of
+     =bind_address= as the arguments to ~socket~.
+
+  4. It is common to see programs that call ~socket~ first. This
+     complicates things since socket family, type, and protocol must
+     be entered multiple times.
+
+** Check that the call to ~socket~ is successful
+
+- We check that the call to ~socket~ was successful:
+  #+name: check that socket is valid
+  #+begin_src C  :main no :includes  :results none
+    if (!(socket_listen >=0)) {
+      fprintf(stderr, "socket() failed, (%d)\n", errno);
+      return 1;
+     }
+  #+end_src
+
+- Explanation of Socket Validation Code for Time Program
+
+  1. =if (!(socket_listen >= 0))=: Checks if =socket_listen= is valid
+     (non-negative).
+  2. =fprintf(stderr, "socket() failed, (%d)\n", errno)=: Prints error
+     to ~stderr~ with ~errno(3)~ if socket creation fails. Check ~man
+     errno~.
+
+  3. =return 1=: Exits program with error code 1 on socket failure.
+
+** Call ~bind~ to associate the socket with =bind_address=
+
+- Once the socket has been created, we call ~bind~ to associate the
+  socket with the address generated by ~getaddrinfo~:
+  #+name: bind address to socket
+  #+begin_src C  :main no :includes  :results none
+    printf("Binding socket to local address...\n");
+    if (bind(socket_listen,
+             bind_address->ai_addr,
+             bind_address->ai_addrlen)) {
+      fprintf(stderr, "bind() failed. (%d)\n", errno);
+      return 1;
+     }
+    freeaddrinfo(bind_address);
+  #+end_src
+
+- Explanation:
+
+  1. =if (bind(socket_listen, ...))=: Binds =socket_listen= to the address
+     and port in =bind_address=. When ~bind~ succeeds (0) the condition is
+     false.
+
+  2. =fprintf(stderr, "bind() failed. (%d\n", errno)=: Prints error with
+     ~errno~ if binding fails. ~bind~ returns 0 on success. It fails (-1)
+     if the port we are binding to is already in use.
+
+  3. =return 1=: Exits program with error code 1 if binding fails.
+
+  4. =freeaddrinfo(bind_address)=: Frees memory allocated for
+     =bind_address=.
+
+** Start listening for connections with ~listen(2)~
+
+- Once socket has been created and bound to a local address, we can
+  start listening for connections:
+  #+name: listen to connections
+  #+begin_src C :main no :includes  :results none
+    printf("Listening...\n");
+    if (listen(socket_listen, CONN) < 0) {
+      fprintf(stderr, "listen() failed. (%d)\n", errno);
+      return 1;
+     }
+  #+end_src
+
+- Explanation:
+
+  1. =if (listen(socket_listen, CONN) < 0)=: Sets =socket_listen= to
+     listen for up to =CONN= incoming connections.
+
+  2. =fprintf(stderr, "listen() failed. (%d)\n", errno)=: Prints error
+     with ~errno~ if ~listen~ fails.
+
+  3. =return 1=: Exits program with error code 1 if ~listen~ fails.
+
+** Start accepting incoming connection with ~accept(2)~
+
+- Once the socket has begun listening for connections, you can ~accept~
+  incoming connections:
+  #+name: accept incoming connection
+  #+begin_src C :main no :includes :results none
+    printf("Waiting for connection...\n");
+    struct sockaddr_storage client_address;
+    socklen_t client_len = sizeof(client_address);
+    int socket_client = accept(socket_listen,
+                           (struct sockaddr*) &client_address,
+                           &client_len);
+    if (!(socket_client >= 0)) {
+      fprintf(stderr, "accept() failed, (%d)\n", errno);
+      return 1;
+     }
+  #+end_src
+
+- Explanation:
+
+  1. =struct sockaddr_storage client_address:= Declares storage for
+     client address info.
+
+  2. =socklen_t client_len = sizeof(client_address)=: Sets size of
+     =client_address= ~struct~.
+
+  3. =int socket_client = accept(socket_listen, ...)=: Accepts client
+     connection, returns new socket.
+
+  4. =if (!(socket_client >= 0))=: Checks if accept failed
+     =(socket_client < 0)=.
+
+  5. =fprintf(stderr, "accept() failed, (%d)\n", errno)=: Prints error
+     with ~errno~ if accept fails.
+
+  6. =return 1=: Exits program with error code 1 if ~accept~ fails.
+
+- ~accept~ will block your program until a new connection is made: it
+  will ~sleep~ until a client connects to =socket_listen=. Then ~accept~
+  will create a new socket =socket_client= used to send and receive
+  data, and ~address~ also fills in address info of the client.
+
+** Print the client's address to the console with ~getnameinfo(3)~
+
+- A TCP connection to a remote client has now been established, and
+  we're waiting for the client to make a request.
+
+- This step is optional but it is good practice to log network
+  connections, and we're using ~getnameinfo~ for that.
+  #+name: print client address to console
+  #+begin_src C :main no :includes :results none
+    printf("Client is connected... ");
+    char address_buffer[100];
+    getnameinfo((struct sockaddr*) &client_address,
+            client_len,
+            address_buffer,
+            sizeof(address_buffer),
+            0,0,NI_NUMERICHOST);
+    printf("%s\n", address_buffer);
+  #+end_src
+
+- Explanation:
+
+  1. =char address_buffer[100]=: Declares array to store client’s IP
+     address as string.
+
+  2. =getnameinfo(...)=: Converts client address to numeric IP string.
+
+  3. =printf("%s\n", address_buffer)=: Prints the client’s IP address
+     from buffer.
+
+- The ~getnameinfo(3)~ prototype:
+#+begin_example C
+  int getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
+                  char *host, socklen_t hostlen,
+                  char *serv, socklen_t servlen, int flags);
+#+end_example
+
+The function takes the client's address =addr= and address length
+=addlen= (it can work with both IPv4 and IPv6 addresses). The
+hostname output is written to =host=. The service name and its length
+is output to =serv= and =servlen= (we don't care about this here). The
+~NI_NUMERICHOST~ flag means that we want to see the hostname as an IP
+address.
+
+** Read client request with ~recv~
+
+- We read a client request using the ~recv(2)~ function:
+  #+name: receive client request
+  #+begin_src C :main no :includes :results none
+    printf("Reading request...\n");
+    char request[1024];
+    int bytes_received = recv(socket_client,
+                              request,
+                              1024,0);
+    printf("Received %d bytes.\n", bytes_received);
+  #+end_src
+
+- Explanation:
+
+  1. =char request[1024]=: Declares array to store client’s request up
+     to 1024 bytes.
+
+  2. =int bytes_received = recv(socket_client, request, 1024, 0)=:
+     Receives data from client into =request=, returns bytes read.
+
+  3. =printf("Received %d bytes.\n", bytes_received)=: Prints number of
+     bytes received.
+
+- If nothing has been received yet, ~recv~ blocks until it has
+  something. If the connection is terminated by the client, ~recv~
+  returns 0 or -1 (one should check =recv > 0=).
+
+- A real web server would need to parse the request and look at which
+  resource the web client is requestion (e.g. HTTP, FTP etc.). Here,
+  we can ignore the =request= altogether but you can print it to
+  console.
+
+** Send response from server back to the client with ~send(2)~
+
+- Once the web browser has sent the client request, the server can
+  send its response back:
+  #+name: send server response
+  #+begin_src C :main no :includes :results none
+    printf("Sending response...\n");
+    const char *response =
+      "HTTP/1.1 200 OK\r\n"
+      "Connection: close\r\n"
+      "Content-Type: text/plain\r\n\r\n"
+      "Local time is: ";
+    int bytes_sent = send(socket_client,
+                      response,
+                      strlen(response),
+                      0);
+    printf("Sent %d of %d bytes.\n", bytes_sent, (int) strlen(response));
+  #+end_src
+
+- Explanation:
+
+  1. =const char *response = "HTTP/1.1 200 OK\r\n..." ...=: Defines HTTP
+     response header with time prefix.
+
+  2. =int bytes_sent = send(socket_client, response, strlen(response),
+     0)=: Sends response string to client, returns bytes sent.
+
+  3. =printf("Sent %d bytes.\n", bytes_sent)=: Prints number of bytes sent.
+
+- We set =response= to a standard HTTP response header followed by the
+  beginning of our message (="Local time is: "=). It tells the browser:
+  1) Your request is OK.
+  2) The server will close the connection when all data is sent.
+  3) The data you receive will be plain text.
+
+- HTTP requires line endings to take the form of a carriage return
+  followed by a new line: =\r\n= is a blank line in your response.
+
+- You should generally check that the number of bytes sent with
+  ~send(2)~ was as expected, and you try to send the rest if it's not.
+
+** TODO Send the time with ~send(2)~
+
+- Once the HTTP header and the beginning of the message is sent, we
+  can send the actual time. We get it as before in =time_console.c=, and
+  we send it using ~send(2)~:
+  #+name: send time
+  #+begin_src C :main no :includes :results none
+    time_t timer;  // declare a variable to hold the time
+    time(&timer);  // get the time
+    char *time_msg = ctime(&timer);
+    bytes_sent = send(socket_client,
+                  time_msg,
+                  strlen(time_msg),
+                  0);
+    printf("Sent %d of %d bytes.\n",bytes_sent, (int)strlen(time_msg));
+  #+end_src
+
+- Explanation:
+
+  1. =time_t timer=: Declares variable to hold current time.
+
+  2. =time(&timer)=: Fetches current system time into timer.
+
+  3. =char *time_msg = ctime(&timer)=: Converts timer to human-readable
+     string.
+
+  4. =bytes_sent = send(socket_client, time_msg, strlen(time_msg), 0)=:
+     Sends time string to client, returns bytes sent.
+
+  5. =printf("Sent %d of %d bytes.\n", ...)=: Prints bytes sent vs. time
+     string length.
+
+** TODO Close client connection with ~close(2)~
+
+- We now must ~close~ the client connection to indicate to the browser
+  application that we've sent all of our request data:
+  #+name: close client connection
+  #+begin_src C :main no :includes :results none
+    printf("Closing requesting (client) connection...\n");
+    close(socket_client);
+  #+end_src
+
+- If we don't close the connection, the browser will wait for more
+  data until it times out (~300s for Chrome - browser dependent).
+
+** TODO Close server connection with ~close(2)~
+
+- We could call ~accept~ on =socket_listen= to accept additional
+  connections: That's what a real server would do.
+  #+name: close server connection
+  #+begin_src C :main no :includes :results none
+    printf("Closing listening (server) connection...\n");
+    close(socket_listen);
+    printf("Finished.\n");
+  #+end_src
+
+* TODO Compile and run the program
+
+- Compile the program:
+  #+begin_src bash :results output
+    make time_server
+  #+end_src
+
+  #+RESULTS:
+  : cc     time_server.c   -o time_server
+
+- Start the server on the terminal (=M-x term /usr/bin/bash=) or open
+  another fully functional terminal outside of Emacs.
+
+- Start the server with =./time_server=
+
+- When you see the ="Waiting for connection..."= message, open a web
+  browser to the address =127.0.0.1:8080= or =localhost:8080=.
+
+- This is what you should see:
+  #+begin_example
+  $ ./time_server
+  Configuring local address...
+  Creating socket...
+  Binding socket to local address...
+  Listening...
+  Waiting for connection...
+  Client is connected... 127.0.0.1
+  Reading request...
+  Received 660 bytes.
+  Sending response...
+  Sent 79 of 79 bytes.
+  Sent 25 of 25 bytes.
+  Closing requesting (client) connection...
+  Closing listening (server) connection...
+  Finished.
+  $
+  #+end_example
+
+- If you restart the server immediately after this, you may get a
+  =bind() failed. (98)= error. This is the ~EADDRINUSE~ error code from
+  ~<errno.h>~.
+
+- For the location of ~<errno.h>~ in ~/usr/include~ (std header files):
+  #+begin_src bash :results output :exports both
+    grep -r "#define.*\b98\b" /usr/include | grep errno.h
+  #+end_src
+
+  #+RESULTS:
+  : /usr/include/asm-generic/errno.h:#define    EADDRINUSE      98      /* Address already in use */
+
+- The port =8080= was still in use because that port is still in
+  ~TIME_WAIT~ state for a short period to make sure any lingering
+  packets are handled, about 30-60 seconds.
+
+- Fix this by calling ~setsockopt(2)~ after ~socket~ but before ~bind~:
+  #+name: enable immediate socket reuse
+  #+begin_src C :main no :includes :results none
+    int opt = 1; // flag to enable socket option
+    setsockopt(socket_listen, // socket on which the server listens
+               SOL_SOCKET, // change options at the sockets API level
+               SO_REUSEADDR, // option name
+               &opt, // option value (switch on)
+               sizeof(opt)); // length of option value
+  #+end_src
+
+- Insert this into the ~main~ program before the =<<bind...>>= code:
+  #+begin_example C
+      <<enable immediate socket reuse>>
+  #+end_example
+
+- Then tangle =time_server.c=, ~make time_server~ again, start the server,
+  get the time, restart the server and try to get the time immediately
+  and it should work now.
+
+- Alternative check: Use ~netcat~ (~nc~) if you have it:
+  #+begin_example bash
+    nc localhost 8080
+  #+end_example
+
+- Output:
+  #+begin_example
+  HTTP/1.1 200 OK
+  Connection: close
+  Content-Type: text/plain
+
+  Local time is: Mon Apr 14 20:24:22 2025
+  #+end_example
+
+* TODO Networking with ~inetd~
+
+- On Unix-like systems like Linux or MacOS, the ~inetd~ service (a
+  system daemon program) can be used to turn console-only applications
+  into networked ones. This service only runs when a client connects.
+
+- You can configure ~inetd~ with ~/etc/inetd.conf~ with the program's
+  location, port number, protocol, and the user you want it to run as.
+
+- Steps to do this:
+
+  1. Check if ~inetd~ exists: =which inetd=
+
+  2. Install it: =sudo apt-get install openbsd-inetd=
+
+  3. Modify the program to use ~stdin~ and ~stdout~ instead of sockets.
+
+  4. Configure ~inetd~ to launch the program on a port (e.g. =8080=).
+
+** Modify the Program
+
+- Remove socket code (~socket~, ~bind~, etc.).
+- Read client request from ~stdin~ (optional, for HTTP).
+- Write HTTP response and time to ~stdout~.
+- Add =#include <time.h>= for time functions.
+- ~fgets~ reads HTTP request (e.g. from browser).
+- ~fputs~ write response to ~stdout~, sent to client.
+- ~fflush(stdout)~ ensures data is sent before exit.
+
+- Code: You can run this file since it writes to ~stdout~, but you
+  should tangle it as =time_inetd.c= and =make time_inetd= it.
+  #+BEGIN_SRC C :main no :includes :tangle time_inetd.c :results output
+    #include <stdio.h>
+    #include <string.h>
+    #include <time.h>
+
+    int main(void) {
+      // Read request from stdin (optional, to handle HTTP clients)
+      char request[1024];
+      if (fgets(request, sizeof(request), stdin) == NULL) {
+        fprintf(stderr, "No input received\n");
+      }
+
+      // Prepare HTTP response
+      const char *header =
+        "HTTP/1.1 200 OK\r\n"
+        "Connection: close\r\n"
+        "Content-Type: text/plain\r\n\r\n"
+        "Local time is: ";
+      fputs(header, stdout);
+
+      // Get and send time
+      time_t timer;
+      time(&timer);
+      char *time_msg = ctime(&timer);
+      fputs(time_msg, stdout);
+      fflush(stdout); // Ensure output is sent
+
+      return 0;
+    }
+  #+END_SRC
+
+  #+RESULTS:
+  : HTTP/1.1 200 OK
+  : Connection: close
+  : Content-Type: text/plain
+  : 
+  : Local time is: Mon Apr 14 20:08:35 2025
+
+- Build it:
+  #+begin_src bash :results output :exports both
+    make time_inetd
+  #+end_src
+
+  #+RESULTS:
+  : cc     time_inetd.c   -o time_inetd
+
+- Move the executable to ~/usr/local/bin~
+  #+begin_example bash
+  mv -v time_inetd /usr/local/bin/time_inetd
+  which time_inetd
+  #+end_example
+
+** Configure inetd and service
+
+- To update ~/etc/inetd.conf~, use ~update-inetd(8)~. Or you can write
+  this to the file in the service category ~#:OTHER~:
+  #+BEGIN_SRC conf
+    time_service stream tcp nowait nobody /usr/local/bin/time_inetd time_inetd
+  #+END_SRC
+- Fields:
+  - =time_service=: Service name (defined in ~/etc/services~).
+  - =stream=: TCP socket type.
+  - =tcp=: Protocol.
+  - =nowait=: Spawn new process per connection.
+  - =nobody=: Run as low-privilege user.
+  - ~/usr/local/bin/time_inetd~: Program path.
+  - =time_inetd=: Program name (=argv[0]=).
+
+- Update ~/etc/services~: Map service name to port in /etc/services.
+  #+BEGIN_SRC conf
+    time_service 8080/tcp # Time service
+  #+END_SRC
+
+- Restart ~inetd~ daemon: =sudo service inetd restart=.
+
+- Test the program: 
+  1. Ensure program is executable: =chmod +x /usr/local/bin/time_inetd=
+- Test with browser: http://localhost:8080.
+- Or use =netcat: nc localhost 8080=.
+- Expected output:
+  #+BEGIN_EXAMPLE
+  HTTP/1.1 200 OK
+  Connection: close
+  Content-Type: text/plain
+
+  Local time is: Mon Apr 14 20:00:00 2025
+  #+END_EXAMPLE
 
 * Sources
 
