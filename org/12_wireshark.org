@@ -1,0 +1,52 @@
+#+STARTUP: overview hideblocks indent entitiespretty:
+#+OPTIONS: toc:nil num:nil ^:nil: 
+* Wireshark Setup Without Admin Rights
+
+This guide helps you install and use Wireshark on Windows *without
+needing administrator privileges*. You'll use it to analyze
+pre-captured network traffic files (.pcap) provided.
+
+You will not be able to capture live traffic, but you can analyze
+existing captures just fine.*
+
+*Step 1: Download and Install Wireshark*
+
+1. Go to https://www.wireshark.org/download.html
+
+2. Download the Windows installer for the latest stable version
+   (64-bit).
+
+3. Run the installer:
+   - If prompted for admin access, choose "No" or "Cancel" and re-run
+     the installer as a normal user.
+   - *Uncheck* any options related to Npcap or live capture.
+   - Make sure to keep the default options for the Wireshark GUI and
+     TShark CLI.
+
+*Step 2: Open a `.pcap` File*
+
+You can find a .pcap (capture network traffic file) here:
+https://tinyurl.com/wireshark-pcap-1
+
+You can open them in two ways:
+
+*Using the GUI:*
+1. Open the Wireshark application.
+2. Go to =File → Open= and select the `.pcap` file.
+3. Apply filters in the top filter bar (e.g., =http= or =ip.addr==192.168.1.10=).
+
+*Using the Command Line (TShark):*
+1. Open a terminal.
+2. Navigate to the folder where your `.pcap` file is saved.
+3. Run:
+
+   #+begin_src sh
+     tshark -r example.pcap
+   #+end_src
+
+   You can also filter specific protocols, like this:
+
+   #+begin_src sh
+     tshark -r example.pcap -Y "http.request"
+   #+end_src
+
