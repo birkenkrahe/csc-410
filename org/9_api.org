@@ -967,6 +967,7 @@ This program teaches you to:
   | =errno.h=      | Error handling for network issues in time server.       |
   | =time.h=       | Time funcs (~time~, ~ctime~) to get/format time for client. |
   | =stdio.h=      | ~printf~ to format time string for network transmission.  |
+  | =string.h=     | String manipulation functions such as ~strlen~            |
 
 * Building the networked time-telling program
 
@@ -1326,7 +1327,7 @@ address.
 - You should generally check that the number of bytes sent with
   ~send(2)~ was as expected, and you try to send the rest if it's not.
 
-** TODO Send the time with ~send(2)~
+** Send the time with ~send(2)~
 
 - Once the HTTP header and the beginning of the message is sent, we
   can send the actual time. We get it as before in =time_console.c=, and
@@ -1358,7 +1359,7 @@ address.
   5. =printf("Sent %d of %d bytes.\n", ...)=: Prints bytes sent vs. time
      string length.
 
-** TODO Close client connection with ~close(2)~
+** Close client connection with ~close(2)~
 
 - We now must ~close~ the client connection to indicate to the browser
   application that we've sent all of our request data:
@@ -1371,7 +1372,7 @@ address.
 - If we don't close the connection, the browser will wait for more
   data until it times out (~300s for Chrome - browser dependent).
 
-** TODO Close server connection with ~close(2)~
+** Close server connection with ~close(2)~
 
 - We could call ~accept~ on =socket_listen= to accept additional
   connections: That's what a real server would do.
@@ -1382,7 +1383,7 @@ address.
     printf("Finished.\n");
   #+end_src
 
-* TODO Compile and run the program
+* Compile and run the program
 
 - Compile the program:
   #+begin_src bash :results output

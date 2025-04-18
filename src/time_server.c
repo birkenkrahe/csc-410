@@ -39,8 +39,8 @@ int main(void)
   struct sockaddr_storage client_address;
   socklen_t client_len = sizeof(client_address);
   int socket_client = accept(socket_listen,
-  			   (struct sockaddr*) &client_address,
-  			   &client_len);
+                         (struct sockaddr*) &client_address,
+                         &client_len);
   if (!(socket_client >= 0)) {
     fprintf(stderr, "accept() failed, (%d)\n", errno);
     return 1;
@@ -48,10 +48,10 @@ int main(void)
   printf("Client is connected... ");
   char address_buffer[100];
   getnameinfo((struct sockaddr*) &client_address,
-  	    client_len,
-  	    address_buffer,
-  	    sizeof(address_buffer),
-  	    0,0,NI_NUMERICHOST);
+          client_len,
+          address_buffer,
+          sizeof(address_buffer),
+          0,0,NI_NUMERICHOST);
   printf("%s\n", address_buffer);
   printf("Reading request...\n");
   char request[1024];
@@ -66,21 +66,20 @@ int main(void)
     "Content-Type: text/plain\r\n\r\n"
     "Local time is: ";
   int bytes_sent = send(socket_client,
-  		      response,
-  		      strlen(response),
-  		      0);
+                    response,
+                    strlen(response),
+                    0);
   printf("Sent %d of %d bytes.\n", bytes_sent, (int) strlen(response));
-  time_t timer; // holds the time
-  time(&timer); // get the time defined in <time.h>
-  char *time_msg = ctime(&timer); // convert time to string
-  bytes_sent = send(socket_client,  // this is the 2nd socket
-  		  time_msg,  // this is now the time msg string
-  		  strlen(time_msg), // requires <string.h>
-  		  0);
-  printf("Sent %d of %d bytes.\n",
-         bytes_sent, (int)strlen(time_msg));
+  time_t timer;  // declare a variable to hold the time
+  time(&timer);  // get the time
+  char *time_msg = ctime(&timer);
+  bytes_sent = send(socket_client,
+                time_msg,
+                strlen(time_msg),
+                0);
+  printf("Sent %d of %d bytes.\n",bytes_sent, (int)strlen(time_msg));
   printf("Closing requesting (client) connection...\n");
-  close(socket_client); // close the send/receive socket
+  close(socket_client);
   printf("Closing listening (server) connection...\n");
   close(socket_listen);
   printf("Finished.\n");
