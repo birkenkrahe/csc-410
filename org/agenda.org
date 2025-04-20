@@ -1952,15 +1952,14 @@ new worth knowing and/or reviewing.
    software. As an example, check out [[https://github.com/emacs-mirror/emacs][github.com/emacs-mirror/emacs]]
    #+end_quote
    
-
-* Week 14: Networking a web service
+* DONE Week 13: Networking a web service
 
 - [X] *Code along:* Networking a time-telling program.
 - [X] *Test*: GNU Make / Byte Order / one-shot server / Web service.
-- [ ] *Home assignment*: Modify the networked time-telling program.
+- [X] *Home assignment*: Modify the networked time-telling program.
 - [ ] *Bonus assignment:* Network =timer_console.c= using ~inetd~.
 
-** DONE Review: Time-Telling Program
+** Review: Time-Telling Program
 
 Can you explain every line of this program?
 
@@ -1992,94 +1991,19 @@ To code along, open [[https://tinyurl.com/api-codealong][tinyurl.com/api-codealo
   wget -O api.org tinyurl.com/api-codealong
 #+end_example
 
-** Review: Networking the Time-Telling Program
 
-Popquiz!
+* Week 14: Building a multiplex TCP client and server
 
-1. What is a socket?
-   #+BEGIN_QUOTE
-   A socket is an endpoint for network communication, allowing
-   programs to send/receive data over a network (e.g., TCP/IP). In
-   time_server, it’s used to listen on port 8080.
-   #+END_QUOTE
+** TODO Review test
+#+attr_html: :width 200px :float nil:
+[[../img/test.png]]
 
-2. What is a connectionless protocol? What is a connection-oriented
-   protocol? Examples?
-   #+BEGIN_QUOTE
-   - Connectionless: Sends data without establishing a link
-     (unreliable, fast). Example: UDP (e.g., DNS).
-   - Connection-oriented: Establishes a link before sending data
-     (reliable). Example: TCP (e.g., HTTP in time_server).
-   #+END_QUOTE
+- [ ] Review as test: Networking the time-telling program
+- [ ] Forking with ~fork~ and multiplexing with ~select~
+- [ ] Building a full TCP web client
+- [ ] Building a full TCP web server
 
-3. What types of applications generally benefit from using TCP?
-   #+BEGIN_QUOTE
-   Apps needing reliable, ordered data delivery, like web servers
-   (HTTP in time_server), email (SMTP), or file transfers (FTP).
-   #+END_QUOTE
-
-4. What types of applications generally benefit from using UDP?
-   #+BEGIN_QUOTE
-   Apps prioritizing speed over reliability, like video streaming,
-   online gaming, or DNS queries, where minor data loss is tolerable.
-   #+END_QUOTE
-
-5. Does TCP guarantee that data will be transmitted successfully?
-   #+BEGIN_QUOTE
-   TCP guarantees reliable delivery by retransmitting lost packets,
-   ensuring data arrives in order, barring network failure (used in
-   time_server for HTTP response).
-   #+END_QUOTE
-
-6. What does the ~bind~ function do?
-   #+BEGIN_QUOTE
-   bind() assigns a socket to a specific address/port (e.g., port 8080
-   in time_server), so the server can receive connections there.
-   #+END_QUOTE
-
-7. What is the meaning of the '2' in ~bind(2)~?
-   #+BEGIN_QUOTE
-   The '2' means bind is a system call, documented in man page section
-   2 (system calls), covering kernel-level functions like bind in
-   time_server.
-   #+END_QUOTE
-
-8. What does the ~accept~ function do?
-   #+BEGIN_QUOTE
-   accept() retrieves a client connection from a listening socket,
-   creating a new socket for communication (e.g., handling a client in
-   time_server).
-   #+END_QUOTE
-
-9. In a TCP connection, does the client or the server send application data first?
-   #+BEGIN_QUOTE
-   The client typically sends application data first (e.g., HTTP GET
-   in time_server), after the TCP handshake. The server responds
-   (e.g., time data).
-   #+END_QUOTE
-
-10. Describe what you think the ~getaddrinfo(3)~ function does and why
-    it is used? Prototype and call in =timer_server.c=:
-    #+begin_example C
-       // function prototype
-       int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,
-                       struct addrinfo **res);
-       // example function call:
-       getaddrinfo(0, PORT, &hints, &bind_address);
-     #+end_example
-
-    #+BEGIN_QUOTE
-    getaddrinfo(3) resolves addresses/ports into socket-compatible
-    structs. In time_server, it sets up port 8080 for binding, using
-    hints for IPv4/TCP and AI_PASSIVE for server use.
-    #+END_QUOTE
-
-
-** Quick review: Term Projects (3rd sprint review coming up)
-
-
-
-* Week 15: Building a TCP web server or Wireshark practice
+* Week 15: Packet sniffing with Wireshark
 
 * Week 16: Project presentations
 
