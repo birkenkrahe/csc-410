@@ -1998,7 +1998,7 @@ To code along, open [[https://tinyurl.com/api-codealong][tinyurl.com/api-codealo
 #+attr_html: :width 200px :float nil:
 [[../img/test.png]]
 
-- [ ] Review as test: Networking the time-telling program
+- [X] Review as test in class: Networking the time-telling program
 - [ ] Forking with ~fork~ and multiplexing with ~select~
 - [ ] Building a full TCP web client
 - [ ] Building a full TCP web server
