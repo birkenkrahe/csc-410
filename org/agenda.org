@@ -1994,7 +1994,11 @@ To code along, open [[https://tinyurl.com/api-codealong][tinyurl.com/api-codealo
 
 * Week 14: Building a multiplex TCP client and server
 
-** TODO Review test
+- [X] Review and test: Networking a time-telling program
+- [ ] Lecture/practice: Forking and multiplexing
+- [ ] Lecture/codealong: Building a multiplexing TCP client
+
+** DONE Review test
 #+attr_html: :width 200px :float nil:
 [[../img/test.png]]
 
@@ -2002,6 +2006,41 @@ To code along, open [[https://tinyurl.com/api-codealong][tinyurl.com/api-codealo
 - [ ] Forking with ~fork~ and multiplexing with ~select~
 - [ ] Building a full TCP web client
 - [ ] Building a full TCP web server
+
+** DONE Project review
+#+attr_html: :width 200px :float nil:
+[[../img/project_review.png]]
+
+** TODO Socket vs. API
+
+- A socket is a tool you use to do networking, like a telephone.
+
+- A socket API is the interface (a set of functions) that leets you
+  use sockets, including: ~bind(2)~, ~connect(2), ~send(2)~, ~recv(2)~,
+  etc. This is the way you dial, answer, and speak into the telephone.
+
+- An API can be about any application (task or service): Databases,
+  graphics, file systems, not just networking. This could be
+  telephones, text messages, or email - all communication interfaces.
+
+- So a socket is not strictly speaking the same as an API.
+
+- Here are properties of some common API frameworks that you'll see
+  (Source: Kardell/Brouwer, 2025):
+  #+caption: Source: Kardell/Brouwer 2025.
+  #+attr_html: :width 600px :float nil:
+  [[../img/apis.png]]
+  
+** IN_PROGRESS Introduction to forking and multiplexing
+
+Get the codealong file: [[https://tinyurl.com/web-codealong-1][tinyurl.com/web-codealong-1]]
+
+#+begin_example
+  wget -O web.org tinyurl.com/web-codealong-1
+#+end_example
+
+And open it in Emacs!
+
 
 * Week 15: Packet sniffing with Wireshark
 
