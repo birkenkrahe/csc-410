@@ -2154,7 +2154,7 @@ And open it in Emacs!
 
 ** TODO Building a TCP client with multiplexing
 
-Download the code along file:
+Download the code along file: [[https://tinyurl.com/web-codealong-2][tinyurl.com/web-codealong-2]]
 #+begin_example sh
 wget -O web2.org tinyurl.com/web-codealong-2
 #+end_example
