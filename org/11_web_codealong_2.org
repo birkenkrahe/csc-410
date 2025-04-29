@@ -1,0 +1,800 @@
+#+TITLE: Building a web client and server (codealong 2)
+#+AUTHOR: Marcus Birkenkrahe & ChatGPT (pledged)
+#+OPTIONS: toc:nil num:nil
+#+STARTUP: overview hideblocks indent
+#+properties: header-args:C :main no :includes :results output :exports both
+* Overview
+
+- We implemented a simple TCP server that served a web page with HTTP.
+
+- We will now implement a TCP client that can establish an IPv4
+  connection with any listening TCP server.
+
+- Topics:
+  1. [ ] Configuring a remote address with ~getaddrinfo~
+  2. [ ] Initiating a TCP connection with ~connect~
+  3. [ ] Detecting terminal input in a non-blocking manner
+  4. [ ] Multiplexing with ~fork~
+  5. [ ] Multiplexing with ~select~
+  6. [ ] Detecting peer disconnects
+  7. [ ] Implementing a basic microservice
+  8. [ ] The stream-like nature of TCP
+  9. [ ] The blocking behavior of ~send~
+
+* Header files
+
+- We use the same header files as before when networking the
+  time-telling program, and we're tangling to =tcp.h=
+
+  #+begin_src C :tangle tcp.h :main no :includes :results none
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <netdb.h>
+    #include <unistd.h>
+    #include <errno.h>
+    #include <stdio.h>
+    #include <time.h>
+    #include <string.h>
+  #+end_src
+
+* Multiplexing connections (multiple clients, multiple services)
+
+- The socket APIs are blocking by default: When ~accept~ runs to wait
+  for a connection, the program is on hold until it becomes
+  available. When you use ~recv~, the program blocks until new data is
+  available.
+
+- If you only have one client (like for =time_server.c=), blocking is no
+  problem but if you have multiple clients, it is. Any other clients
+  that tried to connect while one is being served, have to wait.
+
+- You cannot have blocking on the server side if you want to serve
+  multiple clients. Serving one client at a time is not going to work.
+
+- You cannot have blocking on the client side if you want to download
+  multiple resources (e.g. images, scripts, etc.) in parallel.
+
+- The solution to this is to start a new process for each connection
+  so that blocking sockets don't block other processes.
+
+* Forking processes
+
+- On Unix-based systems, starting a new process is easy using the ~fork~
+  function to create a child process. Each child process has its own
+  memory space, and each client is handled in a separate process.
+
+- From ~man fork(2)~: Returns a unique new process ID (PID).
+  #+begin_example C
+  pid_t fork(void);
+  #+end_example
+
+- Here is how it works:
+  #+begin_src C :main no :includes :results output
+    #include <stdio.h>  // for input/output
+    #include <unistd.h> // to close sockets
+    #include <errno.h>  // perror and errno
+
+    int main(void)
+    {
+      pid_t pid = fork(); // create a new process
+
+      if (pid == 0) { //
+        // child process
+        printf("Hello from child (PID: %d)\n", getpid());
+      } else if (pid > 0) {
+        // parent process
+        printf("Hello from parent (PID: %d, child PID: %d)\n", getpid(), pid);
+      } else {
+        // fork failed
+        perror("fork failed");
+      }
+      return 0;
+    }
+  #+end_src
+
+  #+RESULTS:
+  : Hello from parent (PID: 1239813, child PID: 1239814)
+  : Hello from child (PID: 1239814)
+
+- ~fork~ returns 0 in the child process, and a positive number (child's
+  PID) in the parent process, and -1 if the fork fails.
+
+- You can create a *fork bomb* if you're not careful by forking in an
+  infinite loop. If you try this, you should set a process limit first
+  with ~ulimit -u 100~.
+
+- Check the current limit:
+  #+begin_src bash :results output :exports both
+    ulimit -u
+  #+end_src
+
+  #+RESULTS:
+  : 255424
+
+- Similar to process forking is *multithreading*: here, a new thread
+  within the same process is created using ~pthread_createe(3)~. Threads
+  share the same address space - more scalable for large number of
+  connections.
+
+- To learn more about this, take the Operating Systems course (CSC
+  420) where we talk about process management.
+
+* Practice: Creating a Fork Bomb (Safely)
+
+Why? To understand how uncontrolled process creation can overload a
+system, and learn how to limit and observe system behavior.
+
+1. Create the fork bomb program: Tangle it and build it with ~make~:
+   #+begin_src c :tangle fork_bomb.c
+     #include <stdio.h>
+     #include <unistd.h>
+
+     int main() {
+       while (1) {
+         pid_t pid = fork();
+         if (pid < 0) {
+           perror("fork failed");
+           break;
+         }
+       }
+       return 0;
+     }
+   #+end_src
+
+2. In a terminal:
+   1) Check the current number of permitted concurrent processes
+   2) Reset the limit to 100
+   3) Check again to make sure
+   4) Build ~fork_bomb~
+   5) Run ~fork_bomb~ - after a bit, send an interrupt signal (C-c C-c)
+   6) Try any command on that shell, e.g. =ls=
+   #+begin_src bash :results output
+     ulimit -u  # before limiting the process number
+     ulimit -u 100  # lower limit of allowed processes
+     ulimit -u  # check again
+     make fork_bomb # build fork bomb
+     ./fork_bomb  # run fork bomb - interrupt process with C-c C-c
+     ls # this should fail
+   #+end_src
+
+3. Observe the output:
+
+   - You should see:
+     *fork failed: Resource temporarily unavailable*
+   - While =fork_bomb= is running, you can use ~ps~ or ~htop~ in another
+     terminal to inspect child processes with =ps aux | grep
+     fork_bomb=.
+   - To see the parent PID:
+     #+begin_example bash
+     ps -eo pid,ppid,cmd | grep fork_bomb
+     #+end_example
+   - Clean up using:
+     #+begin_src bash
+       pkill -P <parent_pid>  # for example 991934
+     #+end_src
+     or kill/restart the shell session.
+
+** Safety Notes
+
+- Always use ~ulimit -u~ before running this kind of experiment.
+- Never run fork bombs on shared or production systems.
+- This exercise is for educational purposes only.
+
+** Submission
+
+- Upload the screenshot from the shell with the =fork failed....=
+  printout or the screenshot that shows the child processes. Example:
+  #+attr_html: :width 400px :float nil:
+  [[../img/fork_bomb.png]]
+
+* Forking TCP processes on Unix and Windows
+
+- A multi-process TCP server may accept connections like this:
+  #+begin_src C
+    while (1) {
+      socket_client = accept(socket_listen,
+                         &new_client, &new_client_length);
+      int pid = fork();
+      if (pid == 0) { // child process only serves one connection
+        close(socket_listen); // no need to listen here any longer
+        recv(socket_client, ...); // receive stuff
+        send(socket_client, ...); // send stuff
+        close(socket_client); // child process closes socket copy
+        exit(0); // exit gracefully
+      }
+      // parent process
+      close(socket_client); // parent process closes socket
+     }
+  #+end_src
+
+- When you call ~fork~, the child inherits copies of all open file
+  descriptors/sockets but each process is independent. So the socket
+  has to be closed in *both* processes.
+
+- The child does not ~accept~ new connections but only receives and
+  sends data, so it can =close(socket_listen)=.
+
+- Overview:
+  | Process | Socket FD     | Why we close it            |
+  |---------+---------------+----------------------------|
+  | Parent  | socket_client | Child handles it           |
+  | Child   | socket_listen | Not accepting anymore      |
+  | Child   | socket_client | Done talking to the client |
+
+- Using multiple processes or threads in Windows is much more
+  complicated. The OS uses multiple system functions.
+
+- Debugging multi-process/thread programs is much more complicated
+  than single process programs, and managing the shared state and the
+  socket communication is harder, too.
+
+-
+
+* Multiplexing with ~select~
+
+- We can give ~select(2)~ a set of sockets, and it tells us which ones
+  are ready to be read, which sockets are ready to write to, and which
+  sockets have exceptions.
+
+- ~select~ is supported on Unix and Windows so it keeps our programs
+  portable.
+
+- The C function prototype (see ~man select~):
+  #+begin_example C
+  int select(int nfds, fd_set *readfds, fd_set *writefds,
+             fd_set *exceptfds, struct timeval *timeout);
+  #+end_example
+
+- Prototype analysis:
+  #+begin_quote
+  - Monitors multiple file descriptors for I/O readiness (read, write,
+    exceptions).
+  - Parameters:
+    + ~nfds~: Highest file descriptor number + 1.
+    + ~readfds~: File descriptors to check for readability (NULL if not needed).
+    + ~writefds~: File descriptors to check for writability (NULL if not needed).
+    + ~exceptfds~: File descriptors to check for exceptions (NULL if not needed).
+    + ~timeout~: ~struct timeval~ for blocking duration (NULL for
+      indefinite, 0 for non-blocking).
+  - Return value:
+    - Positive: Number of ready file descriptors.
+    - =0=: Timeout expired.
+    - =-1=: Error (check ~errno~).
+    - fd_set Macros:
+      + ~FD_ZERO~: Clear set.
+      + ~FD_SET~: Add descriptor.
+      + ~FD_CLR~: Remove descriptor.
+      + ~FD_ISSET~: Check if descriptor is ready.
+    - Notes:
+      + Blocks until descriptors are ready, timeout, or signal interrupt.
+      + Limited by ~FD_SETSIZE~ (typically 1024).
+      + Alternatives: ~poll~, ~epoll~, ~kqueue~.
+  #+end_quote
+
+- Before calling ~select~, we have to add our sockets in an ~fd_set~. If
+  we have three sockets =socket_listen=, =socket_a= and =socket_b=:
+
+  #+begin_example C
+      fd_set our_sockets; // declare socket set
+      FD_ZERO(&our sockets); // zeroing out (emptying) the set
+      FD_SET(socket_listen, &our_sockets);
+      FD_SET(socket_a, &our_sockets);
+      FD_SET(socket_b, &our_sockets);
+  #+end_example
+
+- ~fd_set~ is a bit array or bit mask where each bit represents a file
+  descriptor, manipulated with macro commands. It's okay for a small
+  set, and it's not dynamic (doesn't grow/shrink as needed).
+
+- To remove a socket, you can use the ~FD_CLR~ macro, and to check for
+  the presence of a socket, use ~FD_ISSET~.
+
+- ~select~ requires that we pass a number that's large than the largest
+  socket descriptor we are going to monitor:
+  #+begin_example C
+  int max_socket;
+  max_socket = socket_listen;
+  if (socket_a > max_socket) max_socket = socket_a;
+  if (socket_b > max_socket) max_socket = socket_b;
+  #+end_example
+
+- When we call ~select~, it will modify =fd_set= - so we want to copy our
+  socket set before calling it.
+  #+begin_example C
+  fd_set copy; // declare copy
+  copy = our_sockets; // copy our socket set
+  #+end_example
+
+- This call checks the =copy= until at least one of the sockets in the
+  list is ready to be read from.
+  #+begin_example C
+  // args: highest socket no + 1, copy of set
+  select(max_socket + 1, &copy, 0, 0, 0);
+  #+end_example
+
+- To check which sockets are still in =copy=, use ~FD_ISSET~:
+  #+begin_example C
+  if (FD_ISSET(socket_list, &copy)) {
+     // socket_listen has a new connection - accept
+     accept(socket_listen, ...)
+  }
+  if (FD_ISSET(socket_a, &copy)) {
+     // socket_a is ready to be read from - receive
+     recv(socket_a, ...)
+  }
+  if (FD_ISSET(socket_list, &copy)) {
+     // socket_b is ready to be read from - receive
+     recv(socket_b, ...)
+  }
+  #+end_example
+
+- Similarly, to check for *writeability* (~send~) instead of *readability*
+  (~recv~), we would use the third argument for =copy=. When we monitor a
+  set of sockets for exceptional conditions (special data,
+  e.g. "urgent" data, like an interrupt signal for the ~telnet~ protocol
+  = complete remote terminal access).
+
+* Timeout
+
+- The last argument of ~select~ allows us to specify a timeout:
+  #+begin_example C
+  struct timeval {
+     long tv_sec;   // number of seconds
+     long tv_usec;  // number of microseconds
+  }
+  #+end_example
+
+- Example: To wait a maximum of 1.5 seconds
+  #+begin_example C
+  struct timeval timeout; // create a timeout object
+  timeout.tv_sec = 1;
+  timeout.tv_usec = 500000 // 5 seconds = 500 milli sec = 500,000 micro secs
+
+  // select returns after a socket in fd_set copy is ready or after 1.5 secs
+  select(max_socket + 1, &copy, 0, 0, &timeout);
+  #+end_example
+
+- If =timeout.tv_sec = timeout.tv_usec = 0=, then ~select~ returns
+  immediately. If we pass a ~NULL~ pointer, it does not return until at
+  least one socket is ready to be read.
+
+* Monitoring sockets
+
+- To monitor for writeable sockets on which we could call ~send~ without
+  blocking, you can check for all three conditions with one call:
+  #+begin_example C
+  select(max_socket + 1, &ready_to_read, &ready_to_write, &excepted, &timeout);
+  #+end_example
+
+- On success, ~select~ returns the number of socket descriptors
+  contained in the up to three descriptor sets it monitors. If it
+  timed out before any sockets were readable/writeable/excepted, it
+  returns -1 to indicate an error.
+
+* Practice: Multiplexing with ~select~ using ~stdin~
+
+- Goal: Introduce the concept of using ~select()~ to monitor a file descriptor
+  (stdin) for input readiness, with a timeout.
+
+- Instructions:
+  1. Type the following C program that monitors ~stdin~ (file
+     descriptor 0) for up to 5 seconds.
+  2. Run the program and either type something quickly or wait for the
+     timeout.
+  3. Observe how ~select()~ behaves.
+
+*-* Source Code: Tangle the file =select_stdin.c=
+#+begin_src C :tangle select_stdin.c :main no :includes :results none
+  #include <stdio.h>        // for printf, perror, fgets
+  #include <unistd.h>       // for read, STDIN_FILENO
+  #include <sys/select.h>   // for select(), fd_set, timeval
+
+  int main() {
+    fd_set readfds;               // fd_set is a set of file descriptors (bitmask)
+    struct timeval timeout;       // timeval defines the timeout for select()
+
+    // Step 1: Initialize the file descriptor set
+    FD_ZERO(&readfds);            // Always clear the set before using
+    FD_SET(0, &readfds);          // Add stdin (file descriptor 0) to the set
+
+    // Step 2: Set the timeout for select()
+    timeout.tv_sec = 5;           // Wait for up to 5 seconds
+    timeout.tv_usec = 0;          // and 0 microseconds
+
+    printf("Waiting for input on stdin (5 sec timeout)...\n");
+
+    // Step 3: Call select()
+    // Parameters:
+    // - 1: max file descriptor + 1 (stdin is 0, so we pass 1)
+    // - &readfds: watch for readability on stdin
+    // - NULL: not checking for writability
+    // - NULL: not checking for exceptions
+    // - &timeout: how long to wait
+    int ret = select(1, &readfds, NULL, NULL, &timeout);
+
+    // Step 4: Handle the result
+    if (ret == -1) {
+      // select() returned an error
+      perror("select() error");
+    } else if (ret == 0) {
+      // Timeout occurred, no file descriptors were ready
+      printf("Timeout. No input.\n");
+    } else {
+      // At least one file descriptor is ready — check which
+      if (FD_ISSET(0, &readfds)) {
+        // stdin is ready for reading
+        char buffer[100];
+        fgets(buffer, sizeof(buffer), stdin);  // Read input from user
+        printf("You typed: %s\n", buffer);     // Print what the user typed
+      }
+    }
+
+    return 0;
+  }
+#+end_src
+
+- Expected Behavior
+  + If you type something within 5 seconds, it prints what you typed.
+  + If you wait more than 5 seconds, it prints a timeout message.
+  + If an error occurs (e.g., interrupted by a signal), it prints the
+    error using ~perror("select")~. For this to work e.g. with C-c, you
+    need to install a signal handler (returns to ~perror~ to print).
+
+- ~make~ the executable and test it in a terminal (not in an .org file):
+  #+begin_example bash
+   make select_stdin
+   ./select_stdin
+  #+end_example
+
+- *Extension questions:*
+
+  + What would happen if you set ~timeout.tv_sec = 0~ and
+    ~timeout.tv_usec = 0~?
+    #+begin_quote
+    The call would become non-blocking - it would return immediately,
+    indicating which sockets are ready at that moment.
+    #+end_quote
+  + How would you modify the program to also monitor a socket
+    =socket_fd=?
+    #+begin_quote
+    Add =socket_fd= to =fd_set= using =FD_SET(socket_fd, &readfds)=, and
+    update the first argument to ~select~ to be the highest socket + 1:
+    =select(max(fd_stdin, socket_fd) + 1, ...)=.
+    #+end_quote
+  + What other events could you watch for using the ~writefds~ and
+    ~exceptfds~ arguments?
+    #+begin_quote
+    ~writefds~ - which sockets are ready to send data to without
+    blocking, and ~exceptfds~ - detect exceptional conditions, which may
+    indicate urgent messages or errors.
+    #+end_quote
+
+
+* NEXT Building a TCP client that can connect to any TCP server
+
+- This TCP client will take a hostname (or IP address) and port number
+  from the command line.
+
+- It will attempt a connection to the TCP server at that address.
+
+- If successful, it will relay data that's received from that server
+  to the terminal, and data inputted into the terminal to the server.
+
+- It will continue until either is terminated with C-c or the server
+  closes the connection.
+
+- [[https://github.com/birkenkrahe/csc-410/blob/main/img/tcp_client.png][Program flow (link)]]
+
+- We resolve the server address from the command-line arguments with
+  ~getaddrinfo~. We create the socket with ~socket~, and ~connect~ it to the
+  server. We monitor for keyboard input with ~select~. If there's input,
+  we send it over the socket with ~send~. If ~select~ says that socket
+  data is available, we read it with ~recv~ and ~printf~ it. The ~select~
+  loop is repeated until the socket is closed.
+
+* Source code
+
+** Main program with header file and code chunks
+#+begin_src C :main no :includes :tangle tcp_client.c :noweb yes
+  #include "tcp.h"
+  int main(int argc, char *argv[])
+  {
+    <<check command-line arguments>>
+    <<configure remote address to connect>>
+    <<print remote address>>
+    <<create socket>>
+    <<connect to remote server>>
+    <<monitor new data>>
+    <<close socket>>
+    return 0;
+  }
+#+end_src
+
+** Check if command-line arguments were given
+
+- Code:
+  #+name: check command-line arguments
+  #+begin_src C :main no :includes :results none
+
+  #+end_src
+
+- Code Explanation: Command-Line Argument Check
+  + Checks if enough command-line arguments are provided.
+  + ~argc < 3~: Tests if fewer than 3 arguments (program name + 2 args)
+    are passed.
+    - ~argc~: Number of arguments (includes program name, e.g.,
+      ~./tcp_client~).
+    - Minimum 3 required: program name, hostname, port.
+  + ~fprintf(stderr, "usage: tcp_client hostname port\n")~:
+    - Prints usage message to standard error if check fails.
+    - Informs user to provide hostname and port (e.g., ~./tcp_client
+      example.com 8080~).
+  + ~return 1~: Exits program with error code 1 (indicating failure).
+  + Purpose: Ensures user provides required inputs for TCP client
+    (hostname and port).
+
+** Use input to configure a remote address
+
+- Code:
+  #+name: configure remote address to connect
+  #+begin_src C :main no :includes :results none
+    printf("Configuring remote address...\n");
+
+    // point to linked list of addrinfo structs
+
+    // perform name resolution host + port
+
+      // return non-zero on error
+
+  #+end_src
+
+- Explanation:
+  + Prints: "Configuring remote address..." to indicate start of
+    address setup.
+  + ~struct addrinfo hints~: Defines criteria for address resolution.
+  + ~memset(&hints, 0, sizeof(hints))~: Clears ~hints~ structure to avoid
+    garbage values.
+  + ~hints.ai_socktype = SOCK_STREAM~: Specifies TCP socket
+    (stream-based).
+  + ~struct addrinfo *peer_address~: Pointer to linked list of address
+    results.
+  + ~getaddrinfo(argv[1], argv[2], &hints, &peer_address)~:
+    - Resolves hostname (~argv[1]~, e.g., "example.com") and port
+      (~argv[2]~, e.g., "8080") to socket addresses.
+    - Uses ~hints~ to filter results (TCP only).
+    - Stores results in ~peer_address~.
+  + Error handling:
+    - Non-zero return from ~getaddrinfo~ indicates failure.
+    - Prints error to ~stderr~ with ~errno~.
+    - Exits with ~return 1~ (error status).
+  + Purpose: Prepares remote server address for TCP client connection.
+
+- Notice the difference to the time-telling program:
+  1) Then, we wanted to configure a *local* address, this time, we want
+     to configure a *remote* address.
+  2) We don't need to seet =hints.ai_family= here because ~getaddrinfo~
+     can decide if IPv4 or IPv6 is the appropriate protocol.
+  3) Hostname and port are passed directly to ~getaddrinfo~, and if
+     everything goes well, our remote address is in =peer_address=.
+
+** Print remote address after configuration
+
+- We don't need to do this but it's a good debugging measure.
+
+- The function ~getnameinfo(3)~ converts the remote address back into a
+  string for printout:
+  #+name: print remote address
+  #+begin_src C
+    printf("Remote address is: ");
+    // declare buffers to store IP and port number
+
+    // convert socket address to string
+
+    // print remote address
+
+  #+end_src
+
+- Explanation:
+  + Prints remote peer’s IP address and port as strings.
+  + ~address_buffer[100]~: Stores numeric IP (e.g., "192.168.1.1").
+  + ~service_buffer[100]~: Stores port number (e.g., "8080").
+  + ~getnameinfo~:
+    - Converts ~peer_address->ai_addr~ (socket address) to strings.
+    - ~NI_NUMERICHOST~: Returns numeric IP, not hostname.
+    - Fills ~address_buffer~ (IP) and ~service_buffer~ (port).
+  + ~printf("%s %s\n", address_buffer, service_buffer)~: Outputs IP and port.
+  + Example output: "Remote address is: 192.168.1.1 8080".
+
+** Create socket on client side
+
+- We can now create our socket using ~socket(2)~:
+  #+name: create socket
+  #+begin_src C
+    printf("Creating socket...\n");
+    // create socket for connection to peer
+
+    // ensure socket creation successful
+
+  #+end_src
+
+- Code Explanation:
+  + ~int socket_peer~: Variable to store the socket file descriptor.
+  + ~socket(peer_address->ai_family, peer_address->ai_socktype,
+    peer_address->ai_protocol)~:
+    - Creates a new socket using parameters from ~peer_address~ (from
+      ~getaddrinfo~).
+    - ~ai_family~: Address family (e.g., ~AF_INET~ for IPv4, ~AF_INET6~ for
+      IPv6).
+    - ~ai_socktype~: Socket type (e.g., ~SOCK_STREAM~ for TCP).
+    - ~ai_protocol~: Protocol (e.g., ~IPPROTO_TCP~ for TCP).
+  + Error handling:
+    - Checks ~!(socket_peer > 0)~: Ensures socket creation succeeded
+      (valid file descriptor > 0).
+    - On failure, prints error to ~stderr~ with ~errno~ (system error
+      code).
+    - Exits with ~return 1~ (error status).
+  + Purpose: Creates a TCP socket for connecting to a remote server.
+
+** Establish connection to remote server
+
+- After the socket has been created, we call ~connect(2)~ to establish a
+connection to the remote server:
+#+name: connect to remote server
+#+begin_src C
+  printf("Connecting...\n");
+  // establish connection to remote server
+
+  // free memory allocated to getaddrinfo for peer_address
+
+  // print confirmation
+  printf("Connected.\n");
+  printf("To send data, enter text followed by enter.\n");
+#+end_src
+
+- Explanation:
+  + ~connect(socket_peer, peer_address->ai_addr,
+    peer_address->ai_addrlen)~:
+    - Initiates a TCP connection to the remote server.
+    - ~socket_peer~: Socket file descriptor (from ~socket()~).
+    - ~peer_address->ai_addr~: Remote server address (from
+      ~getaddrinfo()~).
+    - ~peer_address->ai_addrlen~: Length of the address structure.
+  + Error handling:
+    - Non-zero return from ~connect()~ indicates failure.
+    - Prints error to ~stderr~ with ~errno~ (system error code, e.g.,
+      connection refused).
+    - Exits with ~return 1~ (error status).
+  + ~freeaddrinfo(peer_address)~:
+    - Frees memory allocated by ~getaddrinfo()~ for ~peer_address~.
+    - Prevents memory leaks after the address is used.
+  + Purpose: Establishes a TCP connection to the server and cleans
+    up.
+
+- Note: This is very similar to ~bind~ in the networking the
+  time-telling program. Instead of associating a socket with a local
+  address, ~connect~ associates a socket with a remote address and
+  initiates a TCP connection.
+
+** Loop while checking for new data
+
+- The TCP connection has now been established to the remote server.
+
+- The program needs to loop while checking both the terminal and the
+  socket for new data. Terminal data are sent over the socket, and
+  data read from the socket is printed out to the terminal.
+
+- We cannot use ~recv(2)~ directly because it would block the connection
+  until data comes from the socket, and terminal input is ignored.
+
+- Instead, we're now bringing in ~select(2)~ to monitor for input using
+  the file descriptor set:
+  #+name: monitor new data
+  #+begin_src C
+    // BEGIN WHILE
+      // stores socket set
+      // zero the set
+      // add our socket
+      // add terminal 
+      
+      // check for socket activity
+      // timeout after 100 milliseconds
+
+      // read socket data
+
+      // check terminal input (stdin 0)
+
+    // END WHILE
+  #+end_src
+
+  - Errors on ~send(2)~ are ignored because a closed socket causes
+    ~select(2)~ to return immediately, and we notice it in the next
+    iteration when calling ~recv(2)~.
+
+  - This loop works well on Unix. You can pipe input in from a file:
+    #+begin_example
+
+    #+end_example
+
+- Explanation:
+  + ~fd_set reads~: Set to monitor ~socket_peer~ for readability.
+    - ~FD_ZERO(&reads)~: Clears the set.
+    - ~FD_SET(socket_peer, &reads)~: Adds the socket.
+    - ~FD_SET(0, &reads)~: Adds 0 for ~STDIN_FILENO~.
+  + ~struct timeval timeout~: Sets 100ms timeout for ~select~.
+  + ~select(socket_peer + 1, &reads, 0, 0, &timeout)~:
+    - Monitors ~socket_peer~ for incoming data.
+    - Errors: Prints ~errno~ and exits.
+  + ~FD_ISSET(socket_peer, &reads)~ (first check):
+    - If socket has data: ~recv()~ reads up to 4096 bytes.
+    - ~bytes_received < 1~: Server closed connection; breaks loop.
+    - Prints received data.
+  + ~FD_ISSET(socket_peer, &reads)~ (second check):
+    - Monitors ~STDIN_FILENO~ (0) for terminal input.
+    - ~fgets(read, 4096, stdin)~: Reads user input.
+    - ~send(socket_peer, read, strlen(read), 0)~: Sends input to server.
+    - Prints bytes sent.
+  + Purpose: Handles bidirectional communication with server.
+
+** Close socket
+
+#+name: close socket
+#+begin_src C
+  printf("Closing socket...\n");
+  // close socket
+  printf("Finished.\n");
+#+end_src
+
+* Compile and test TCP client
+
+1) Tangle =tcp_client.c=
+
+2) Build the complete program ([[https://tinyurl.com/tcp-client-full][tinyurl.com/tcp-client-full]])
+
+   #+begin_src bash :results output :exports both
+
+   #+end_src
+
+3) Test with ~example.com~ on port ~80~ (http): Run the client to connect
+   to ~example.com~ on port ~http~ (port 80):
+   #+begin_src bash :results output :exports both
+
+   #+end_src
+
+4) Send an HTTP GET Request:  After the client prints "Connected." and "To send data, enter text followed by enter.", type the following HTTP GET request (press Enter after each line, and twice after the last line):
+   #+begin_src bash :results output :exports both
+
+   #+end_src
+   - This sends a request to ~example.com~ to retrieve its homepage.
+
+5) Expected Output: After sending the request
+   #+begin_example
+       Sending: GET / HTTP/1.1\n
+       Sent 16 bytes.
+       Sending: Host: example.com\n
+       Sent 18 bytes.
+       Sending: \n
+       Sent 1 bytes.
+       Received (... bytes): HTTP/1.1 200 OK...
+       [HTML content from example.com]
+   #+end_example
+
+   - The client prints the server’s response, including HTTP headers
+     and the webpage’s HTML.
+
+   - Note: ~example.com~ may close the connection after responding:
+     #+begin_example
+     "Connection closed by peer.", "Closing socket...", "Finished.".
+     #+end_example
+ 
+6) Close connection with CTRL+D (EOF) to exit.
+
+* TODO Building a full TCP server
+
+* Source
+
+This lecture and practice is based on van Winkle, Hands On Network
+Programming with C (Packt, 2020), chapter 3 (pp. 70-100), and on
+Kozierok's The TCP/IP guide (NoStarch, 2005), see also
+[[http://tcpipguide.com/][tcpipguide.com/]].

@@ -1879,7 +1879,7 @@ new worth knowing and/or reviewing.
 - [X] From host order to [[file:9_api.org::* Byte order][network byte order]] with ~htons~
 - [X] *Lecture/practice:* TCP vs UDP program workflow
 - [X] *Code along*: Networking a time-telling program
-  
+
 ** Home assignment: One-shot echo server
 
 - Task: Create a one-shot echo client/server app that exchanges one
@@ -1894,7 +1894,7 @@ new worth knowing and/or reviewing.
   |                                  |
   | connect(network_socket) -------->| bind(server_socket)
   |                                  | listen(server_socket, CONN)
-  |                                  | 
+  |                                  |
   |                                  | client_socket = accept(server_socket)
   | send(network_socket, echo) ----->| recv(client_socket, buffer)
   |                                  | printf("Client said: %s", buffer)
@@ -1906,7 +1906,7 @@ new worth knowing and/or reviewing.
   | close(network_socket) ---------->| close(client_socket)
   |                                  | close(server_socket)
   #+end_example
-  
+
 - *Bonus assignment* (May 2): Persistent TCP echo server (more than one
   message).
 
@@ -1924,7 +1924,7 @@ new worth knowing and/or reviewing.
 
 2) Where is GNU ~make~ *executed*? Where is it *located* on the computer?
    #+begin_quote
-   On the shell (aka commandline). Location: check ~which make~. 
+   On the shell (aka commandline). Location: check ~which make~.
    #+end_quote
 
    #+begin_src bash :results output
@@ -1951,7 +1951,7 @@ new worth knowing and/or reviewing.
    In projects with multiple source files or steps to build the
    software. As an example, check out [[https://github.com/emacs-mirror/emacs][github.com/emacs-mirror/emacs]]
    #+end_quote
-   
+
 * DONE Week 13: Networking a web service
 
 - [X] *Code along:* Networking a time-telling program.
@@ -1965,7 +1965,7 @@ Can you explain every line of this program?
 
 #+begin_src C
   #include <stdio.h>
-  #include <time.h> 
+  #include <time.h>
 
   int main()
   {
@@ -1975,7 +1975,7 @@ Can you explain every line of this program?
 
     printf("Local time is: %s", ctime(&timer));
 
-    return 0; 
+    return 0;
   }
 #+end_src
 
@@ -1991,8 +1991,7 @@ To code along, open [[https://tinyurl.com/api-codealong][tinyurl.com/api-codealo
   wget -O api.org tinyurl.com/api-codealong
 #+end_example
 
-
-* Week 14: Building a multiplex TCP client and server
+* DONE Week 14: Building a multiplex TCP client and server
 
 - [X] Review and test: Networking a time-telling program
 - [ ] Lecture/practice: Forking and multiplexing
@@ -2011,11 +2010,11 @@ To code along, open [[https://tinyurl.com/api-codealong][tinyurl.com/api-codealo
 #+attr_html: :width 200px :float nil:
 [[../img/project_review.png]]
 
-** TODO Socket vs. API
+** DONE Socket vs. API
 
 - A socket is a tool you use to do networking, like a telephone.
 
-- A socket API is the interface (a set of functions) that leets you
+- A socket API is the interface (a set of functions) that lets you
   use sockets, including: ~bind(2)~, ~connect(2), ~send(2)~, ~recv(2)~,
   etc. This is the way you dial, answer, and speak into the telephone.
 
@@ -2030,7 +2029,7 @@ To code along, open [[https://tinyurl.com/api-codealong][tinyurl.com/api-codealo
   #+caption: Source: Kardell/Brouwer 2025.
   #+attr_html: :width 600px :float nil:
   [[../img/apis.png]]
-  
+
 ** IN_PROGRESS Introduction to forking and multiplexing
 
 Get the codealong file: [[https://tinyurl.com/web-codealong-1][tinyurl.com/web-codealong-1]]
@@ -2042,7 +2041,123 @@ Get the codealong file: [[https://tinyurl.com/web-codealong-1][tinyurl.com/web-c
 And open it in Emacs!
 
 
-* Week 15: Packet sniffing with Wireshark
+* Week 15: Building a TCP client & Packet sniffing with Wireshark (?)
+
+- [X] Last test available until Friday May 2nd.
+- [X] 4th sprint review due in the week May 5-9.
+- [X] Pick your presentation slot in Canvas now.
+
+** DONE Final presentation
+#+attr_html: :width 600px :float nil: 
+[[../img/checklist.png]]
+
+- [X] Rehearse with an audience
+- [X] Test the technology before the presentation
+- [X] Contact me if you have any questions 
+
+** DONE Test preview/review
+
+1. What happens to a program if it uses ~accept()~ and multiple clients
+   try to connect?
+   #+begin_quote
+   Only one client can be served at a time; others must wait.
+   #+end_quote
+
+2. What system call creates a new process to avoid blocking the
+   server?
+   #+begin_quote
+   The terribly dangerous ~fork()~ function (think "bomb").
+   #+end_quote
+
+3. What is the return value of ~fork()~ inside the child process?
+   #+begin_quote
+   0 - In the parent process, ~fork~ returns the PID of the newly
+   created child process (a positive integer). This is efficient
+   because you can write one program that tells you whether it's the
+   parent or the child just by checking ~pid==0~. 
+
+   | Return value | Process | Meaning                       |
+   |--------------+---------+-------------------------------|
+   |            0 | Child   | "I am the new process"        |
+   |          > 0 | Parent  | "My child was created, PID=X" |
+   |           -1 | Parent  | "Error, no child created"     |
+
+   The value of =pid= is different depending on if you're in the parent
+   or in the child process.
+   #+end_quote
+
+   #+begin_src C :main yes :includes <stdio.h> <unistd.h> :results output
+     pid_t pid = fork();
+
+     if (pid == 0) {
+       // Child process
+       printf("Hello from child with pid = %d\n", pid);
+      } else if (pid > 0) { 
+       // Parent process
+       printf("Hello from parent with pid = %d\n", pid);
+      } else {
+       // Error
+       perror("fork failed");
+      }
+   #+end_src
+
+   #+RESULTS:
+   : Hello from parent with pid = 19738
+   : Hello from child with pid = 0
+
+4. What happens if you fork infinitely without setting a limit?
+   #+begin_quote
+   You overload the system by creating too many processes. To be
+   exact: The shell process (parent process) that does the forking is
+   overloaded.
+   #+end_quote
+   
+5. What shell command limits the maximum number of user processes?
+   #+begin_quote
+   ~ulimit -u 100~ sets it to 100, ~ulimit -u~ gets the current value.
+   #+end_quote
+
+6. After forking, why should the child process call ~close(socket_listen)~?
+   #+begin_quote
+   Because the child is only serving a single client, not accepting
+   new connections.
+   #+end_quote
+
+7. What function lets you monitor multiple sockets without blocking?
+   #+begin_quote
+   ~select()~
+   #+end_quote
+
+8. What must you do before adding sockets into an ~fd_set~?
+   #+begin_quote
+   Call ~FD_ZERO(&set)~ to clear the set where ~set~ is an ~fd_set~.
+   #+end_quote
+
+9. What does ~FD_ISSET(socket, &copy)~ check after ~select()~ where =copy=
+   is a copy of ~fd_set~, and =socket= is the socket we're using?
+   #+begin_quote
+   It checks if ~socket~ is ready to read or write.
+   #+end_quote
+
+10. What happens if you set the ~timeout~ for ~select()~ to all zeros?
+    #+begin_quote
+    ~select()~ becomes non-blocking and returns immediately.
+    #+end_quote
+
+11. What kind of data structure is ~fd_set~?
+    #+begin_quote
+    It's a bit array (or bit mask) that tracks file descriptors: each
+    bit tracks a file descriptor (socket, in our case), and the mask
+    as a whole can be manipulated with macros like ~FD_ISSET~.
+    #+end_quote
+
+
+** TODO Building a TCP client with multiplexing
+
+Download the code along file:
+#+begin_example sh
+wget -O web2.org tinyurl.com/web-codealong-2
+#+end_example
 
 * Week 16: Project presentations
 
