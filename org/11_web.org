@@ -123,13 +123,10 @@
 
 * Practice: Creating a Fork Bomb (Safely)
 
-- Why? To understand how uncontrolled process creation can overload a
-  system, and learn how to limit and observe system behavior.
-
-** Step-by-step Instructions
+Why? To understand how uncontrolled process creation can overload a
+system, and learn how to limit and observe system behavior.
 
 1. Create the fork bomb program: Tangle it and build it with ~make~:
-
    #+begin_src c :tangle fork_bomb.c
      #include <stdio.h>
      #include <unistd.h>
@@ -475,7 +472,6 @@
     #+end_quote
 
 
-
 * Building a TCP client that can connect to any TCP server
 
 - This TCP client will take a hostname (or IP address) and port number
@@ -501,7 +497,6 @@
   loop is repeated until the socket is closed.
 
 * Source code
-
 ** Main program with header file and code chunks
 #+begin_src C :main no :includes :tangle tcp_client.c :noweb yes
   #include "tcp.h"
@@ -792,18 +787,18 @@ connection to the remote server:
   printf("Finished.\n");
 #+end_src
 
-* Compile and test TCP client
+* NEXT Compile and test TCP client
 
-1) Tangle =tcp_client.c=
+1) Tangle =tcp_client.c= (or download from: [[https://tinyurl.com/tcp-client-full][tinyurl.com/tcp-client-full]])
 
-2) Build the complete program ([[https://tinyurl.com/tcp-client-full][tinyurl.com/tcp-client-full]])
+2) Build the complete program
 
    #+begin_src bash :results output :exports both
      make tcp_client
    #+end_src
 
    #+RESULTS:
-   : cc     tcp_client.c   -o tcp_client
+   : make: 'tcp_client' is up to date.
 
 3) Test with ~example.com~ on port ~80~ (http): Run the client to connect
    to ~example.com~ on port ~http~ (port 80):
@@ -811,7 +806,10 @@ connection to the remote server:
      ./tcp_client example.com http
    #+end_src
 
-4) Send an HTTP GET Request:  After the client prints "Connected." and "To send data, enter text followed by enter.", type the following HTTP GET request (press Enter after each line, and twice after the last line):
+4) Send an HTTP GET Request: After the client prints "Connected." and
+   "To send data, enter text followed by enter.", type the following
+   HTTP GET request (press Enter after each line, and twice after the
+   last line):
    #+begin_src bash :results output :exports both
      GET / HTTP/1.1
      Host: example.com
@@ -840,8 +838,222 @@ connection to the remote server:
  
 6) Close connection with CTRL+D (EOF) to exit.
 
-
 * TODO Building a full TCP server
+
+- Now you could also build a multiplex server in the same way. In the
+  illustration, the server's only service is to turn any input into
+  upper case with the ~toupper~ function applied to the input sent from
+  the client.
+  #+attr_html: :width 400px :float nil:
+  #+caption: Source: van Winkle (2020), p. 89
+  [[../img/tcp_server.png]]
+
+- The output might look like this:
+  #+attr_html: :width 400px :float nil:
+  #+caption: Source: van Winkle (2020), p. 95.
+  [[../img/server_output.png]]
+    
+* TODO Extensions: Chat Room
+
+- Next, you can try and send data between two connected clients by
+  modifying the TCP server program.
+
+- Example: A chat room. Whatever you type in one of the TCP client
+  terminals gets sent to all other connected terminals:
+  #+attr_html: :width 400px :float nil:
+  #+caption: Source: van Winkle (2020) p.97
+  [[../img/chatroom.png]]
+
+* TODO UDP client and server
+
+- Do you know what the best way about a UDP joke is?
+  #+begin_quote
+  I don't care if you get it or not.
+  #+end_quote
+
+- For the client, the main difference is ~ai_socktype (~SOCK_DGRAM~), and
+  that no reliable connection with the server is established.
+  #+attr_html: :width 400px :float nil:
+  #+caption: Source: van Winkle (2020) p. 106
+  [[../img/tcp_vs_udp.png]]
+
+- For the server, only one socket is required that can communicate
+  with any number of peers.
+  #+attr_html: :width 400px :float nil:
+  #+caption: Source: van Winkle (2020) p. 107  
+  [[../img/udp_server.png]]
+
+* TODO TCP web client and web server
+
+- We haven't built a web server or web client yet: All we've done is
+  send and receive text over local and then remote network connections.
+
+- For HTTP, more is required: The requests need to comply with the
+  HTTP protocol (~GET~):
+  #+attr_html: :width 400px :float nil:
+  #+caption: Source: van Winkle (2020) p.168.
+  [[../img/http2.png]]
+
+- The web resource itself is encoded as URL:
+  #+attr_html: :width 400px :float nil:
+  [[../img/url2.png]]
+
+- We need to write a C function to parse a given URL. That's not
+  trivial - the final source code runs to 250 lines. Its core looks
+  like this:
+  #+begin_example C
+void parse_url(char *url, char **hostname, char **port, char** path) {
+    // Print the full input URL for debugging
+    printf("URL: %s\n", url);
+    char *p;
+    // Look for the "://" delimiter to separate protocol from the rest
+    p = strstr(url, "://");
+    char *protocol = 0;
+    if (p) {
+        protocol = url; // Start of the protocol string
+        *p = 0;         // Terminate the protocol string at ":"
+        p += 3;         // Move pointer to the start of hostname
+    } else {
+        // If no protocol is found, assume the entire string is the rest of the URL
+        p = url;
+    }
+    // If a protocol was specified, verify it's "http"
+    if (protocol) {
+        if (strcmp(protocol, "http")) {
+            fprintf(stderr,
+                    "Unknown protocol '%s'. Only 'http' is supported.\n",
+                    protocol);
+            exit(1); // Exit if protocol is unsupported
+        }
+    }
+    // Start of the hostname
+    *hostname = p;
+    // Advance until we find a port delimiter (:), path (/), or fragment (#)
+    while (*p && *p != ':' && *p != '/' && *p != '#') ++p;
+    // Default HTTP port
+    *port = "80";
+    if (*p == ':') {
+        *p++ = 0; // Null-terminate the hostname
+        *port = p; // Start of the port string
+    }
+    // Move past the port number
+    while (*p && *p != '/' && *p != '#') ++p;
+    *path = p; // Temporarily set the path pointer
+    if (*p == '/') {
+        *path = p + 1; // Skip the '/' and point to the start of the path
+    }
+    *p = 0; // Null-terminate the port or path
+    ++p;
+    // Skip until the end of the string or a fragment delimiter
+    while (*p && *p != '#') ++p;
+    if (*p == '#') *p = 0; // Remove fragment if present
+    // Debugging output
+    printf("hostname: %s\n", *hostname);
+    printf("port: %s\n", *port);
+    printf("path: %s\n", *path);
+}
+  #+end_example
+
+- How would this look like in Python? With the ~urllib~ library:
+  #+begin_example python
+from urllib.parse import urlparse
+
+def parse_url(url):
+    print(f"URL: {url}")
+
+    # Parse the URL using urlparse
+    parsed = urlparse(url)
+
+    # Check for protocol
+    if parsed.scheme and parsed.scheme != 'http':
+        raise ValueError(f"Unknown protocol '{parsed.scheme}'. Only 'http' is supported.")
+
+    # Extract hostname
+    hostname = parsed.hostname
+    if not hostname:
+        raise ValueError("Hostname could not be parsed.")
+
+    # Extract port, use 80 if not provided
+    port = parsed.port if parsed.port else 80
+
+    # Extract path, skip the leading slash
+    path = parsed.path[1:] if parsed.path.startswith('/') else parsed.path
+
+    # Output for debugging
+    print(f"hostname: {hostname}")
+    print(f"port: {port}")
+    print(f"path: {path}")
+
+    return hostname, str(port), path
+  #+end_example
+
+- But without ~urllib~, the manual parsing is just as tedious though
+  you don't have to juggle pointers (but you also have no control):
+  #+begin_example python
+def parse_url(url):
+    print(f"URL: {url}")
+
+    # Initialize default values
+    protocol = None
+    hostname = None
+    port = "80"
+    path = ""
+
+    # Handle protocol
+    if "://" in url:
+        protocol, remainder = url.split("://", 1)
+        if protocol != "http":
+            raise ValueError(f"Unknown protocol '{protocol}'. Only 'http' is supported.")
+    else:
+        remainder = url  # Assume entire string is host/path/port
+
+    # Find end of hostname
+    host_end = len(remainder)
+    for i, c in enumerate(remainder):
+        if c in [':', '/', '#']:
+            host_end = i
+            break
+
+    hostname = remainder[:host_end]
+    remainder = remainder[host_end:]
+
+    # Handle port if present
+    if remainder.startswith(':'):
+        remainder = remainder[1:]
+        port_end = len(remainder)
+        for i, c in enumerate(remainder):
+            if c in ['/', '#']:
+                port_end = i
+                break
+        port = remainder[:port_end]
+        remainder = remainder[port_end:]
+
+    # Handle path if present
+    if remainder.startswith('/'):
+        path_start = 1  # Skip the leading slash
+    else:
+        path_start = 0
+    path_end = len(remainder)
+    for i in range(path_start, len(remainder)):
+        if remainder[i] == '#':
+            path_end = i
+            break
+    path = remainder[path_start:path_end]
+
+    # Output for debugging
+    print(f"hostname: {hostname}")
+    print(f"port: {port}")
+    print(f"path: {path}")
+
+    return hostname, port, path
+  #+end_example
+
+* TODO What's left?
+
+- Learning encryption and loading secure web pages.
+- Making a program send email (SMTP).
+- Establishing secure shell connections (SSH).
+- Monitoring and securing network connections (Wireshark).
 
 * Source
 

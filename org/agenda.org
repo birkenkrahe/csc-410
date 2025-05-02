@@ -1994,10 +1994,10 @@ To code along, open [[https://tinyurl.com/api-codealong][tinyurl.com/api-codealo
 * DONE Week 14: Building a multiplex TCP client and server
 
 - [X] Review and test: Networking a time-telling program
-- [ ] Lecture/practice: Forking and multiplexing
+- [X] Lecture/practice: Forking and multiplexing
 - [ ] Lecture/codealong: Building a multiplexing TCP client
 
-** DONE Review test
+** Review test
 #+attr_html: :width 200px :float nil:
 [[../img/test.png]]
 
@@ -2006,11 +2006,11 @@ To code along, open [[https://tinyurl.com/api-codealong][tinyurl.com/api-codealo
 - [ ] Building a full TCP web client
 - [ ] Building a full TCP web server
 
-** DONE Project review
+** Project review
 #+attr_html: :width 200px :float nil:
 [[../img/project_review.png]]
 
-** DONE Socket vs. API
+** Socket vs. API
 
 - A socket is a tool you use to do networking, like a telephone.
 
@@ -2030,7 +2030,7 @@ To code along, open [[https://tinyurl.com/api-codealong][tinyurl.com/api-codealo
   #+attr_html: :width 600px :float nil:
   [[../img/apis.png]]
 
-** IN_PROGRESS Introduction to forking and multiplexing
+** Introduction to forking and multiplexing
 
 Get the codealong file: [[https://tinyurl.com/web-codealong-1][tinyurl.com/web-codealong-1]]
 
@@ -2041,7 +2041,7 @@ Get the codealong file: [[https://tinyurl.com/web-codealong-1][tinyurl.com/web-c
 And open it in Emacs!
 
 
-* Week 15: Building a TCP client & Packet sniffing with Wireshark (?)
+* Week 15: Building a TCP client +& Packet sniffing with Wireshark (?)
 
 - [X] Last test available until Friday May 2nd.
 - [X] 4th sprint review due in the week May 5-9.
@@ -2151,17 +2151,33 @@ And open it in Emacs!
     as a whole can be manipulated with macros like ~FD_ISSET~.
     #+end_quote
 
+** DONE 3rd sprint review missing?
+ #+attr_html: :width 600px :float nil:
+ [[../img/third.png]]
 
-** TODO 3rd sprint review
+** DONE Schedule your presentations in Canvas (or I'll do it for you)
+ #+attr_html: :width 400px :float nil:
+[[../img/schedule.png]]
+
+** DONE 3rd sprint review
 #+attr_html: :width 600px :float nil:
 [[../img/third.png]]
 
-** TODO Building a TCP client with multiplexing
+** IN_PROGRESS Building a TCP client with multiplexing
 
 Download the code along file: [[https://tinyurl.com/web-codealong-2][tinyurl.com/web-codealong-2]]
 #+begin_example sh
-wget -O web2.org tinyurl.com/web-codealong-2
+  wget -O web2.org tinyurl.com/web-codealong-2
 #+end_example
+
+** TODO Wrap-up: What else we could have done
+
+...if we had had 6 more weeks of term.
+
+*Recommended:* Buy and finish the book by van Winkle, Hands-on
+Networking Programming in C (2020). We've covered 100/450 pages.
+#+attr_html: :width 400px :float nil: 
+[[../img/vanWinkle.png]]
 
 * Week 16: Project presentations
 
