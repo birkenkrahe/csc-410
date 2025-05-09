@@ -2040,8 +2040,7 @@ Get the codealong file: [[https://tinyurl.com/web-codealong-1][tinyurl.com/web-c
 
 And open it in Emacs!
 
-
-* Week 15: Building a TCP client +& Packet sniffing with Wireshark (?)
+* DONE Week 15: Building a TCP client +& Packet sniffing with Wireshark (?)
 
 - [X] Last test available until Friday May 2nd.
 - [X] 4th sprint review due in the week May 5-9.
@@ -2163,6 +2162,7 @@ And open it in Emacs!
 #+attr_html: :width 600px :float nil:
 [[../img/third.png]]
 
+
 ** IN_PROGRESS Building a TCP client with multiplexing
 
 Download the code along file: [[https://tinyurl.com/web-codealong-2][tinyurl.com/web-codealong-2]]
@@ -2179,7 +2179,30 @@ Networking Programming in C (2020). We've covered 100/450 pages.
 #+attr_html: :width 400px :float nil: 
 [[../img/vanWinkle.png]]
 
-* Week 16: Project presentations
+
+* IN_PROGRESS Week 16: Project presentations
+#+attr_html: :width 400px:
+[[../img/schedule.png]]
+
+
+* TODO What next?
+#+attr_html: :width 400px :float nil:
+[[../img/what_next.png]]
+
+- Get the *free book*: Beej's Guide to Network Programming Using
+  Internet Sockets ([[https://beej.us/guide/bgnet/][beej.us/guide/bgnet/]]). Well written, very short.
+
+- Finish the *textbook for the course*: Hands-on Network Programming
+  with C by Lewis van Winkle, Packt 2020).
+
+- Go deeper with C: UNIX Network Programming volume 1 ([[https://unpbook.com/][unpbook.com/]]),
+  3rd edition.
+
+- Explore Wireshark.
+
+- Do more Cisco Net Academy courses.
+
+- Get the CCNA certification.
 
 * Footnotes
 
