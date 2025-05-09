@@ -2204,6 +2204,10 @@ Networking Programming in C (2020). We've covered 100/450 pages.
 
 - Get the CCNA certification.
 
+- There is a nice Udemy course by David Bombal where he shows the real
+  networks with Switches, PCs, routers etc. and works with Packet
+  Tracer and Wireshark.
+
 * Footnotes
 
 [fn:2]  Informally speaking what is particularly annoying is to feel as
