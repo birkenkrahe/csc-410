@@ -2179,34 +2179,33 @@ Networking Programming in C (2020). We've covered 100/450 pages.
 #+attr_html: :width 400px :float nil: 
 [[../img/vanWinkle.png]]
 
-
-* IN_PROGRESS Week 16: Project presentations
+* DONE Week 16: Project presentations
 #+attr_html: :width 400px:
 [[../img/schedule.png]]
 
-
-* TODO What next?
+** What next?
 #+attr_html: :width 400px :float nil:
 [[../img/what_next.png]]
 
-- Get the *free book*: Beej's Guide to Network Programming Using
++ Get the *free book*: Beej's Guide to Network Programming Using
   Internet Sockets ([[https://beej.us/guide/bgnet/][beej.us/guide/bgnet/]]). Well written, very short.
 
-- Finish the *textbook for the course*: Hands-on Network Programming
++ Finish the *textbook for the course*: Hands-on Network Programming
   with C by Lewis van Winkle, Packt 2020).
 
-- Go deeper with C: UNIX Network Programming volume 1 ([[https://unpbook.com/][unpbook.com/]]),
++ Go deeper with C: UNIX Network Programming volume 1 ([[https://unpbook.com/][unpbook.com/]]),
   3rd edition.
 
-- Explore Wireshark.
++ Explore [[https://www.wireshark.org/][Wireshark]], a packet-sniffing tool
 
-- Do more Cisco Net Academy courses.
++ Do more [[eww:][Cisco Net Academy courses]] (Packet Tracer required)
 
-- Get the CCNA certification.
++ Get the CCNA certification - work though [[https://www.manning.com/books/learn-cisco-network-administration-in-a-month-of-lunches][this book]] in a "month of
+  lunches".
 
-- There is a nice Udemy course by David Bombal where he shows the real
++ There is a nice [[https://www.udemy.com/user/davidbombal/][Udemy course by David Bombal]] where he shows the real
   networks with Switches, PCs, routers etc. and works with Packet
-  Tracer and Wireshark.
+  Tracer and Wireshark. If you get it, wait for a discount period.
 
 * Footnotes
 
